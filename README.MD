@@ -71,8 +71,8 @@ See [examples](examples) directory for featured examples.
 
 ## <a name="example_single_test"/>Single test
 
-This type of tests which you can describe single test. \
-For test with **allure information** you can use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/blob/master/README_en.md#pkgprovidert).
+See an example of creating a single test. \
+For a result with **allure information** you can use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/blob/master/README_en.md#pkgprovidert).
 
 ```go
 import (
@@ -105,7 +105,7 @@ func TestExample(t *testing.T) {
 }
 ```
 
-Full example [here](examples/single_test.go)
+See full example [here](examples/single_test.go)
 
 **Allure:**
 
@@ -113,11 +113,9 @@ Full example [here](examples/single_test.go)
 
 ## <a name="example_suite_test"/>Suite
 
-This type of tests which you can describe tests by grouping them into test suites.
-This can be handy if you have a lot of different tests, and it's hard to navigate through them without additional "levels nesting
-levels" of test calls.
+Suite provides a structure in which you can describe tests by grouping them into test suites. This can be useful if you have a lot of different tests and it is difficult to navigate through them without having additional "layers nesting levels" of test calls.
 
-About `Allure.Suite` you can read [here](https://github.com/ozontech/allure-go/blob/master/README_en.md#configure-suite)
+You can read about `Allure.Suite` [here](https://github.com/ozontech/allure-go/blob/master/README_en.md#configure-suite)
 
 1) Declare a structure with `suite.Suite` and `*cute.HTTPTestMaker`
 
@@ -215,7 +213,7 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
         ExecuteTest(context.Background(), t)
 }
 ```
-Full example [here](examples/one_step.go)
+See full example [here](examples/one_step.go)
 
 **Allure:**
 
@@ -223,34 +221,34 @@ Full example [here](examples/one_step.go)
 
 ## <a name="asserts"/>Asserts
 
-You may create your own asserts and use ready-made asserts from the package asserts
+You can create your own asserts or use ready-made asserts from the package asserts
 
 ### <a name="asserts_json"/>JSON asserts:
 
-Implementation [here](asserts/json/json.go)
+You can find implementation [here](asserts/json/json.go)
 
 - **Equal** is a function to assert that a jsonpath expression matches the given value
-- **NotEqual** is a function to check json path expression value is not equal to given value
-- **Length** is a function to asserts that value is the expected length
-- **GreaterThan** is a function to asserts that value is greater than the given length
-- **LessThan** is a function to asserts that value is less than the given length
-- **Present** is a function to asserts that value is present
-- **NotPresent** is a function to asserts that value is not present
+- **NotEqual** is a function to check that jsonpath expression value is not equal to the given value
+- **Length** is a function to assert that value is the expected length
+- **GreaterThan** is a function to assert that value is greater than the given length
+- **LessThan** is a function to assert that value is less than the given length
+- **Present** is a function to assert that value is present
+- **NotPresent** is a function to assert that value is not present
 
 ### <a name="asserts_headers"/>Headers asserts:
 
-Implementation [here](asserts/headers/headers.go)
+See implementation [here](asserts/headers/headers.go)
 
-- **Present** is a function to asserts that header is present
-- **NotPresent** is a function to asserts that header is not present
+- **Present** is a function to assert that header is present
+- **NotPresent** is a function to assert that header is not present
 
 ## <a name="asserts_custom"/>Custom asserts
 
-You may implement [2 type of asserts](assert.go):
+You can implement [2 type of asserts](assert.go):
 
 ### <a name="asserts_custom_base"/>Base
 
-This is type for create custom assertions.
+Types for creating custom assertions.
 
 ```go
 type AssertBody func(body []byte) error
@@ -274,9 +272,9 @@ func customAssertBody() asserts.AssertBody {
 
 ### <a name="asserts_custom_t"/>T
 
-This is type for create custom assertions with using Allure [Actions](https://github.com/ozontech/allure-go#configure-suite) and [testing.TB](https://pkg.go.dev/testing#TB). \
-You may log some information to Allure. \
-Also you may allure error on Allure or just return and error log automatically.
+Types for creating custom assertions using Allure [Actions](https://github.com/ozontech/allure-go#configure-suite) and [testing.TB](https://pkg.go.dev/testing#TB). \
+You can log some information to Allure. \
+Also you can log error on Allure yourself or just return error.
 
 ```go
 type AssertBodyT func(t cute.T, body []byte) error
@@ -342,7 +340,7 @@ func customAssertBodyWithCustomError() cute.AssertBody {
     }
 }
 ```
-If you want creates pretty **error in your custom** assert. You must implement error with [interfaces](errors/error.go):
+If you'd like to create a pretty **error in your custom** assert you should implement error with [interfaces](errors/error.go):
 
 ##### With name
 ```go
@@ -364,7 +362,7 @@ type ExpectedError interface {
 ![assert_error.png](.images/assert_error.png)
 
 #### Optional assert
-If assert return optional error, step will be **failed**, but test will be success.
+If assert returns optional error step will be **failed** but test will be success.
 
 You can use method `errors.NewOptionalError(error)` from package [errors](errors/error.go):
 
@@ -385,7 +383,7 @@ func customAssertBodyWithCustomError() cute.AssertBody {
 }
 ```
 
-For create optional error, you must implement error with interface
+To create optional error you should implement error with interface
 
 ```go
 type OptionalError interface {
