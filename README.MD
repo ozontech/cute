@@ -2,11 +2,11 @@
   <img src=".images/cute.png" alt="cute"/>
 </p>
 
-# CUTE - create u tests easy.
+# CUTE — create your tests easily
 
 HTTP and REST API testing for Go.
 
-Three step for testing your HTTP service:
+Three steps for testing your HTTP service:
 1) Create request and write assets
 2) Run tests
 3) Check allure
