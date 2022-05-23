@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": [
+    {
+      "type": "object",
+      "properties": {
+        "postId": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "postId",
+        "id",
+        "name",
+        "email",
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "postId": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "postId",
+        "id",
+        "name",
+        "email",
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "postId": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "postId",
+        "id",
+        "name",
+        "email",
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "postId": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "postId",
+        "id",
+        "name",
+        "email",
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "postId": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "postId",
+        "id",
+        "name",
+        "email",
+        "body"
+      ]
+    }
+  ]
+}
