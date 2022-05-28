@@ -244,7 +244,7 @@ See implementation [here](asserts/headers/headers.go)
 
 ## <a name="asserts_custom"/>Custom asserts
 
-You can implement [2 type of asserts](assert.go):
+You can implement [3 type of asserts](assert.go):
 
 ### <a name="asserts_custom_base"/>Base
 
