@@ -213,7 +213,7 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
         ExecuteTest(context.Background(), t)
 }
 ```
-See full example [here](examples/one_step.go)
+See full example [here](examples/suite)
 
 **Allure:**
 
