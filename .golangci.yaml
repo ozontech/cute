@@ -33,7 +33,7 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - golint
+    - revive
     - govet
     - errcheck
     - deadcode
