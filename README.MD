@@ -213,7 +213,7 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
         ExecuteTest(context.Background(), t)
 }
 ```
-See full example [here](examples/one_step.go)
+See full example [here](examples/suite)
 
 **Allure:**
 
@@ -244,7 +244,7 @@ See implementation [here](asserts/headers/headers.go)
 
 ## <a name="asserts_custom"/>Custom asserts
 
-You can implement [2 type of asserts](assert.go):
+You can implement [3 type of asserts](assert.go):
 
 ### <a name="asserts_custom_base"/>Base
 
