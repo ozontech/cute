@@ -47,7 +47,7 @@ func checkJSONSchema(expect gojsonschema.JSONLoader, data []byte) []error {
 			scope = append(
 				scope,
 				errors.NewAssertError(
-					"",
+					fmt.Sprintf("Error \"%v\"", resultError.Type()),
 					convertJSONSchemaError(resultError),
 					resultError.Details()["given"],
 					resultError.Details()["expected"]),
