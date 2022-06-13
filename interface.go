@@ -92,6 +92,7 @@ type RequestHTTPBuilder interface {
 // ExpectHTTPBuilder is a scope of methods for validate http response
 type ExpectHTTPBuilder interface {
 	// ExpectExecuteTimeout is function for validate time of execution
+	// Default value - 10 seconds
 	ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder
 
 	// ExpectStatus is function for validate response status code
