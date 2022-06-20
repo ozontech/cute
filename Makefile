@@ -1,8 +1,3 @@
-APP?=cute
-
-COMMIT?=$(shell git rev-parse --short HEAD)
-BUILD_TIME?=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
-
 export GO111MODULE=on
 export GOSUMDB=off
 LOCAL_BIN:=$(CURDIR)/bin

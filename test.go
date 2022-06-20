@@ -180,6 +180,10 @@ func (it *test) processTestErrors(t internalT, errs []error) {
 		resErrors = append(resErrors, err)
 	}
 
+	if len(resErrors) == 0 {
+		return
+	}
+
 	if len(resErrors) == 1 {
 		t.Errorf("[ERROR] %v", resErrors[0])
 
