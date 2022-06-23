@@ -393,7 +393,6 @@ type OptionalError interface {
 ```
 
 **Allure:**
-
 ![optional_error.png](.images/optional_error.png)
 
 ## <a name="global_env_keys"/>Global Environment Keys
