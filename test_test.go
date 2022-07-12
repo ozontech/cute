@@ -31,7 +31,7 @@ func TestValidateResponseEmpty(t *testing.T) {
 	ht := test{
 		expect: new(expect),
 	}
-	temp := common.NewT(t, "package", t.Name())
+	temp := common.NewT(t)
 
 	errs := ht.validateResponse(temp, &http.Response{})
 	require.Empty(t, errs)
@@ -41,7 +41,7 @@ func TestValidateResponseCode(t *testing.T) {
 	ht := test{
 		expect: &expect{code: 200},
 	}
-	temp := common.NewT(t, "package", t.Name())
+	temp := common.NewT(t)
 
 	errs := ht.validateResponse(temp, &http.Response{StatusCode: http.StatusOK})
 	require.Empty(t, errs)
@@ -67,7 +67,7 @@ func TestValidateResponseWithErrors(t *testing.T) {
 		},
 	}
 	reader := bytes.NewReader([]byte(`{"a":"ab","b":"bc"}`))
-	temp := common.NewT(t, "package", t.Name())
+	temp := common.NewT(t)
 	temp.NewTest(t.Name(), "package")
 	temp.TestContext()
 

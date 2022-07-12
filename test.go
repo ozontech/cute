@@ -111,7 +111,7 @@ func (it *test) ExecuteTest(ctx context.Context, t testing.TB) ResultsHTTPBuilde
 
 	tOriginal, ok := t.(*testing.T)
 	if ok {
-		temp := common.NewT(tOriginal, "package", t.Name())
+		temp := common.NewT(tOriginal)
 		temp.NewTest(t.Name(), "package")
 		temp.TestContext()
 
