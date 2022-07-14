@@ -48,37 +48,36 @@ func TestValidateResponseCode(t *testing.T) {
 }
 
 func TestValidateResponseWithErrors(t *testing.T) {
-	ht := test{
-		expect: &expect{
-			code: 200,
-			assertHeaders: []AssertHeaders{
-				func(headers http.Header) error {
-					return errors.New("two error")
+	var (
+		ht = test{
+			expect: &expect{
+				code: 200,
+				assertHeaders: []AssertHeaders{
+					func(headers http.Header) error {
+						return errors.New("two error")
+					},
+				},
+				assertResponse: []AssertResponse{
+					func(response *http.Response) error {
+						if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
+							return errors.New("bad response")
+						}
+						return nil
+					},
 				},
 			},
-			assertResponse: []AssertResponse{
-				func(response *http.Response) error {
-					if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
-						return errors.New("bad response")
-					}
-					return nil
-				},
+		}
+		reader = bytes.NewReader([]byte(`{"a":"ab","b":"bc"}`))
+		temp   = createAllureT(t)
+		resp   = &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Header: map[string][]string{
+				"key":  []string{"value"},
+				"auth": []string{"sometoken"},
 			},
-		},
-	}
-	reader := bytes.NewReader([]byte(`{"a":"ab","b":"bc"}`))
-	temp := common.NewT(t)
-	temp.NewTest(t.Name(), "package")
-	temp.TestContext()
-
-	resp := &http.Response{
-		StatusCode: http.StatusBadRequest,
-		Header: map[string][]string{
-			"key":  []string{"value"},
-			"auth": []string{"sometoken"},
-		},
-		Body: ioutil.NopCloser(reader),
-	}
+			Body: ioutil.NopCloser(reader),
+		}
+	)
 
 	errs := ht.validateResponse(temp, resp)
 

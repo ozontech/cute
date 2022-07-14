@@ -257,6 +257,18 @@ func (it *test) AfterExecuteT(fs ...AfterExecuteT) Middleware {
 	return it
 }
 
+func (it *test) RequestRepeat(count int) ExpectHTTPBuilder {
+	it.request.repeat.count = count
+
+	return it
+}
+
+func (it *test) RequestRepeatDelay(delay time.Time) ExpectHTTPBuilder {
+	it.request.repeat.delay = delay
+
+	return it
+}
+
 func (it *test) Request(r *http.Request) ExpectHTTPBuilder {
 	it.request.base = r
 

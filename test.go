@@ -9,10 +9,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/ozontech/allure-go/pkg/allure"
+	"github.com/ozontech/allure-go/pkg/framework/core/allure_manager/manager"
 	"github.com/ozontech/allure-go/pkg/framework/core/common"
 	"github.com/ozontech/allure-go/pkg/framework/provider"
 	cuteErrors "github.com/ozontech/cute/errors"
@@ -46,6 +48,12 @@ type test struct {
 type request struct {
 	base     *http.Request
 	builders []requestBuilder
+	repeat   *requestRepeatPolitic
+}
+
+type requestRepeatPolitic struct {
+	count int
+	delay time.Time
 }
 
 type middleware struct {
@@ -111,12 +119,10 @@ func (it *test) ExecuteTest(ctx context.Context, t testing.TB) ResultsHTTPBuilde
 
 	tOriginal, ok := t.(*testing.T)
 	if ok {
-		temp := common.NewT(tOriginal)
-		temp.NewTest(t.Name(), "package")
-		temp.TestContext()
+		newT := createAllureT(tOriginal)
+		defer newT.FinishTest()
 
-		defer temp.FinishTest()
-		internalT = temp
+		internalT = newT
 	}
 
 	allureT, ok := t.(provider.T)
@@ -129,6 +135,25 @@ func (it *test) ExecuteTest(ctx context.Context, t testing.TB) ResultsHTTPBuilde
 	}
 
 	return it.executeTest(ctx, internalT)
+}
+
+func createAllureT(t *testing.T) *common.Common {
+	var (
+		newT        = common.NewT(t)
+		callers     = strings.Split(t.Name(), "/")
+		providerCfg = manager.NewProviderConfig().
+			WithFullName(t.Name()).
+			WithPackageName("package").
+			WithSuiteName(t.Name()).
+			WithRunner(callers[0])
+		newProvider = manager.NewProvider(providerCfg)
+	)
+	newProvider.NewTest(t.Name(), "package")
+
+	newT.SetProvider(newProvider)
+	newT.Provider.TestContext()
+
+	return newT
 }
 
 func (it *test) clearState() {

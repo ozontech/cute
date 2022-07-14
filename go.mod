@@ -6,7 +6,7 @@ require (
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/moul/http2curl v1.0.0
 	github.com/ozontech/allure-go/pkg/allure v0.6.1
-	github.com/ozontech/allure-go/pkg/framework v0.6.11
+	github.com/ozontech/allure-go/pkg/framework v0.6.12
 	github.com/stretchr/testify v1.7.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 )

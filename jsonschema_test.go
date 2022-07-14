@@ -1,10 +1,8 @@
 package cute
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/ozontech/allure-go/pkg/framework/core/common"
 	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/stretchr/testify/require"
 )
@@ -23,13 +21,8 @@ func TestValidateJSONSchemaFromString(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
 		tBuilder = a.NewTestBuilder().(*test)
-		tempT    = common.NewT(t)
+		tempT    = createAllureT(t)
 	)
-
-	fmt.Println(tempT, t)
-	fmt.Println("dasdasd", tempT)
-	tempT.NewTest("t.Name()", "package")
-	tempT.TestContext()
 
 	body := []byte(`
 	{
@@ -68,11 +61,8 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
 		tBuilder = a.NewTestBuilder().(*test)
-		tempT    = common.NewT(t)
+		tempT    = createAllureT(t)
 	)
-
-	tempT.NewTest(t.Name(), "package")
-	tempT.TestContext()
 
 	body := []byte(`
 	{
@@ -118,11 +108,8 @@ func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
 		tBuilder = a.NewTestBuilder().(*test)
-		tempT    = common.NewT(t)
+		tempT    = createAllureT(t)
 	)
-
-	tempT.NewTest(t.Name(), "package")
-	tempT.TestContext()
 
 	body := []byte(`
 	{
