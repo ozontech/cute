@@ -201,12 +201,22 @@ func TestCreateHTTPTestMakerWithHttpClient(t *testing.T) {
 	require.Equal(t, time.Duration(100), maker.httpClient.Timeout)
 }
 
+type rt struct {
+}
+
+func (r *rt) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, nil
+}
+
 func TestCreateHTTPMakerOps(t *testing.T) {
 	timeout := time.Second * 100
+	roundTripper := &rt{}
 
 	maker := NewHTTPTestMaker(
 		WithCustomHTTPTimeout(timeout),
+		WithCustomHTTPRoundTripper(roundTripper),
 	)
 
 	require.Equal(t, timeout, maker.httpClient.Timeout)
+	require.Equal(t, roundTripper, maker.httpClient.Transport)
 }

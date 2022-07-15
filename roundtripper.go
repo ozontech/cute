@@ -184,8 +184,6 @@ func addInformationResponse(t T, response *http.Response) {
 	}
 
 	t.WithAttachments(allure.NewAttachment("response", responseType, body))
-
-	return
 }
 
 func createTitle(try, countRepeat int, req *http.Request) string {
