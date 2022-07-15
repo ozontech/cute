@@ -33,6 +33,8 @@ type tProvider interface {
 	Fail()
 	FailNow()
 
+	Name() string
+
 	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
 }

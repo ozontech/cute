@@ -9,124 +9,164 @@ import (
 
 	"github.com/moul/http2curl"
 	"github.com/ozontech/allure-go/pkg/allure"
+	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/ozontech/cute/internal/utils"
 )
 
-type allureRoundTripper struct {
-	roundTripper http.RoundTripper
-}
+func (it *test) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {
+	var (
+		delay       = defaultDelayRepeat
+		countRepeat = 1
 
-func newAllureRoundTripper(next http.RoundTripper) http.RoundTripper {
-	return &allureRoundTripper{
-		roundTripper: next,
+		resp  *http.Response
+		err   error
+		scope = make([]error, 0)
+	)
+
+	if it.request.repeat.delay != 0 {
+		delay = it.request.repeat.delay
 	}
+
+	if it.request.repeat.count != 0 {
+		countRepeat = it.request.repeat.count
+	}
+
+	for i := 1; i <= countRepeat; i++ {
+		it.executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
+			resp, err = it.doRequest(t, req)
+			if err != nil {
+				return []error{err}
+			}
+
+			return nil
+		})
+
+		if err == nil {
+			break
+		}
+
+		scope = append(scope, err)
+		if i != countRepeat {
+			time.Sleep(delay)
+		}
+	}
+
+	return resp, scope
 }
 
-func (a *allureRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	t, err := getProviderT(req.Context())
+func (it *test) doRequest(t T, req *http.Request) (*http.Response, error) {
+	// Add information (method, host, curl) about request to Allure step
+	err := addInformationRequest(t, req)
 	if err != nil {
+
 		return nil, err
 	}
 
-	step, err := prepareStep(req)
+	resp, err := it.httpClient.Do(req)
 	if err != nil {
+
 		return nil, err
 	}
 
-	defer func() {
-		t.Step(step)
-	}()
+	if resp != nil {
+		// Add information (code, body, headers) about response to Allure step
+		addInformationResponse(t, resp)
 
-	response, err := a.roundTripper.RoundTrip(req)
-
-	// if err add allure.Attachment with text fail
-	if err != nil {
-		step.Status = allure.Failed
-		step.WithAttachments(allure.NewAttachment("Error", allure.Text, []byte(err.Error())))
-
-		return response, err
+		err = it.validateResponseCode(resp)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	updateStepWithResponse(step, response)
+	return resp, nil
+}
 
-	return response, nil
+func (it *test) validateResponseCode(resp *http.Response) error {
+	if resp == nil {
+		return nil
+	}
+
+	if it.expect.code != 0 && it.expect.code != resp.StatusCode {
+		return cuteErrors.NewAssertError(
+			"Assert response code",
+			fmt.Sprintf("Response code expect %v, but was %v", it.expect.code, resp.StatusCode),
+			resp.StatusCode,
+			it.expect.code)
+	}
+
+	return nil
 }
 
 // PrepareStep returns step based on http request.
-func prepareStep(req *http.Request) (*allure.Step, error) {
+func addInformationRequest(t T, req *http.Request) error {
 	var (
 		saveBody io.ReadCloser
 		err      error
 	)
 
-	step := allure.NewSimpleStep(req.Method + " " + req.URL.String())
-
 	curl, err := http2curl.GetCurlCommand(req)
 	if err != nil {
-		return nil, err
-	}
-	headers, err := utils.ToJSON(req.Header)
-	if err != nil {
-		return nil, err
+		return err
 	}
 
-	step.Parameters = allure.NewParameters(
-		"method", req.Method,
-		"host", req.Host,
-		"headers", headers,
-		"curl", curl.String(),
+	headers, err := utils.ToJSON(req.Header)
+	if err != nil {
+		return err
+	}
+
+	t.WithParameters(
+		allure.NewParameters(
+			"method", req.Method,
+			"host", req.Host,
+			"headers", headers,
+			"curl", curl.String(),
+		)...,
 	)
 
 	if req.Body != nil {
 		saveBody, req.Body, err = utils.DrainBody(req.Body)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		body, err := utils.GetBody(saveBody)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		step.Parameters = append(step.Parameters, allure.NewParameter("body", string(body)))
+		t.WithNewParameters("body", string(body))
 	}
 
-	return step, nil
+	return nil
 }
 
 // UpdateStepWithResponse returns step based on already created step and grpc response.
-func updateStepWithResponse(step *allure.Step, response *http.Response) *allure.Step {
+func addInformationResponse(t T, response *http.Response) {
 	var (
 		saveBody io.ReadCloser
 		err      error
 	)
 
-	step.Stop = time.Now().UnixNano() / int64(time.Millisecond)
-
-	if response == nil {
-		return step
-	}
-
 	headers, _ := utils.ToJSON(response.Header)
 	if headers != "" {
-		step.WithNewParameters("response_headers", headers)
+		t.WithNewParameters("response_headers", headers)
 	}
 
-	step.WithNewParameters("response_code", fmt.Sprint(response.StatusCode))
+	t.WithNewParameters("response_code", fmt.Sprint(response.StatusCode))
 
 	if response.Body == nil {
-		return step
+		return
 	}
 
 	saveBody, response.Body, err = utils.DrainBody(response.Body)
 	// if could not get body from response, no add to allure
 	if err != nil {
-		return step
+		return
 	}
 	body, err := utils.GetBody(saveBody)
 	// if could not get body from response, no add to allure
 	if err != nil {
-		return step
+		return
 	}
 
 	responseType := allure.Text
@@ -143,6 +183,17 @@ func updateStepWithResponse(step *allure.Step, response *http.Response) *allure.
 		body, _ = utils.PrettyJSON(body)
 	}
 
-	step.WithAttachments(allure.NewAttachment("response", responseType, body))
-	return step
+	t.WithAttachments(allure.NewAttachment("response", responseType, body))
+
+	return
+}
+
+func createTitle(try, countRepeat int, req *http.Request) string {
+	title := req.Method + " " + req.URL.String()
+
+	if countRepeat == 1 {
+		return title
+	}
+
+	return fmt.Sprintf("[%v/%v] %v", try, countRepeat, title)
 }

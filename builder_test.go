@@ -50,6 +50,8 @@ func TestHTTPTestMaker(t *testing.T) {
 		label          = allure.Label{"kek", "lol"}
 		setIssue       = "SetIssue"
 		setTestCase    = "SetTestCase"
+		repeatCount    = 10
+		repeatDelay    = time.Duration(10)
 		link           = allure.Link{
 			Name: "link",
 			Type: "type",
@@ -131,6 +133,8 @@ func TestHTTPTestMaker(t *testing.T) {
 		Description(desc).
 		CreateWithStep().
 		StepName(stepName).
+		RequestRepeat(repeatCount).
+		RequestRepeatDelay(repeatDelay).
 		Request(req).
 		ExpectExecuteTimeout(executeTime).
 		ExpectStatus(status).
@@ -170,6 +174,8 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, setIssue, resHt.allureLinks.issue)
 	require.Equal(t, setTestCase, resHt.allureLinks.testCase)
 	require.Equal(t, link, resHt.allureLinks.link)
+	require.Equal(t, repeatCount, resHt.request.repeat.count)
+	require.Equal(t, repeatDelay, resHt.request.repeat.delay)
 
 	require.Equal(t, len(assertHeaders), len(resHt.expect.assertHeaders))
 	require.Equal(t, len(assertHeadersT), len(resHt.expect.assertHeadersT))

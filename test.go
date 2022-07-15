@@ -21,7 +21,10 @@ import (
 	"github.com/ozontech/cute/internal/utils"
 )
 
-const defaultExecuteTestTime = 10 * time.Second
+const (
+	defaultExecuteTestTime = 10 * time.Second
+	defaultDelayRepeat     = 1 * time.Second
+)
 
 var (
 	errorRequestMethodEmpty = errors.New("request method must be not empty")
@@ -53,7 +56,7 @@ type request struct {
 
 type requestRepeatPolitic struct {
 	count int
-	delay time.Time
+	delay time.Duration
 }
 
 type middleware struct {
@@ -142,10 +145,10 @@ func createAllureT(t *testing.T) *common.Common {
 		newT        = common.NewT(t)
 		callers     = strings.Split(t.Name(), "/")
 		providerCfg = manager.NewProviderConfig().
-			WithFullName(t.Name()).
-			WithPackageName("package").
-			WithSuiteName(t.Name()).
-			WithRunner(callers[0])
+				WithFullName(t.Name()).
+				WithPackageName("package").
+				WithSuiteName(t.Name()).
+				WithRunner(callers[0])
 		newProvider = manager.NewProvider(providerCfg)
 	)
 	newProvider.NewTest(t.Name(), "package")
@@ -158,10 +161,12 @@ func createAllureT(t *testing.T) *common.Common {
 
 func (it *test) clearState() {
 	it.expect = new(expect)
-	it.request = new(request)
 	it.middleware = new(middleware)
 	it.allureStep = new(allureStep)
 	it.parallel = false
+	it.request = &request{
+		repeat: new(requestRepeatPolitic),
+	}
 }
 
 func (it *test) executeTest(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
@@ -173,6 +178,8 @@ func (it *test) executeTest(ctx context.Context, allureProvider allureProvider) 
 	// set labels
 	it.setAllureInformation(allureProvider)
 
+	allureProvider.Logf("Test start %v", allureProvider.Name())
+
 	if it.allureStep.name == "" { // Test without step
 		resp, errs = it.test(ctx, allureProvider)
 	} else {
@@ -180,6 +187,8 @@ func (it *test) executeTest(ctx context.Context, allureProvider allureProvider) 
 	}
 
 	it.processTestErrors(allureProvider, errs)
+
+	allureProvider.Logf("Test finished %v", allureProvider.Name())
 
 	return &testResults{
 		httpTest: it,
@@ -190,6 +199,7 @@ func (it *test) executeTest(ctx context.Context, allureProvider allureProvider) 
 
 func (it *test) processTestErrors(t internalT, errs []error) {
 	if len(errs) == 0 {
+
 		return
 	}
 
@@ -219,7 +229,7 @@ func (it *test) processTestErrors(t internalT, errs []error) {
 		t.Errorf("[ERROR] %v", err)
 	}
 
-	t.Errorf("[ERROR] Test finished with %v errors", len(resErrors))
+	t.Errorf("Test finished %v with %v errors", t.Name(), len(resErrors))
 }
 
 func (it *test) testWithStep(ctx context.Context, t internalT) (*http.Response, []error) {
@@ -253,7 +263,7 @@ func (it *test) test(ctx context.Context, t internalT) (*http.Response, []error)
 	defer cancel()
 
 	// CreateWithStep request
-	req, err := it.createRequest(ctx, t)
+	req, err := it.createRequest(ctx)
 	if err != nil {
 		return resp, []error{err}
 	}
@@ -263,15 +273,16 @@ func (it *test) test(ctx context.Context, t internalT) (*http.Response, []error)
 		return nil, errs
 	}
 
-	// Make request
-	resp, err = it.httpClient.Do(req)
+	t.Logf(req.Method + " " + req.URL.String())
 
-	if err != nil {
-		return resp, []error{err}
+	// Make request
+	resp, errs := it.makeRequest(t, req)
+	if len(errs) > 0 {
+		return resp, errs
 	}
 
 	// Validate response body
-	errs := it.validateResponse(t, resp)
+	errs = it.validateResponse(t, resp)
 
 	// Execute after
 	afterTestErrs := it.afterTest(t, resp, errs)
@@ -333,7 +344,7 @@ func (it *test) beforeTest(t internalT, req *http.Request) []error {
 	})
 }
 
-func (it *test) createRequest(ctx context.Context, t internalT) (*http.Request, error) {
+func (it *test) createRequest(ctx context.Context) (*http.Request, error) {
 	var (
 		req = it.request.base
 		err error
@@ -369,8 +380,6 @@ func (it *test) createRequest(ctx context.Context, t internalT) (*http.Request, 
 		req.Header = o.headers
 	}
 
-	req = req.WithContext(withProviderT(req.Context(), t))
-
 	// Validate request
 	if err := it.validateRequest(req); err != nil {
 		return nil, err
@@ -397,24 +406,6 @@ func (it *test) validateResponse(t internalT, resp *http.Response) []error {
 		saveBody io.ReadCloser
 		scope    = make([]error, 0)
 	)
-
-	// Validate response code
-	if it.expect.code != 0 && it.expect.code != resp.StatusCode {
-		// todo refactor it
-		statusError := cuteErrors.NewAssertError(
-			"",
-			fmt.Sprintf("expect %v code, but was %v", it.expect.code, resp.StatusCode),
-			resp.StatusCode,
-			it.expect.code)
-
-		it.executeWithStep(t, "Assert response code", func(t T) []error {
-			return []error{
-				statusError,
-			}
-		})
-
-		scope = append(scope, statusError)
-	}
 
 	// Execute asserts for headers
 	if errs := it.assertHeaders(t, resp.Header); len(errs) > 0 {

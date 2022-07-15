@@ -67,4 +67,6 @@ func TestResult(t *testing.T) {
 	require.NotNil(t, hRes.middleware)
 	require.NotNil(t, hRes.allureStep)
 	require.NotNil(t, hRes.httpClient)
+	require.NotNil(t, hRes.request)
+	require.NotNil(t, hRes.request.repeat)
 }

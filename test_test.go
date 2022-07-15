@@ -81,5 +81,5 @@ func TestValidateResponseWithErrors(t *testing.T) {
 
 	errs := ht.validateResponse(temp, resp)
 
-	require.Len(t, errs, 3)
+	require.Len(t, errs, 2)
 }
