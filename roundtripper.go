@@ -82,10 +82,6 @@ func (it *test) doRequest(t T, req *http.Request) (*http.Response, error) {
 }
 
 func (it *test) validateResponseCode(resp *http.Response) error {
-	if resp == nil {
-		return nil
-	}
-
 	if it.expect.code != 0 && it.expect.code != resp.StatusCode {
 		return cuteErrors.NewAssertError(
 			"Assert response code",
