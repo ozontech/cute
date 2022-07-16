@@ -43,7 +43,6 @@ func (i *ExampleSuite) TestExample_OneStep_Errors(t provider.T) {
 		).
 		ExpectExecuteTimeout(10*time.Second).
 		ExpectJSONSchemaFile("file://./resources/example_valid_request.json").
-		ExpectStatus(http.StatusCreated).
 		AssertBody(
 			json.Equal("$[0].email", "something"),
 			json.Present("$[1].not_present"),
@@ -76,7 +75,7 @@ func (i *ExampleSuite) TestExample_OneStep_Errors(t provider.T) {
 		).
 		AssertBody(
 			func(body []byte) error {
-				return cuteErrors.NewOptionalError(errors.New("some optional error from creator")) // example optional error
+				return cuteErrors.NewOptionalError("some optional error from creator") // example optional error
 			},
 		).
 		ExecuteTest(context.Background(), t)

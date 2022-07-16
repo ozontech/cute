@@ -163,10 +163,10 @@ func wrapOptionalError(err error) error {
 	}
 
 	if tErr, ok := err.(errors.OptionalError); ok {
-		tErr.SetOptional()
+		tErr.SetOptional(true)
 
-		return err
+		return tErr.(error)
 	}
 
-	return errors.NewOptionalError(err)
+	return errors.NewOptionalError(err.Error())
 }

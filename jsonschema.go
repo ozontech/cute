@@ -46,11 +46,7 @@ func checkJSONSchema(expect gojsonschema.JSONLoader, data []byte) []error {
 		for _, resultError := range validateResult.Errors() {
 			scope = append(
 				scope,
-				errors.NewAssertError(
-					fmt.Sprintf("Error \"%v\"", resultError.Type()),
-					convertJSONSchemaError(resultError),
-					resultError.Details()["given"],
-					resultError.Details()["expected"]),
+				createJSONSchemaError(resultError),
 			)
 		}
 	}
@@ -58,18 +54,29 @@ func checkJSONSchema(expect gojsonschema.JSONLoader, data []byte) []error {
 	return scope
 }
 
-func convertJSONSchemaError(err gojsonschema.ResultError) string {
-	res := ""
+func createJSONSchemaError(err gojsonschema.ResultError) error {
+	fields := make(map[string]interface{})
+	textError := ""
 
 	if v, ok := err.Details()["context"]; ok {
-		res = fmt.Sprintf("On path: %v.", v)
+		textError = fmt.Sprintf("On path: %v.", v)
+		fields["Path"] = v
 	}
 
 	if v, ok := err.Details()["field"]; ok {
-		res = fmt.Sprintf("%v Error field: %v.", res, v)
+		textError = fmt.Sprintf("%v Error field: %v.", textError, v)
+		fields["Field"] = v
 	}
 
-	res = fmt.Sprintf("%v Error: %v.", res, err.String())
+	textError = fmt.Sprintf("%v Error: %v.", textError, err.String())
 
-	return res
+	assertError := errors.NewAssertError(
+		fmt.Sprintf("Error \"%v\"", err.Type()),
+		textError,
+		err.Details()["given"],
+		err.Details()["expected"])
+
+	assertError.(errors.WithFields).PutFields(fields)
+
+	return assertError
 }

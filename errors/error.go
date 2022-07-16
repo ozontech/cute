@@ -1,33 +1,46 @@
 package errors
 
+const (
+	actualField   = "Actual"
+	expectedField = "Expected"
+)
+
+// WithNameError is interface for creates allure step.
+// If function returns error, which implement this interface, allure step will create automatically
 type WithNameError interface {
 	GetName() string
+	SetName(string)
 }
 
+// WithFields is interface for put parameters in allure step.
+// If function returns error, which implement this interface, parameters will add to allure step
+type WithFields interface {
+	GetFields() map[string]interface{}
+	PutFields(map[string]interface{})
+}
+
+// OptionalError is interface for put parameters in allure step.
+// If function returns error, which implement this interface, allure step will have skip status
 type OptionalError interface {
 	IsOptional() bool
-	SetOptional()
-}
-
-type ExpectedError interface {
-	GetActual() interface{}
-	GetExpected() interface{}
+	SetOptional(bool)
 }
 
 type assertError struct {
 	optional bool
 	name     string
 	message  string
-	actual   interface{}
-	expected interface{}
+	fields   map[string]interface{}
 }
 
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
 	return &assertError{
-		name:     name,
-		message:  message,
-		actual:   actual,
-		expected: expected,
+		name:    name,
+		message: message,
+		fields: map[string]interface{}{
+			actualField:   actual,
+			expectedField: expected,
+		},
 	}
 }
 
@@ -39,38 +52,48 @@ func (a *assertError) GetName() string {
 	return a.name
 }
 
-func (a *assertError) GetActual() interface{} {
-	return a.actual
+func (a *assertError) SetName(name string) {
+	a.name = name
 }
 
-func (a *assertError) GetExpected() interface{} {
-	return a.expected
+func (a *assertError) GetFields() map[string]interface{} {
+	return a.fields
+}
+
+func (a *assertError) PutFields(fields map[string]interface{}) {
+	for k, v := range fields {
+		a.fields[k] = v
+	}
 }
 
 func (a *assertError) IsOptional() bool {
 	return a.optional
 }
 
-func (a *assertError) SetOptional() {
-	a.optional = true
+func (a *assertError) SetOptional(opt bool) {
+	a.optional = opt
 }
 
 type optionalError struct {
-	error
+	err      string
 	optional bool
 }
 
-func NewOptionalError(err error) error {
+func NewOptionalError(err string) error {
 	return &optionalError{
-		error:    err,
 		optional: true,
+		err:      err,
 	}
 }
 
-func (a *optionalError) IsOptional() bool {
-	return a.optional
+func (o *optionalError) Error() string {
+	return o.err
 }
 
-func (a *optionalError) SetOptional() {
-	a.optional = true
+func (o *optionalError) IsOptional() bool {
+	return o.optional
+}
+
+func (o *optionalError) SetOptional(opt bool) {
+	o.optional = opt
 }

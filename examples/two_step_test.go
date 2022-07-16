@@ -2,7 +2,6 @@ package examples
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -17,7 +16,7 @@ import (
 func TestExample_TwoSteps(t *testing.T) {
 	runner.Run(t, "Test with two steps", func(t provider.T) {
 		test := cute.NewTestBuilder().
-			Title("Twp steps").
+			Title("Two steps").
 			Description("some_description").
 			CreateWithStep().
 			StepName("Request 1").
@@ -33,7 +32,7 @@ func TestExample_TwoSteps(t *testing.T) {
 			log.Fatal(err)
 		}
 		// process body
-		fmt.Println(string(bodyBytes))
+		_ = string(bodyBytes)
 
 		cute.NewTestBuilder().
 			CreateWithStep().

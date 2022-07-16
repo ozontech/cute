@@ -99,9 +99,11 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 	errWithName := errs[0].(cuteErrors.WithNameError)
 	require.NotEmpty(t, errWithName.GetName())
 
-	expectedError := errs[0].(cuteErrors.ExpectedError)
-	require.Equal(t, "integer", expectedError.GetExpected())
-	require.Equal(t, "string", expectedError.GetActual())
+	expectedError := errs[0].(cuteErrors.WithFields)
+	require.Equal(t, "integer", expectedError.GetFields()["Expected"])
+	require.Equal(t, "string", expectedError.GetFields()["Actual"])
+	require.Equal(t, "age", expectedError.GetFields()["Field"])
+	require.Equal(t, "(root).age", expectedError.GetFields()["Path"])
 }
 
 func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
@@ -146,8 +148,8 @@ func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 		errWithName := err.(cuteErrors.WithNameError)
 		require.NotEmpty(t, errWithName.GetName())
 
-		expectedError := err.(cuteErrors.ExpectedError)
-		require.NotEmpty(t, expectedError.GetExpected())
-		require.NotEmpty(t, expectedError.GetActual())
+		expectedError := err.(cuteErrors.WithFields)
+		require.NotEmpty(t, expectedError.GetFields()["Actual"])
+		require.NotEmpty(t, expectedError.GetFields()["Expected"])
 	}
 }

@@ -25,7 +25,8 @@ Three steps for testing your HTTP service:
 6. [Asserts](#asserts)
    1. [JSON asserts](#asserts_json)
    2. [Headers asserts](#asserts_headers)
-   3. [Custom asserts](#asserts_custom)
+   3. [JSON schema](#assert_json_schema)
+   4. [Custom asserts](#asserts_custom)
       1. [Base](#asserts_custom_base)
       2. [T](#asserts_custom_t)
       3. [Errors](#assert_errors)
@@ -122,7 +123,6 @@ You can read about `Allure.Suite` [here](https://github.com/ozontech/allure-go/b
 ```go
 import (
     "github.com/ozontech/allure-go/pkg/framework/provider"
-    
     "github.com/ozontech/cute"
 )
 
@@ -155,7 +155,6 @@ import (
 )
 
 func TestExampleTest(t *testing.T) {
-    t.Parallel()
     suite.RunSuite(t, new(ExampleSuite))
 }
 ```
@@ -227,20 +226,32 @@ You can create your own asserts or use ready-made asserts from the package asser
 
 You can find implementation [here](asserts/json/json.go)
 
-- **Equal** is a function to assert that a jsonpath expression matches the given value
-- **NotEqual** is a function to check that jsonpath expression value is not equal to the given value
-- **Length** is a function to assert that value is the expected length
-- **GreaterThan** is a function to assert that value is greater than the given length
-- **LessThan** is a function to assert that value is less than the given length
-- **Present** is a function to assert that value is present
-- **NotPresent** is a function to assert that value is not present
+- `Equal` is a function to assert that a jsonpath expression matches the given value
+- `NotEqual` is a function to check that jsonpath expression value is not equal to the given value
+- `Length` is a function to assert that value is the expected length
+- `GreaterThan` is a function to assert that value is greater than the given length
+- `LessThan` is a function to assert that value is less than the given length
+- `Present` is a function to assert that value is present
+- `NotPresent` is a function to assert that value is not present
 
 ### <a name="asserts_headers"/>Headers asserts:
 
 See implementation [here](asserts/headers/headers.go)
 
-- **Present** is a function to assert that header is present
-- **NotPresent** is a function to assert that header is not present
+- `Present` is a function to assert that header is present
+- `NotPresent` is a function to assert that header is not present
+
+### <a name="assert_json_schema"/>JSON schema validations:
+
+There are three ways to validate a JSON Schema. It all depends on where you have it.
+
+- `ExpectJSONSchemaString(string)` - is a function for compares a JSON schema from a string.
+- `ExpectJSONSchemaByte([]byte)` - is a function for compares a JSON schema from an array of bytes.
+- `ExpectJSONSchemaFile(string)` - is a function for compares a JSON schema from a file or remote resource.
+
+**Allure:**
+
+![img.png](.images/json_schema.png)
 
 ## <a name="asserts_custom"/>Custom asserts
 
@@ -285,7 +296,7 @@ type AssertResponseT func(t cute.T, response *http.Response) error
 **Example with T:**
 
 ```go
-func customAssertBodyTB() cute.AssertBodyT {
+func customAssertBodyT() cute.AssertBodyT {
     return func(t cute.T, bytes []byte) error {
         require.GreaterOrEqual(t, len(bytes), 100)
         return nil
@@ -343,17 +354,20 @@ func customAssertBodyWithCustomError() cute.AssertBody {
 If you'd like to create a pretty **error in your custom** assert you should implement error with [interfaces](errors/error.go):
 
 ##### With name
+
 ```go
 type WithNameError interface {
     GetName() string
+    SetName(string)
 }
 ```
 
-#### With actual and expected values
+#### With field for allure step
+
 ```go
-type ExpectedError interface {
-    GetActual() interface{}
-    GetExpected() interface{}
+type WithFields interface {
+    GetFields() map[string]interface{}
+    SetFields(map[string]interface{})
 }
 ```
 
@@ -375,7 +389,7 @@ import (
 func customAssertBodyWithCustomError() cute.AssertBody {
     return func(bytes []byte) error {
         if len(bytes) == 0 {
-            return errors.NewOptionalError(fmt.Errorf("body is empty"))
+            return errors.NewOptionalError("body is empty")
         }
 
         return nil
@@ -388,11 +402,12 @@ To create optional error you should implement error with interface
 ```go
 type OptionalError interface {
     IsOptional() bool
-    SetOptional()
+    SetOptional(opt bool)
 }
 ```
 
 **Allure:**
+
 ![optional_error.png](.images/optional_error.png)
 
 ## <a name="global_env_keys"/>Global Environment Keys
