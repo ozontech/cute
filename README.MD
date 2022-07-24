@@ -363,12 +363,12 @@ type WithNameError interface {
 }
 ```
 
-#### With field for allure step
+#### With parameters for allure step
 
 ```go
 type WithFields interface {
     GetFields() map[string]interface{}
-    SetFields(map[string]interface{})
+    PutFields(map[string]interface{})
 }
 ```
 
@@ -403,7 +403,7 @@ To create optional error you should implement error with interface
 ```go
 type OptionalError interface {
     IsOptional() bool
-    SetOptional(opt bool)
+    SetOptional(bool)
 }
 ```
 

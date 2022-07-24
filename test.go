@@ -199,7 +199,6 @@ func (it *test) executeTest(ctx context.Context, allureProvider allureProvider) 
 
 func (it *test) processTestErrors(t internalT, errs []error) {
 	if len(errs) == 0 {
-
 		return
 	}
 
