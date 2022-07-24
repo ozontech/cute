@@ -27,8 +27,10 @@ func (r *testResults) NextTest() Middleware {
 		parallel:     r.httpTest.parallel,
 		allureStep:   new(allureStep),
 		middleware:   new(middleware),
-		request:      new(request),
 		expect:       new(expect),
+		request: &request{
+			repeat: new(requestRepeatPolitic),
+		},
 	}
 }
 

@@ -3,7 +3,6 @@ package cute
 import (
 	"testing"
 
-	"github.com/ozontech/allure-go/pkg/framework/core/common"
 	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/stretchr/testify/require"
 )
@@ -22,10 +21,8 @@ func TestValidateJSONSchemaFromString(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
 		tBuilder = a.NewTestBuilder().(*test)
-		tempT    = common.NewT(t, "package", t.Name())
+		tempT    = createAllureT(t)
 	)
-	tempT.NewTest(t.Name(), "package")
-	tempT.TestContext()
 
 	body := []byte(`
 	{
@@ -64,10 +61,8 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
 		tBuilder = a.NewTestBuilder().(*test)
-		tempT    = common.NewT(t, "package", t.Name())
+		tempT    = createAllureT(t)
 	)
-	tempT.NewTest(t.Name(), "package")
-	tempT.TestContext()
 
 	body := []byte(`
 	{
@@ -104,19 +99,19 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 	errWithName := errs[0].(cuteErrors.WithNameError)
 	require.NotEmpty(t, errWithName.GetName())
 
-	expectedError := errs[0].(cuteErrors.ExpectedError)
-	require.Equal(t, "integer", expectedError.GetExpected())
-	require.Equal(t, "string", expectedError.GetActual())
+	expectedError := errs[0].(cuteErrors.WithFields)
+	require.Equal(t, "integer", expectedError.GetFields()["Expected"])
+	require.Equal(t, "string", expectedError.GetFields()["Actual"])
+	require.Equal(t, "age", expectedError.GetFields()["Field"])
+	require.Equal(t, "(root).age", expectedError.GetFields()["Path"])
 }
 
 func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
 		tBuilder = a.NewTestBuilder().(*test)
-		tempT    = common.NewT(t, "package", t.Name())
+		tempT    = createAllureT(t)
 	)
-	tempT.NewTest(t.Name(), "package")
-	tempT.TestContext()
 
 	body := []byte(`
 	{
@@ -153,8 +148,8 @@ func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 		errWithName := err.(cuteErrors.WithNameError)
 		require.NotEmpty(t, errWithName.GetName())
 
-		expectedError := err.(cuteErrors.ExpectedError)
-		require.NotEmpty(t, expectedError.GetExpected())
-		require.NotEmpty(t, expectedError.GetActual())
+		expectedError := err.(cuteErrors.WithFields)
+		require.NotEmpty(t, expectedError.GetFields()["Actual"])
+		require.NotEmpty(t, expectedError.GetFields()["Expected"])
 	}
 }

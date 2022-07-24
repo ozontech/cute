@@ -78,5 +78,6 @@ func TestAsyncTestTwo(t *testing.T) {
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 			cute.WithMethod(http.MethodGet),
 		).
+		ExpectStatus(200).
 		ExecuteTest(context.Background(), t)
 }

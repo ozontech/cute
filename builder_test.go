@@ -50,6 +50,8 @@ func TestHTTPTestMaker(t *testing.T) {
 		label          = allure.Label{"kek", "lol"}
 		setIssue       = "SetIssue"
 		setTestCase    = "SetTestCase"
+		repeatCount    = 10
+		repeatDelay    = time.Duration(10)
 		link           = allure.Link{
 			Name: "link",
 			Type: "type",
@@ -131,6 +133,8 @@ func TestHTTPTestMaker(t *testing.T) {
 		Description(desc).
 		CreateWithStep().
 		StepName(stepName).
+		RequestRepeat(repeatCount).
+		RequestRepeatDelay(repeatDelay).
 		Request(req).
 		ExpectExecuteTimeout(executeTime).
 		ExpectStatus(status).
@@ -170,6 +174,8 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, setIssue, resHt.allureLinks.issue)
 	require.Equal(t, setTestCase, resHt.allureLinks.testCase)
 	require.Equal(t, link, resHt.allureLinks.link)
+	require.Equal(t, repeatCount, resHt.request.repeat.count)
+	require.Equal(t, repeatDelay, resHt.request.repeat.delay)
 
 	require.Equal(t, len(assertHeaders), len(resHt.expect.assertHeaders))
 	require.Equal(t, len(assertHeadersT), len(resHt.expect.assertHeadersT))
@@ -195,12 +201,22 @@ func TestCreateHTTPTestMakerWithHttpClient(t *testing.T) {
 	require.Equal(t, time.Duration(100), maker.httpClient.Timeout)
 }
 
+type rt struct {
+}
+
+func (r *rt) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, nil
+}
+
 func TestCreateHTTPMakerOps(t *testing.T) {
 	timeout := time.Second * 100
+	roundTripper := &rt{}
 
 	maker := NewHTTPTestMaker(
 		WithCustomHTTPTimeout(timeout),
+		WithCustomHTTPRoundTripper(roundTripper),
 	)
 
 	require.Equal(t, timeout, maker.httpClient.Timeout)
+	require.Equal(t, roundTripper, maker.httpClient.Transport)
 }

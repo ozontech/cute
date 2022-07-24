@@ -57,10 +57,20 @@ func LessThan(expression string, maximumLength int) cute.AssertBody {
 }
 
 // Present is a function to asserts that value is present
+// value can be nil or 0
 // About expression - https://goessner.net/articles/JsonPath/
 func Present(expression string) cute.AssertBody {
 	return func(body []byte) error {
 		return present(body, expression)
+	}
+}
+
+// NotEmpty is a function to asserts that value is present
+// value can't be nil or 0
+// About expression - https://goessner.net/articles/JsonPath/
+func NotEmpty(expression string) cute.AssertBody {
+	return func(body []byte) error {
+		return notEmpty(body, expression)
 	}
 }
 

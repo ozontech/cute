@@ -65,7 +65,7 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	}
 
 	httpClient := &http.Client{
-		Transport: newAllureRoundTripper(roundTripper),
+		Transport: roundTripper,
 		Timeout:   timeout,
 	}
 
@@ -89,9 +89,11 @@ func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
 		allureLinks:  new(allureLinks),
 		allureLabels: new(allureLabels),
 		middleware:   new(middleware),
-		request:      new(request),
-		expect:       new(expect),
-		parallel:     false,
+		request: &request{
+			repeat: new(requestRepeatPolitic),
+		},
+		expect:   new(expect),
+		parallel: false,
 	}
 }
 
@@ -253,6 +255,18 @@ func (it *test) AfterExecute(fs ...AfterExecute) Middleware {
 
 func (it *test) AfterExecuteT(fs ...AfterExecuteT) Middleware {
 	it.middleware.afterT = append(it.middleware.afterT, fs...)
+
+	return it
+}
+
+func (it *test) RequestRepeat(count int) RequestHTTPBuilder {
+	it.request.repeat.count = count
+
+	return it
+}
+
+func (it *test) RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder {
+	it.request.repeat.delay = delay
 
 	return it
 }

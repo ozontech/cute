@@ -5,16 +5,15 @@ import (
 	"net/http"
 
 	"github.com/ozontech/allure-go/pkg/allure"
-	"github.com/stretchr/testify/require"
-
 	"github.com/ozontech/cute"
-	cErrors "github.com/ozontech/cute/errors"
+	cuteErrors "github.com/ozontech/cute/errors"
+	"github.com/stretchr/testify/require"
 )
 
 func CustomAssertBodyWithCustomError() cute.AssertBody {
 	return func(bytes []byte) error {
 		if len(bytes) == 0 {
-			return cErrors.NewAssertError("customAssertBodyWithCustomError", "body must be not empty", "len is 0", "len more 0")
+			return cuteErrors.NewAssertError("customAssertBodyWithCustomError", "body must be not empty", "len is 0", "len more 0")
 		}
 
 		return nil

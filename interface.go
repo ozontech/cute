@@ -87,6 +87,11 @@ type RequestHTTPBuilder interface {
 	// WithBody
 	// WithURI
 	RequestBuilder(r ...requestBuilder) ExpectHTTPBuilder
+	// RequestRepeat is a count of repeat request, if request was failed.
+	RequestRepeat(count int) RequestHTTPBuilder
+	// RequestRepeatDelay is a time between repeat request, if request was failed.
+	// Default 1 second
+	RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder
 }
 
 // ExpectHTTPBuilder is a scope of methods for validate http response

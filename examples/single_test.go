@@ -33,11 +33,12 @@ func TestExampleSingle(t *testing.T) {
 		AssertBody(
 			json.Equal("$[0].email", "Eliseo@gardner.biz"),
 			json.Present("$[1].name"),
+			json.Present("$[0].passport"), // Example fail
 		).
 		ExecuteTest(context.Background(), t)
 }
 
-func TestExampleSingleTest_AllureProviderT(t *testing.T) {
+func TestExampleSingleTest_AllureRunner(t *testing.T) {
 	runner.Run(t, "Single test", func(t provider.T) {
 		var (
 			testMaker   = cute.NewHTTPTestMaker()
@@ -48,18 +49,23 @@ func TestExampleSingleTest_AllureProviderT(t *testing.T) {
 		u.Path = path.Join(u.Path, "/posts/1/comments")
 
 		testBuilder.
-			Title("AllureProviderT").
+			Title("AllureRunner").
 			Description("some_description").
 			Create().
+			RequestRepeatDelay(3*time.Second). // delay before new try
+			RequestRepeat(3).                  // count attempts
 			RequestBuilder(
 				cute.WithURL(u),
 				cute.WithMethod(http.MethodGet),
 			).
 			ExpectExecuteTimeout(10*time.Second).
-			ExpectStatus(http.StatusOK).
+			ExpectStatus(http.StatusBadGateway).
 			AssertBody(
 				json.Equal("$[0].email", "Eliseo@gardner.biz"),
 				json.Present("$[1].name"),
+			).
+			OptionalAssertBody(
+				json.Present("$[0].photo"), // Example optional fail
 			).
 			ExecuteTest(context.Background(), t)
 	})
