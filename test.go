@@ -229,7 +229,7 @@ func (it *test) processTestErrors(t internalT, errs []error) {
 		t.Errorf("[ERROR] %v", err)
 	}
 
-	t.Errorf("Test finished %v with %v errors", t.Name(), len(resErrors))
+	t.Errorf("Test finished with %v errors", len(resErrors))
 }
 
 func (it *test) testWithStep(ctx context.Context, t internalT) (*http.Response, []error) {
@@ -273,13 +273,15 @@ func (it *test) test(ctx context.Context, t internalT) (*http.Response, []error)
 		return nil, errs
 	}
 
-	t.Logf(req.Method + " " + req.URL.String())
+	t.Logf("Start make request")
 
 	// Make request
 	resp, errs := it.makeRequest(t, req)
 	if len(errs) > 0 {
 		return resp, errs
 	}
+
+	t.Logf("Finish make request")
 
 	// Validate response body
 	errs = it.validateResponse(t, resp)

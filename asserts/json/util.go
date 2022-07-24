@@ -107,12 +107,25 @@ func lessThan(data []byte, expression string, maximumLength int) error {
 	return nil
 }
 
-// Present is a function to asserts that value is present
+// notEmpty is a function to asserts that value is not empty (!= 0, != null)
 // About expression - https://goessner.net/articles/JsonPath/
-func present(data []byte, expression string) error {
+func notEmpty(data []byte, expression string) error {
 	value, _ := GetValueFromJSON(data, expression)
 	if isEmpty(value) {
+		return errors.NewAssertError("NotEmpty", fmt.Sprintf("on path %v. value is not present", expression), nil, nil)
+	}
+
+	return nil
+}
+
+// Present is a function to asserts that value is present
+// value can be 0 or null
+// About expression - https://goessner.net/articles/JsonPath/
+func present(data []byte, expression string) error {
+	_, err := GetValueFromJSON(data, expression)
+	if err != nil {
 		return errors.NewAssertError("Present", fmt.Sprintf("on path %v. value not present", expression), nil, nil)
+
 	}
 
 	return nil

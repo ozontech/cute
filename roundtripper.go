@@ -105,6 +105,8 @@ func addInformationRequest(t T, req *http.Request) error {
 		return err
 	}
 
+	t.Log(curl)
+
 	headers, err := utils.ToJSON(req.Header)
 	if err != nil {
 		return err

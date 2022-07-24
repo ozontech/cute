@@ -52,12 +52,13 @@ func TestExampleSingleTest_AllureRunner(t *testing.T) {
 			Title("AllureRunner").
 			Description("some_description").
 			Create().
+			RequestRepeat(3).
 			RequestBuilder(
 				cute.WithURL(u),
 				cute.WithMethod(http.MethodGet),
 			).
 			ExpectExecuteTimeout(10*time.Second).
-			ExpectStatus(http.StatusOK).
+			ExpectStatus(http.StatusBadGateway).
 			AssertBody(
 				json.Equal("$[0].email", "Eliseo@gardner.biz"),
 				json.Present("$[1].name"),

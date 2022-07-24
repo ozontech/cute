@@ -80,10 +80,86 @@ func TestPresent(t *testing.T) {
 			data:       `{"o":["a", "b", "c"]}`,
 			expression: "$.not_correct",
 		},
+		{
+			caseName:   "empty integer",
+			data:       `{"o":0}`,
+			expression: "$.o",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "empty object",
+			data:       `{"o":null}`,
+			expression: "$.o",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "empty string",
+			data:       `{"o":null, "b":""}`,
+			expression: "$.b",
+			IsNilErr:   true,
+		},
 	}
 
 	for _, test := range tests {
 		err := Present(test.expression)([]byte(test.data))
+
+		if test.IsNilErr {
+			require.NoError(t, err, "failed test %v", test.caseName)
+		} else {
+			require.Error(t, err, "failed test %v", test.caseName)
+		}
+	}
+}
+
+func TestNotEmpty(t *testing.T) {
+	tests := []jsonTest{
+		{
+			caseName:   "correct check array",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.o",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "not present check",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.b",
+		},
+		{
+			caseName:   "correct present check array",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.o[0]",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "correct check map",
+			data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
+			expression: "$.o[0][1]",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check not correct path",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.not_correct",
+		},
+		{
+			caseName:   "empty integer",
+			data:       `{"o":0}`,
+			expression: "$.o",
+		},
+		{
+			caseName:   "empty object",
+			data:       `{"o":null}`,
+			expression: "$.o",
+		},
+		{
+			caseName:   "empty string",
+			data:       `{"o":null, "b":""}`,
+			expression: "$.b",
+		},
+	}
+
+	for _, test := range tests {
+		err := NotEmpty(test.expression)([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
