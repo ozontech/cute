@@ -5,9 +5,17 @@ import (
 )
 
 type testResults struct {
-	resp     *http.Response
-	errors   []error
-	httpTest *test
+	name   string
+	resp   *http.Response
+	errors []error
+}
+
+func newTestResult(name string, resp *http.Response, errs []error) ResultsHTTPBuilder {
+	return &testResults{
+		name:   name,
+		resp:   resp,
+		errors: errs,
+	}
 }
 
 func (r *testResults) GetHTTPResponse() *http.Response {
@@ -18,22 +26,6 @@ func (r *testResults) GetErrors() []error {
 	return r.errors
 }
 
-func (r *testResults) NextTest() Middleware {
-	return &test{
-		httpClient:   r.httpTest.httpClient,
-		allureInfo:   r.httpTest.allureInfo,
-		allureLinks:  r.httpTest.allureLinks,
-		allureLabels: r.httpTest.allureLabels,
-		parallel:     r.httpTest.parallel,
-		allureStep:   new(allureStep),
-		middleware:   new(middleware),
-		expect:       new(expect),
-		request: &request{
-			repeat: new(requestRepeatPolitic),
-		},
-	}
-}
-
-func (r *testResults) NextTestWithStep() StepBuilder {
-	return r.NextTest().(StepBuilder)
+func (r *testResults) GetName() string {
+	return r.name
 }

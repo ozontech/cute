@@ -13,7 +13,7 @@ import (
 	"github.com/ozontech/cute/internal/utils"
 )
 
-func (it *test) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {
+func (it *cute) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {
 	var (
 		delay       = defaultDelayRepeat
 		countRepeat = 1
@@ -23,12 +23,12 @@ func (it *test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 		scope = make([]error, 0)
 	)
 
-	if it.request.repeat.delay != 0 {
-		delay = it.request.repeat.delay
+	if it.tests[it.correctTest].request.repeat.delay != 0 {
+		delay = it.tests[it.correctTest].request.repeat.delay
 	}
 
-	if it.request.repeat.count != 0 {
-		countRepeat = it.request.repeat.count
+	if it.tests[it.correctTest].request.repeat.count != 0 {
+		countRepeat = it.tests[it.correctTest].request.repeat.count
 	}
 
 	for i := 1; i <= countRepeat; i++ {
@@ -54,7 +54,7 @@ func (it *test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	return resp, scope
 }
 
-func (it *test) doRequest(t T, req *http.Request) (*http.Response, error) {
+func (it *cute) doRequest(t T, req *http.Request) (*http.Response, error) {
 	// Add information (method, host, curl) about request to Allure step
 	err := addInformationRequest(t, req)
 	if err != nil {
@@ -81,13 +81,13 @@ func (it *test) doRequest(t T, req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (it *test) validateResponseCode(resp *http.Response) error {
-	if it.expect.code != 0 && it.expect.code != resp.StatusCode {
+func (it *cute) validateResponseCode(resp *http.Response) error {
+	if it.tests[it.correctTest].expect.code != 0 && it.tests[it.correctTest].expect.code != resp.StatusCode {
 		return cuteErrors.NewAssertError(
 			"Assert response code",
-			fmt.Sprintf("Response code expect %v, but was %v", it.expect.code, resp.StatusCode),
+			fmt.Sprintf("Response code expect %v, but was %v", it.tests[it.correctTest].expect.code, resp.StatusCode),
 			resp.StatusCode,
-			it.expect.code)
+			it.tests[it.correctTest].expect.code)
 	}
 
 	return nil

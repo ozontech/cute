@@ -44,7 +44,7 @@ func WithCustomHTTPRoundTripper(r http.RoundTripper) Option {
 	}
 }
 
-// NewHTTPTestMaker is function for set options for all test.
+// NewHTTPTestMaker is function for set options for all cute.
 func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	var (
 		o            = new(options)
@@ -80,319 +80,379 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	return m
 }
 
-// NewTestBuilder is a function for initialization foundation for test
+// NewTestBuilder is a function for initialization foundation for cute
 func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
-	return &test{
+	tests := make([]*test, 1, 1)
+	tests[0] = getDefaultTest()
+
+	return &cute{
 		httpClient:   m.httpClient,
-		allureStep:   new(allureStep),
+		countTests:   0,
+		tests:        tests,
 		allureInfo:   new(allureInformation),
 		allureLinks:  new(allureLinks),
 		allureLabels: new(allureLabels),
-		middleware:   new(middleware),
-		request: &request{
-			repeat: new(requestRepeatPolitic),
-		},
-		expect:   new(expect),
-		parallel: false,
+		parallel:     false,
 	}
 }
 
-func (it *test) Title(title string) AllureBuilder {
+func getDefaultTest() *test {
+	return &test{
+		allureStep: new(allureStep),
+		middleware: new(middleware),
+		request: &request{
+			repeat: new(requestRepeatPolitic),
+		},
+		expect: new(expect),
+	}
+}
+
+func (it *cute) Title(title string) AllureBuilder {
 	it.allureInfo.title = title
 
 	return it
 }
 
-func (it *test) Epic(epic string) AllureBuilder {
+func (it *cute) Epic(epic string) AllureBuilder {
 	it.allureLabels.epic = epic
 
 	return it
 }
 
-func (it *test) SetIssue(issue string) AllureBuilder {
+func (it *cute) SetIssue(issue string) AllureBuilder {
 	it.allureLinks.issue = issue
 
 	return it
 }
 
-func (it *test) SetTestCase(testCase string) AllureBuilder {
+func (it *cute) SetTestCase(testCase string) AllureBuilder {
 	it.allureLinks.testCase = testCase
 
 	return it
 }
 
-func (it *test) Link(link allure.Link) AllureBuilder {
+func (it *cute) Link(link allure.Link) AllureBuilder {
 	it.allureLinks.link = link
 
 	return it
 }
 
-func (it *test) ID(value string) AllureBuilder {
+func (it *cute) ID(value string) AllureBuilder {
 	it.allureLabels.id = value
 
 	return it
 }
 
-func (it *test) AddSuiteLabel(value string) AllureBuilder {
+func (it *cute) AddSuiteLabel(value string) AllureBuilder {
 	it.allureLabels.suiteLabel = value
 
 	return it
 }
 
-func (it *test) AddSubSuite(value string) AllureBuilder {
+func (it *cute) AddSubSuite(value string) AllureBuilder {
 	it.allureLabels.subSuite = value
 
 	return it
 }
 
-func (it *test) AddParentSuite(value string) AllureBuilder {
+func (it *cute) AddParentSuite(value string) AllureBuilder {
 	it.allureLabels.parentSuite = value
 
 	return it
 }
 
-func (it *test) Story(value string) AllureBuilder {
+func (it *cute) Story(value string) AllureBuilder {
 	it.allureLabels.story = value
 
 	return it
 }
 
-func (it *test) Tag(value string) AllureBuilder {
+func (it *cute) Tag(value string) AllureBuilder {
 	it.allureLabels.tag = value
 
 	return it
 }
 
-func (it *test) Severity(value allure.SeverityType) AllureBuilder {
+func (it *cute) Severity(value allure.SeverityType) AllureBuilder {
 	it.allureLabels.severity = value
 
 	return it
 }
 
-func (it *test) Owner(value string) AllureBuilder {
+func (it *cute) Owner(value string) AllureBuilder {
 	it.allureLabels.owner = value
 
 	return it
 }
 
-func (it *test) Lead(value string) AllureBuilder {
+func (it *cute) Lead(value string) AllureBuilder {
 	it.allureLabels.lead = value
 
 	return it
 }
 
-func (it *test) Label(label allure.Label) AllureBuilder {
+func (it *cute) Label(label allure.Label) AllureBuilder {
 	it.allureLabels.label = label
 
 	return it
 }
 
-func (it *test) Labels(labels ...allure.Label) AllureBuilder {
+func (it *cute) Labels(labels ...allure.Label) AllureBuilder {
 	it.allureLabels.labels = labels
 
 	return it
 }
 
-func (it *test) Description(description string) AllureBuilder {
+func (it *cute) Description(description string) AllureBuilder {
 	it.allureInfo.description = description
 
 	return it
 }
 
-func (it *test) Tags(tags ...string) AllureBuilder {
+func (it *cute) Tags(tags ...string) AllureBuilder {
 	it.allureLabels.tags = tags
 
 	return it
 }
 
-func (it *test) Feature(feature string) AllureBuilder {
+func (it *cute) Feature(feature string) AllureBuilder {
 	it.allureLabels.feature = feature
 
 	return it
 }
 
-func (it *test) CreateWithStep() StepBuilder {
+func (it *cute) CreateWithStep() StepBuilder {
 	return it
 }
 
-func (it *test) Create() Middleware {
+func (it *cute) Create() Middleware {
 	return it
 }
 
-func (it *test) Parallel() AllureBuilder {
+func (it *cute) Parallel() AllureBuilder {
 	it.parallel = true
 
 	return it
 }
 
-func (it *test) CreateRequest() RequestHTTPBuilder {
+func (it *cute) CreateRequest() RequestHTTPBuilder {
 	return it
 }
 
-func (it *test) StepName(name string) Middleware {
-	it.allureStep.name = name
-
-	return it
-}
-
-func (it *test) BeforeExecute(fs ...BeforeExecute) Middleware {
-	it.middleware.before = append(it.middleware.before, fs...)
+func (it *cute) StepName(name string) Middleware {
+	it.tests[it.countTests].allureStep.name = name
 
 	return it
 }
 
-func (it *test) BeforeExecuteT(fs ...BeforeExecuteT) Middleware {
-	it.middleware.beforeT = append(it.middleware.beforeT, fs...)
+func (it *cute) BeforeExecute(fs ...BeforeExecute) Middleware {
+	it.tests[it.countTests].middleware.before = append(it.tests[it.countTests].middleware.before, fs...)
 
 	return it
 }
 
-func (it *test) AfterExecute(fs ...AfterExecute) Middleware {
-	it.middleware.after = append(it.middleware.after, fs...)
+func (it *cute) BeforeExecuteT(fs ...BeforeExecuteT) Middleware {
+	it.tests[it.countTests].middleware.beforeT = append(it.tests[it.countTests].middleware.beforeT, fs...)
 
 	return it
 }
 
-func (it *test) AfterExecuteT(fs ...AfterExecuteT) Middleware {
-	it.middleware.afterT = append(it.middleware.afterT, fs...)
+func (it *cute) AfterExecute(fs ...AfterExecute) Middleware {
+	it.tests[it.countTests].middleware.after = append(it.tests[it.countTests].middleware.after, fs...)
 
 	return it
 }
 
-func (it *test) RequestRepeat(count int) RequestHTTPBuilder {
-	it.request.repeat.count = count
+func (it *cute) AfterExecuteT(fs ...AfterExecuteT) Middleware {
+	it.tests[it.countTests].middleware.afterT = append(it.tests[it.countTests].middleware.afterT, fs...)
 
 	return it
 }
 
-func (it *test) RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder {
-	it.request.repeat.delay = delay
+func (it *cute) RequestRepeat(count int) RequestHTTPBuilder {
+	it.tests[it.countTests].request.repeat.count = count
 
 	return it
 }
 
-func (it *test) Request(r *http.Request) ExpectHTTPBuilder {
-	it.request.base = r
+func (it *cute) RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder {
+	it.tests[it.countTests].request.repeat.delay = delay
 
 	return it
 }
 
-func (it *test) RequestBuilder(r ...requestBuilder) ExpectHTTPBuilder {
-	it.request.builders = append(it.request.builders, r...)
+func (it *cute) Request(r *http.Request) ExpectHTTPBuilder {
+	it.tests[it.countTests].request.base = r
 
 	return it
 }
 
-func (it *test) ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder {
-	it.expect.executeTime = t
+func (it *cute) RequestBuilder(r ...requestBuilder) ExpectHTTPBuilder {
+	it.tests[it.countTests].request.builders = append(it.tests[it.countTests].request.builders, r...)
 
 	return it
 }
 
-func (it *test) ExpectStatus(code int) ExpectHTTPBuilder {
-	it.expect.code = code
+func (it *cute) ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.executeTime = t
 
 	return it
 }
 
-func (it *test) ExpectJSONSchemaString(schema string) ExpectHTTPBuilder {
-	it.expect.jsSchemaString = schema
+func (it *cute) ExpectStatus(code int) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.code = code
 
 	return it
 }
 
-func (it *test) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
-	it.expect.jsSchemaByte = schema
+func (it *cute) ExpectJSONSchemaString(schema string) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.jsSchemaString = schema
 
 	return it
 }
 
-func (it *test) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
-	it.expect.jsSchemaFile = filePath
+func (it *cute) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.jsSchemaByte = schema
 
 	return it
 }
 
-func (it *test) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
-	it.expect.assertBody = append(it.expect.assertBody, asserts...)
+func (it *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.jsSchemaFile = filePath
 
 	return it
 }
 
-func (it *test) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+func (it *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.assertBody = append(it.tests[it.countTests].expect.assertBody, asserts...)
+
+	return it
+}
+
+func (it *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.expect.assertBody = append(it.expect.assertBody, optionalAssertBody(assert))
+		it.tests[it.countTests].expect.assertBody = append(it.tests[it.countTests].expect.assertBody, optionalAssertBody(assert))
 	}
 
 	return it
 }
 
-func (it *test) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	it.expect.assertHeaders = append(it.expect.assertHeaders, asserts...)
+func (it *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.assertHeaders = append(it.tests[it.countTests].expect.assertHeaders, asserts...)
 
 	return it
 }
 
-func (it *test) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+func (it *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.expect.assertHeaders = append(it.expect.assertHeaders, optionalAssertHeaders(assert))
+		it.tests[it.countTests].expect.assertHeaders = append(it.tests[it.countTests].expect.assertHeaders, optionalAssertHeaders(assert))
 	}
 
 	return it
 }
 
-func (it *test) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
-	it.expect.assertResponse = append(it.expect.assertResponse, asserts...)
+func (it *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.assertResponse = append(it.tests[it.countTests].expect.assertResponse, asserts...)
 
 	return it
 }
 
-func (it *test) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+func (it *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.expect.assertResponse = append(it.expect.assertResponse, optionalAssertResponse(assert))
+		it.tests[it.countTests].expect.assertResponse = append(it.tests[it.countTests].expect.assertResponse, optionalAssertResponse(assert))
 	}
 
 	return it
 }
 
-func (it *test) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	it.expect.assertBodyT = append(it.expect.assertBodyT, asserts...)
+func (it *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.assertBodyT = append(it.tests[it.countTests].expect.assertBodyT, asserts...)
 
 	return it
 }
 
-func (it *test) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+func (it *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.expect.assertBodyT = append(it.expect.assertBodyT, optionalAssertBodyT(assert))
+		it.tests[it.countTests].expect.assertBodyT = append(it.tests[it.countTests].expect.assertBodyT, optionalAssertBodyT(assert))
 	}
 
 	return it
 }
 
-func (it *test) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
-	it.expect.assertHeadersT = append(it.expect.assertHeadersT, asserts...)
+func (it *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.assertHeadersT = append(it.tests[it.countTests].expect.assertHeadersT, asserts...)
 
 	return it
 }
 
-func (it *test) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+func (it *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.expect.assertHeadersT = append(it.expect.assertHeadersT, optionalAssertHeadersT(assert))
+		it.tests[it.countTests].expect.assertHeadersT = append(it.tests[it.countTests].expect.assertHeadersT, optionalAssertHeadersT(assert))
 	}
 
 	return it
 }
 
-func (it *test) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
-	it.expect.assertResponseT = append(it.expect.assertResponseT, asserts...)
+func (it *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	it.tests[it.countTests].expect.assertResponseT = append(it.tests[it.countTests].expect.assertResponseT, asserts...)
 
 	return it
 }
 
-func (it *test) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+func (it *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.expect.assertResponseT = append(it.expect.assertResponseT, optionalAssertResponseT(assert))
+		it.tests[it.countTests].expect.assertResponseT = append(it.tests[it.countTests].expect.assertResponseT, optionalAssertResponseT(assert))
 	}
+
+	return it
+}
+
+func (it *cute) NextTest() NextTestBuilder {
+	it.countTests++ // async?
+
+	it.tests = append(it.tests, getDefaultTest())
+
+	return it
+}
+
+func (it *cute) ProcessBody(i []byte) NextTestBuilder {
+	//TODO implement me
+	panic("implement me")
+
+	return it
+}
+
+func (it *cute) ProcessBodyT(t T, i []byte) NextTestBuilder {
+	//TODO implement me
+	panic("implement me")
+
+	return it
+}
+
+func (it *cute) ProcessHeaders(headers http.Header) NextTestBuilder {
+	//TODO implement me
+	panic("implement me")
+
+	return it
+}
+
+func (it *cute) ProcessHeadersT(T, headers http.Header) NextTestBuilder {
+	//TODO implement me
+	panic("implement me")
+
+	return it
+}
+
+func (it *cute) ProcessBodyResponse(response *http.Response) NextTestBuilder {
+	//TODO implement me
+	panic("implement me")
+
+	return it
+}
+
+func (it *cute) ProcessBodyResponseT(t T, response *http.Response) NextTestBuilder {
+	//TODO implement me
+	panic("implement me")
 
 	return it
 }

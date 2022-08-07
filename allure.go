@@ -1,13 +1,13 @@
 package cute
 
-func (it *test) setAllureInformation(t allureProvider) {
+func (it *cute) setAllureInformation(t allureProvider) {
 	// Log main vars to allureProvider
 	it.setLabelsAllure(t)
 	it.setInfoAllure(t)
 	it.setLinksAllure(t)
 }
 
-func (it *test) setLinksAllure(t linksAllureProvider) {
+func (it *cute) setLinksAllure(t linksAllureProvider) {
 	if it.allureLinks.issue != "" {
 		t.SetIssue(it.allureLinks.issue)
 	}
@@ -19,7 +19,7 @@ func (it *test) setLinksAllure(t linksAllureProvider) {
 	}
 }
 
-func (it *test) setLabelsAllure(t labelsAllureProvider) {
+func (it *cute) setLabelsAllure(t labelsAllureProvider) {
 	if it.allureLabels.id != "" {
 		t.ID(it.allureLabels.id)
 	}
@@ -64,7 +64,7 @@ func (it *test) setLabelsAllure(t labelsAllureProvider) {
 	}
 }
 
-func (it *test) setInfoAllure(t infoAllureProvider) {
+func (it *cute) setInfoAllure(t infoAllureProvider) {
 	if it.allureInfo.title != "" {
 		t.Title(it.allureInfo.title)
 	}

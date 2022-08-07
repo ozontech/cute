@@ -6,7 +6,7 @@ import (
 	"github.com/ozontech/cute/errors"
 )
 
-func (it *test) executeWithStep(t internalT, stepName string, execute func(t T) []error) []error {
+func (it *cute) executeWithStep(t internalT, stepName string, execute func(t T) []error) []error {
 	var (
 		errs []error
 	)
@@ -19,7 +19,7 @@ func (it *test) executeWithStep(t internalT, stepName string, execute func(t T) 
 	return errs
 }
 
-func (it *test) processStepErrors(step *allure.Step, errs []error) {
+func (it *cute) processStepErrors(step *allure.Step, errs []error) {
 	var statuses = make([]allure.Status, 0)
 
 	if len(errs) == 0 {

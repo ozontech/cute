@@ -28,15 +28,15 @@ type AssertHeadersT func(t T, headers http.Header) error
 // AssertResponseT ...
 type AssertResponseT func(t T, response *http.Response) error
 
-func (it *test) assertResponse(t internalT, resp *http.Response) []error {
-	if len(it.expect.assertResponse) == 0 && len(it.expect.assertResponseT) == 0 {
+func (it *cute) assertResponse(t internalT, resp *http.Response) []error {
+	if len(it.tests[it.countTests].expect.assertResponse) == 0 && len(it.tests[it.countTests].expect.assertResponseT) == 0 {
 		return nil
 	}
 
 	return it.executeWithStep(t, "Assert response", func(t T) []error {
 		errs := make([]error, 0)
 		// Execute assert only response
-		for _, f := range it.expect.assertResponse {
+		for _, f := range it.tests[it.countTests].expect.assertResponse {
 			err := f(resp)
 			if err != nil {
 				errs = append(errs, err)
@@ -44,7 +44,7 @@ func (it *test) assertResponse(t internalT, resp *http.Response) []error {
 		}
 
 		// Execute assert for response with TB
-		for _, f := range it.expect.assertResponseT {
+		for _, f := range it.tests[it.countTests].expect.assertResponseT {
 			err := f(t, resp)
 			if err != nil {
 				errs = append(errs, err)
@@ -55,15 +55,15 @@ func (it *test) assertResponse(t internalT, resp *http.Response) []error {
 	})
 }
 
-func (it *test) assertHeaders(t internalT, headers http.Header) []error {
-	if len(it.expect.assertHeaders) == 0 && len(it.expect.assertHeadersT) == 0 {
+func (it *cute) assertHeaders(t internalT, headers http.Header) []error {
+	if len(it.tests[it.countTests].expect.assertHeaders) == 0 && len(it.tests[it.countTests].expect.assertHeadersT) == 0 {
 		return nil
 	}
 
 	return it.executeWithStep(t, "Assert headers", func(t T) []error {
 		errs := make([]error, 0)
 		// Execute assert only body
-		for _, f := range it.expect.assertHeaders {
+		for _, f := range it.tests[it.countTests].expect.assertHeaders {
 			err := f(headers)
 			if err != nil {
 				errs = append(errs, err)
@@ -71,7 +71,7 @@ func (it *test) assertHeaders(t internalT, headers http.Header) []error {
 		}
 
 		// Execute assert for headers with TB
-		for _, f := range it.expect.assertHeadersT {
+		for _, f := range it.tests[it.countTests].expect.assertHeadersT {
 			err := f(t, headers)
 			if err != nil {
 				errs = append(errs, err)
@@ -82,15 +82,15 @@ func (it *test) assertHeaders(t internalT, headers http.Header) []error {
 	})
 }
 
-func (it *test) assertBody(t internalT, body []byte) []error {
-	if len(it.expect.assertBody) == 0 && len(it.expect.assertBodyT) == 0 {
+func (it *cute) assertBody(t internalT, body []byte) []error {
+	if len(it.tests[it.countTests].expect.assertBody) == 0 && len(it.tests[it.countTests].expect.assertBodyT) == 0 {
 		return nil
 	}
 
 	return it.executeWithStep(t, "Assert body", func(t T) []error {
 		errs := make([]error, 0)
 		// Execute assert only body
-		for _, f := range it.expect.assertBody {
+		for _, f := range it.tests[it.countTests].expect.assertBody {
 			err := f(body)
 			if err != nil {
 				errs = append(errs, err)
@@ -98,7 +98,7 @@ func (it *test) assertBody(t internalT, body []byte) []error {
 		}
 
 		// Execute assert for body with TB
-		for _, f := range it.expect.assertBodyT {
+		for _, f := range it.tests[it.countTests].expect.assertBodyT {
 			err := f(t, body)
 			if err != nil {
 				errs = append(errs, err)

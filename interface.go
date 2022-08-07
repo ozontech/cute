@@ -14,11 +14,17 @@ type AllureBuilder interface {
 	AllureInfoBuilder
 	AllureLabelsBuilder
 	AllureLinksBuilder
-	// Create is a function for save main information about allure and start write tests
-	Create() Middleware
+
+	CreateBuilder
+
 	// Parallel signals that this test is to be run in parallel with (and only with) other parallel tests.
 	// This function is not thread save. If you use multiply parallel with one T test will panic.
 	Parallel() AllureBuilder
+}
+
+type CreateBuilder interface {
+	// Create is a function for save main information about allure and start write tests
+	Create() Middleware
 	// CreateWithStep is a function for create step and log some information inside
 	CreateWithStep() StepBuilder
 }
@@ -164,8 +170,23 @@ type ExpectHTTPBuilder interface {
 	// Mark in allure as Broken
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
+	NextTest() NextTestBuilder
+
 	// ExecuteTest is a function for execute test
-	ExecuteTest(ctx context.Context, t testing.TB) ResultsHTTPBuilder
+	ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder
+}
+
+type NextTestBuilder interface {
+	ProcessBody([]byte) NextTestBuilder
+	ProcessBodyT(T, []byte) NextTestBuilder
+
+	ProcessHeaders(headers http.Header) NextTestBuilder
+	ProcessHeadersT(T, headers http.Header) NextTestBuilder
+
+	ProcessBodyResponse(*http.Response) NextTestBuilder
+	ProcessBodyResponseT(T, *http.Response) NextTestBuilder
+
+	CreateBuilder
 }
 
 // ResultsHTTPBuilder is a scope of methods for processing results
@@ -174,20 +195,19 @@ type ResultsHTTPBuilder interface {
 	GetHTTPResponse() *http.Response
 	// GetErrors is a function, which returns errors
 	GetErrors() []error
-	// NextTest is a function for create next test
-	NextTest() Middleware
-	// NextTestWithStep is a function for create next test and step
-	NextTestWithStep() StepBuilder
+
+	// TODO
+	GetName() string
 }
 
 // BeforeExecute ...
-type BeforeExecute func(r *http.Request) error
+type BeforeExecute func(*http.Request) error
 
 // BeforeExecuteT ...
-type BeforeExecuteT func(t T, r *http.Request) error
+type BeforeExecuteT func(T, *http.Request) error
 
 // AfterExecute ...
-type AfterExecute func(resp *http.Response, errs []error) error
+type AfterExecute func(*http.Response, []error) error
 
 // AfterExecuteT ...
-type AfterExecuteT func(t T, resp *http.Response, errs []error) error
+type AfterExecuteT func(T, *http.Response, []error) error

@@ -13,13 +13,13 @@ import (
 )
 
 func TestValidateRequestEmptyUrl(t *testing.T) {
-	ht := test{}
+	ht := cute{}
 
 	require.Error(t, ht.validateRequest(&http.Request{}))
 }
 
 func TestValidateRequestEmptyMethod(t *testing.T) {
-	ht := test{}
+	ht := cute{}
 	u, _ := url.Parse("https://go.com")
 
 	require.Error(t, ht.validateRequest(&http.Request{
@@ -28,8 +28,12 @@ func TestValidateRequestEmptyMethod(t *testing.T) {
 }
 
 func TestValidateResponseEmpty(t *testing.T) {
-	ht := test{
-		expect: new(expect),
+	ht := cute{
+		tests: []*test{
+			{
+				expect: new(expect),
+			},
+		},
 	}
 	temp := common.NewT(t)
 
@@ -38,8 +42,12 @@ func TestValidateResponseEmpty(t *testing.T) {
 }
 
 func TestValidateResponseCode(t *testing.T) {
-	ht := test{
-		expect: &expect{code: 200},
+	ht := cute{
+		tests: []*test{
+			{
+				expect: &expect{code: 200},
+			},
+		},
 	}
 	temp := common.NewT(t)
 
@@ -49,24 +57,29 @@ func TestValidateResponseCode(t *testing.T) {
 
 func TestValidateResponseWithErrors(t *testing.T) {
 	var (
-		ht = test{
-			expect: &expect{
-				code: 200,
-				assertHeaders: []AssertHeaders{
-					func(headers http.Header) error {
-						return errors.New("two error")
-					},
-				},
-				assertResponse: []AssertResponse{
-					func(response *http.Response) error {
-						if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
-							return errors.New("bad response")
-						}
-						return nil
+		ht = cute{
+			tests: []*test{
+				{
+					expect: &expect{
+						code: 200,
+						assertHeaders: []AssertHeaders{
+							func(headers http.Header) error {
+								return errors.New("two error")
+							},
+						},
+						assertResponse: []AssertResponse{
+							func(response *http.Response) error {
+								if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
+									return errors.New("bad response")
+								}
+								return nil
+							},
+						},
 					},
 				},
 			},
 		}
+
 		reader = bytes.NewReader([]byte(`{"a":"ab","b":"bc"}`))
 		temp   = createAllureT(t)
 		resp   = &http.Response{

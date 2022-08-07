@@ -82,11 +82,10 @@ func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
 			// Custom assert body
 			examples.CustomAssertBody(),
 		).
-		ExecuteTest(context.Background(), t).
+		NextTest().
+		CreateWithStep().
 
 		// CreateWithStep second step for delete
-
-		NextTestWithStep().
 		StepName("Delete entry").
 		RequestBuilder(
 			cute.WithURL(u),

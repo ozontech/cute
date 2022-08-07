@@ -1,7 +1,11 @@
+//go:build example
+// +build example
+
 package examples
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,7 +17,38 @@ import (
 	"github.com/ozontech/cute"
 )
 
-func TestExample_TwoSteps(t *testing.T) {
+func TestExample_TwoSteps_Example_1(t *testing.T) {
+	cute.NewTestBuilder().
+		Title("TestExample_TwoSteps_Example_1").
+		Tags("TestExample_TwoSteps_Example_1", "some_tag").
+		Parallel().
+		CreateWithStep().
+
+		// CreateWithStep first step
+
+		StepName("Creat entry /posts/1").
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+			cute.WithMethod(http.MethodGet),
+		).
+		ExpectExecuteTimeout(10*time.Second).
+		ExpectStatus(http.StatusCreated).
+		NextTest().
+		CreateWithStep().
+
+		// CreateWithStep second step for delete
+		StepName("Delete entry").
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+			cute.WithMethod(http.MethodDelete),
+			cute.WithHeaders(map[string][]string{
+				"some_auth_token": []string{fmt.Sprint(11111)},
+			}),
+		).
+		ExecuteTest(context.Background(), t)
+}
+
+func TestExample_TwoSteps_Example_2(t *testing.T) {
 	runner.Run(t, "Test with two steps", func(t provider.T) {
 		test := cute.NewTestBuilder().
 			Title("Two steps").
@@ -27,7 +62,7 @@ func TestExample_TwoSteps(t *testing.T) {
 			ExpectStatus(http.StatusOK).
 			ExecuteTest(context.Background(), t)
 
-		bodyBytes, err := io.ReadAll(test.GetHTTPResponse().Body)
+		bodyBytes, err := io.ReadAll(test[0].GetHTTPResponse().Body)
 		if err != nil {
 			log.Fatal(err)
 		}

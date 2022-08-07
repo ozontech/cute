@@ -10,7 +10,7 @@ import (
 func TestValidateJSONSchemaEmptySchema(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
-		tBuilder = a.NewTestBuilder().(*test)
+		tBuilder = a.NewTestBuilder().(*cute)
 	)
 
 	errs := tBuilder.validateJSONSchema(nil, []byte{})
@@ -20,7 +20,7 @@ func TestValidateJSONSchemaEmptySchema(t *testing.T) {
 func TestValidateJSONSchemaFromString(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
-		tBuilder = a.NewTestBuilder().(*test)
+		tBuilder = a.NewTestBuilder().(*cute)
 		tempT    = createAllureT(t)
 	)
 
@@ -32,7 +32,7 @@ func TestValidateJSONSchemaFromString(t *testing.T) {
 	}
 	`)
 
-	tBuilder.expect.jsSchemaString = `
+	tBuilder.tests[0].expect.jsSchemaString = `
 {
   "$id": "https://example.com/person.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -60,7 +60,7 @@ func TestValidateJSONSchemaFromString(t *testing.T) {
 func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
-		tBuilder = a.NewTestBuilder().(*test)
+		tBuilder = a.NewTestBuilder().(*cute)
 		tempT    = createAllureT(t)
 	)
 
@@ -72,7 +72,7 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 	}
 	`)
 
-	tBuilder.expect.jsSchemaString = `
+	tBuilder.tests[0].expect.jsSchemaString = `
 	{
 	  "$id": "https://example.com/person.schema.json",
 	  "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -109,7 +109,7 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 	var (
 		a        = HTTPTestMaker{}
-		tBuilder = a.NewTestBuilder().(*test)
+		tBuilder = a.NewTestBuilder().(*cute)
 		tempT    = createAllureT(t)
 	)
 
@@ -121,7 +121,7 @@ func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 	}
 	`)
 
-	tBuilder.expect.jsSchemaString = `
+	tBuilder.tests[0].expect.jsSchemaString = `
 	{
 	  "$id": "https://example.com/person.schema.json",
 	  "$schema": "https://json-schema.org/draft/2020-12/schema",
