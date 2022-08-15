@@ -116,8 +116,24 @@ func lessThan(data []byte, expression string, maximumLength int) error {
 	}
 
 	v := reflect.ValueOf(value)
-	if v.Len() > maximumLength {
+	if v.Len() >= maximumLength {
 		return errors.NewAssertError("LessThan", fmt.Sprintf("on path %v. %v is less than %v", expression, v.Len(), maximumLength), v.Len(), maximumLength)
+	}
+
+	return nil
+}
+
+// LessOrEqualThan is a function to asserts that value is less or equal than the given length
+// About expression - https://goessner.net/articles/JsonPath/
+func lessOrEqualThan(data []byte, expression string, maximumLength int) error {
+	value, err := GetValueFromJSON(data, expression)
+	if err != nil {
+		return err
+	}
+
+	v := reflect.ValueOf(value)
+	if v.Len() > maximumLength {
+		return errors.NewAssertError("LessThan", fmt.Sprintf("on path %v. %v is less or equal than %v", expression, v.Len(), maximumLength), v.Len(), maximumLength)
 	}
 
 	return nil

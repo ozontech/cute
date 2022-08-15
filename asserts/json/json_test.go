@@ -370,36 +370,40 @@ func TestLessThan(t *testing.T) {
 			caseName:   "correct check array",
 			data:       `{"o":["a", "b", "c"]}`,
 			expression: "$.o",
-			expect:     2,
-			IsNilErr:   false,
+			expect:     4,
+			IsNilErr:   true,
 		},
 		{
 			caseName:   "not correct check array",
 			data:       `{"o":["a", "b", "c"]}`,
 			expression: "$.o",
 			expect:     3,
-			IsNilErr:   true,
 		},
 		{
 			caseName:   "correct check string",
 			data:       `{"o":"123456"}`,
 			expression: "$.o",
-			expect:     4,
-			IsNilErr:   false,
+			expect:     7,
+			IsNilErr:   true,
 		},
 		{
 			caseName:   "not correct check string",
 			data:       `{"o":"123456"}`,
 			expression: "$.o",
-			expect:     99,
-			IsNilErr:   true,
+			expect:     6,
 		},
 		{
 			caseName:   "correct check map",
 			data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
 			expression: "$.o",
-			expect:     1,
-			IsNilErr:   false,
+			expect:     4,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "not correct check map",
+			data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
+			expression: "$.o",
+			expect:     3,
 		},
 		{
 			caseName:   "check not correct path",
@@ -411,6 +415,87 @@ func TestLessThan(t *testing.T) {
 
 	for _, test := range tests {
 		err := LessThan(test.expression, test.expect.(int))([]byte(test.data))
+
+		if test.IsNilErr {
+			require.NoError(t, err, "failed test %v", test.caseName)
+		} else {
+			require.Error(t, err, "failed test %v", test.caseName)
+		}
+	}
+}
+
+func TestLessOrEqualThan(t *testing.T) {
+	tests := []jsonTest{
+		{
+			caseName:   "correct check array",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.o",
+			expect:     4,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "correct check array when equal",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.o",
+			expect:     3,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "not correct check array",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.o",
+			expect:     2,
+		},
+		{
+			caseName:   "correct check string",
+			data:       `{"o":"123456"}`,
+			expression: "$.o",
+			expect:     7,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "correct check string when equal",
+			data:       `{"o":"123456"}`,
+			expression: "$.o",
+			expect:     6,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "not correct check string",
+			data:       `{"o":"123456"}`,
+			expression: "$.o",
+			expect:     5,
+		},
+		{
+			caseName:   "correct check map",
+			data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
+			expression: "$.o",
+			expect:     4,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "correct check map when equal",
+			data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
+			expression: "$.o",
+			expect:     3,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "not correct check map",
+			data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
+			expression: "$.o",
+			expect:     2,
+		},
+		{
+			caseName:   "check not correct path",
+			data:       `{"o":["a", "b", "c"]}`,
+			expression: "$.not_correct",
+			expect:     0,
+		},
+	}
+
+	for _, test := range tests {
+		err := LessOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
