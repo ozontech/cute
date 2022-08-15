@@ -530,6 +530,13 @@ func TestEqual(t *testing.T) {
 			expression: "$.b[bs]",
 		},
 		{
+			caseName:   "valid array",
+			data:       `{"arr": ["one","two"]}`,
+			expression: "$.arr",
+			expect:     []string{"one", "two"},
+			IsNilErr:   true,
+		},
+		{
 			caseName:   "check equal map",
 			data:       `{"a":"as", "b":{"bs":"sb"}}`,
 			expression: "$.b",
