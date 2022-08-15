@@ -48,6 +48,14 @@ func GreaterThan(expression string, minimumLength int) cute.AssertBody {
 	}
 }
 
+// GreaterOrEqualThan is a function to asserts that value is greater or equal than the given length
+// About expression - https://goessner.net/articles/JsonPath/
+func GreaterOrEqualThan(expression string, minimumLength int) cute.AssertBody {
+	return func(body []byte) error {
+		return greaterOrEqualThan(body, expression, minimumLength)
+	}
+}
+
 // LessThan is a function to asserts that value is less than the given length
 // About expression - https://goessner.net/articles/JsonPath/
 func LessThan(expression string, maximumLength int) cute.AssertBody {

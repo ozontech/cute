@@ -230,6 +230,7 @@ You can find implementation [here](asserts/json/json.go)
 - `NotEqual` is a function to check that jsonpath expression value is not equal to the given value
 - `Length` is a function to assert that value is the expected length
 - `GreaterThan` is a function to assert that value is greater than the given length
+- `GreaterOrEqualThan` is a function to assert that value is greater or equal than the given length
 - `LessThan` is a function to assert that value is less than the given length
 - `Present` is a function to assert that value is present (value can be 0 or null)
 - `NotEmpty` is a function to assert that value is present and not empty (value can't be 0 or null)
