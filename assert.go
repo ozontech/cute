@@ -11,8 +11,6 @@ import (
 // AssertBody ...
 type AssertBody func(body []byte) error
 
-//type AssertBodyWithName func(name string, body []byte) error todo think about it, m.b. add options? like name, or execute time?
-
 // AssertHeaders ...
 type AssertHeaders func(headers http.Header) error
 
@@ -39,6 +37,8 @@ func (it *cute) assertResponse(t internalT, resp *http.Response) []error {
 		errs := make([]error, 0)
 		// Execute assert only response
 		for _, f := range it.tests[it.countTests].expect.assertResponse {
+			// Todo посмотреть как получить имя функции и добавить ее в отчет.
+
 			err := f(resp)
 			if err != nil {
 				errs = append(errs, err)
