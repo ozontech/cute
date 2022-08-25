@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ozontech/allure-go/pkg/allure"
 	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/allure-go/pkg/framework/runner"
 
@@ -35,6 +36,11 @@ func TestExampleSingle(t *testing.T) {
 			json.Present("$[1].name"),
 			json.Present("$[0].passport"), // Example fail
 		).
+		AssertBodyT(func(t cute.T, body []byte) error {
+			t.Step(allure.NewSimpleStep("inside Assert body. 1 ", allure.NewParameters("key", "value")...))
+
+			return nil
+		}).
 		ExecuteTest(context.Background(), t)
 }
 

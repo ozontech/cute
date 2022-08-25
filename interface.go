@@ -25,8 +25,12 @@ type AllureBuilder interface {
 type CreateBuilder interface {
 	// Create is a function for save main information about allure and start write tests
 	Create() Middleware
+
 	// CreateWithStep is a function for create step and log some information inside
+	// Deprecated use CreateStep(string)
 	CreateWithStep() StepBuilder
+	// CreateStep is a function for create step inside suite for test
+	CreateStep(string) Middleware
 }
 
 type AllureInfoBuilder interface {
@@ -60,6 +64,7 @@ type AllureLabelsBuilder interface {
 }
 
 // StepBuilder is a scope of methods for set step information
+// Deprecated.
 type StepBuilder interface {
 	// StepName is a function to wrap a test in new steps with name
 	StepName(name string) Middleware

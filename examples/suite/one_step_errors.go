@@ -23,8 +23,7 @@ func (i *ExampleSuite) TestExample_OneStep_Errors(t provider.T) {
 		Title("TestExample_OneStep_Errors").
 		Tags("one_step", "some_local_tag", "json").
 		Parallel().
-		CreateWithStep().
-		StepName("Example GET json request").
+		CreateStep("Example GET json request").
 		RequestBuilder(
 			cute.WithHeaders(map[string][]string{
 				"some_header":       []string{"something"},

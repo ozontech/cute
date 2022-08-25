@@ -2,6 +2,7 @@ package cute
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -9,8 +10,99 @@ import (
 	"testing"
 
 	"github.com/ozontech/allure-go/pkg/framework/core/common"
+	"github.com/ozontech/cute/internal/utils"
 	"github.com/stretchr/testify/require"
 )
+
+func TestCreateRequest(t *testing.T) {
+	req, err := http.NewRequest(http.MethodGet, "http://go.com", nil)
+	require.NoError(t, err)
+
+	ht := cute{
+		countTests:  1,
+		correctTest: 0,
+		tests: []*test{
+			{
+				request: &request{
+					base: req,
+				},
+			},
+		},
+	}
+
+	resReq, err := ht.createRequest(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, req, resReq)
+}
+
+func TestCreateRequestBuilder(t *testing.T) {
+	var (
+		body    = []byte("HELLO")
+		headers = map[string][]string{
+			"Good": []string{"Day"},
+			"Mad":  []string{"Max"},
+		}
+		url = "http://go.com"
+	)
+
+	req, err := http.NewRequest(http.MethodGet, url, ioutil.NopCloser(bytes.NewReader(body)))
+	require.NoError(t, err)
+
+	req.Header = headers
+
+	ht := cute{
+		countTests:  1,
+		correctTest: 0,
+		tests: []*test{
+			{
+				request: &request{
+					builders: []requestBuilder{
+						WithURI(url),
+						WithMethod("GET"),
+						WithHeaders(headers),
+						WithBody(body),
+					},
+				},
+			},
+		},
+	}
+
+	resReq, err := ht.createRequest(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, req, resReq)
+}
+
+func TestCreateRequestBuilder_MarshalBody(t *testing.T) {
+	var (
+		str = struct {
+			name string
+		}{
+			"hello",
+		}
+	)
+
+	ht := cute{
+		countTests:  1,
+		correctTest: 0,
+		tests: []*test{
+			{
+				request: &request{
+					builders: []requestBuilder{
+						WithMarshalBody(str),
+					},
+				},
+			},
+		},
+	}
+
+	resReq, err := ht.createRequest(context.Background())
+	require.NoError(t, err)
+
+	getBody, err := utils.GetBody(resReq.Body)
+	require.NoError(t, err)
+
+	require.NotEmpty(t, getBody)
+}
 
 func TestValidateRequestEmptyUrl(t *testing.T) {
 	ht := cute{}

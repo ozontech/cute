@@ -41,9 +41,10 @@ type cute struct {
 	allureLinks  *allureLinks
 	allureLabels *allureLabels
 
-	correctTest int
-	countTests  int
-	tests       []*test
+	countTests  int // Общее количество тестов.
+	correctTest int // Тест которые в данный момент выполняется.
+
+	tests []*test
 }
 
 type test struct {
@@ -148,10 +149,10 @@ func createAllureT(t *testing.T) *common.Common {
 		newT        = common.NewT(t)
 		callers     = strings.Split(t.Name(), "/")
 		providerCfg = manager.NewProviderConfig().
-			WithFullName(t.Name()).
-			WithPackageName("package").
-			WithSuiteName(t.Name()).
-			WithRunner(callers[0])
+				WithFullName(t.Name()).
+				WithPackageName("package").
+				WithSuiteName(t.Name()).
+				WithRunner(callers[0])
 		newProvider = manager.NewProvider(providerCfg)
 	)
 	newProvider.NewTest(t.Name(), "package")
@@ -192,6 +193,7 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 			it.processTestErrors(allureProvider, errs)
 
 			allureProvider.Logf("Finish step %v", name)
+
 		} else {
 			// Test without step
 			resp, errs = it.test(ctx, allureProvider)
@@ -387,7 +389,9 @@ func (it *cute) createRequest(ctx context.Context) (*http.Request, error) {
 			return nil, err
 		}
 
-		req.Header = o.headers
+		if len(o.headers) != 0 {
+			req.Header = o.headers
+		}
 	}
 
 	// Validate request

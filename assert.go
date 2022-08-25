@@ -11,6 +11,8 @@ import (
 // AssertBody ...
 type AssertBody func(body []byte) error
 
+//type AssertBodyWithName func(name string, body []byte) error todo think about it, m.b. add options? like name, or execute time?
+
 // AssertHeaders ...
 type AssertHeaders func(headers http.Header) error
 

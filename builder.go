@@ -229,6 +229,12 @@ func (it *cute) Create() Middleware {
 	return it
 }
 
+func (it *cute) CreateStep(name string) Middleware {
+	it.tests[it.countTests].allureStep.name = name
+
+	return it
+}
+
 func (it *cute) Parallel() AllureBuilder {
 	it.parallel = true
 

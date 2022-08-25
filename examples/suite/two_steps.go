@@ -70,11 +70,10 @@ func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
 		Title("TestExample_TwoSteps").
 		Tags("TestExample_TwoSteps", "some_tag").
 		Parallel().
-		CreateWithStep().
+		CreateStep("Creat entry /posts/1").
 
 		// CreateWithStep first step
 
-		StepName("Creat entry /posts/1").
 		Request(req).
 		ExpectExecuteTimeout(10*time.Second).
 		ExpectStatus(http.StatusCreated).
@@ -83,10 +82,9 @@ func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
 			examples.CustomAssertBody(),
 		).
 		NextTest().
-		CreateWithStep().
+		CreateStep("Delete entry").
 
 		// CreateWithStep second step for delete
-		StepName("Delete entry").
 		RequestBuilder(
 			cute.WithURL(u),
 			cute.WithMethod(http.MethodDelete),

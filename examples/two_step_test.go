@@ -22,11 +22,10 @@ func TestExample_TwoSteps_Example_1(t *testing.T) {
 		Title("TestExample_TwoSteps_Example_1").
 		Tags("TestExample_TwoSteps_Example_1", "some_tag").
 		Parallel().
-		CreateWithStep().
+		CreateStep("Creat entry /posts/1").
 
 		// CreateWithStep first step
 
-		StepName("Creat entry /posts/1").
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 			cute.WithMethod(http.MethodGet),
@@ -34,10 +33,9 @@ func TestExample_TwoSteps_Example_1(t *testing.T) {
 		ExpectExecuteTimeout(10*time.Second).
 		ExpectStatus(http.StatusCreated).
 		NextTest().
-		CreateWithStep().
+		CreateStep("Delete entry").
 
 		// CreateWithStep second step for delete
-		StepName("Delete entry").
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 			cute.WithMethod(http.MethodDelete),
@@ -53,8 +51,7 @@ func TestExample_TwoSteps_Example_2(t *testing.T) {
 		test := cute.NewTestBuilder().
 			Title("Two steps").
 			Description("some_description").
-			CreateWithStep().
-			StepName("Request 1").
+			CreateStep("Request 1").
 			RequestBuilder(
 				cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 				cute.WithMethod(http.MethodGet),
@@ -70,8 +67,7 @@ func TestExample_TwoSteps_Example_2(t *testing.T) {
 		_ = string(bodyBytes)
 
 		cute.NewTestBuilder().
-			CreateWithStep().
-			StepName("Request 2").
+			CreateStep("Request 2").
 			RequestBuilder(
 				cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 				cute.WithMethod(http.MethodGet),

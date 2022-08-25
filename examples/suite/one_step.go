@@ -78,8 +78,7 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
 		Epic("some_epic").
 		Description("some_description").
 		Parallel().
-		CreateWithStep().
-		StepName("Example GET json request").
+		CreateStep("Example GET json request").
 		AfterExecuteT(func(t cute.T, resp *http.Response, errs []error) error {
 			if len(errs) != 0 {
 				return nil
