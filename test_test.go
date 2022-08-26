@@ -123,7 +123,7 @@ func TestValidateResponseEmpty(t *testing.T) {
 	ht := cute{
 		tests: []*test{
 			{
-				expect: new(expect),
+				expect: new(Expect),
 			},
 		},
 	}
@@ -137,7 +137,7 @@ func TestValidateResponseCode(t *testing.T) {
 	ht := cute{
 		tests: []*test{
 			{
-				expect: &expect{code: 200},
+				expect: &Expect{code: 200},
 			},
 		},
 	}
@@ -152,7 +152,7 @@ func TestValidateResponseWithErrors(t *testing.T) {
 		ht = cute{
 			tests: []*test{
 				{
-					expect: &expect{
+					expect: &Expect{
 						code: 200,
 						assertHeaders: []AssertHeaders{
 							func(headers http.Header) error {

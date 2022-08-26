@@ -22,17 +22,6 @@ type AllureBuilder interface {
 	Parallel() AllureBuilder
 }
 
-type CreateBuilder interface {
-	// Create is a function for save main information about allure and start write tests
-	Create() Middleware
-
-	// CreateWithStep is a function for create step and log some information inside
-	// Deprecated use CreateStep(string)
-	CreateWithStep() StepBuilder
-	// CreateStep is a function for create step inside suite for test
-	CreateStep(string) Middleware
-}
-
 type AllureInfoBuilder interface {
 	// Title is a function for set title in allure information
 	Title(title string) AllureBuilder
@@ -70,18 +59,44 @@ type StepBuilder interface {
 	StepName(name string) Middleware
 }
 
+type CreateBuilder interface {
+	// Create is a function for save main information about allure and start write tests
+	Create() Middleware
+
+	// CreateWithStep is a function for create step and log some information inside
+	// Deprecated use CreateStep(string)
+	CreateWithStep() StepBuilder
+	// CreateStep is a function for create step inside suite for test
+	CreateStep(string) Middleware
+}
+
 type Middleware interface {
 	RequestHTTPBuilder
 
+	BeforeTest
+	AfterTest
+}
+
+type BeforeTest interface {
 	// BeforeExecute is function for processing request before createRequest request
 	BeforeExecute(...BeforeExecute) Middleware
 	// BeforeExecuteT is function for processing request before createRequest request
 	BeforeExecuteT(...BeforeExecuteT) Middleware
+}
 
+type AfterTest interface {
 	// AfterExecute is function will run after allureProvider asserts
 	AfterExecute(...AfterExecute) Middleware
 	// AfterExecuteT is function will run after allureProvider asserts
 	AfterExecuteT(...AfterExecuteT) Middleware
+}
+
+// TableTest todo
+type TableTest interface {
+	// PutTest todo
+	PutTest(name string, r *http.Request, expect *Expect)
+
+	ControlTest
 }
 
 // RequestHTTPBuilder is a scope of methods for create HTTP requests
@@ -98,6 +113,11 @@ type RequestHTTPBuilder interface {
 	// WithBody
 	// WithURI
 	RequestBuilder(r ...requestBuilder) ExpectHTTPBuilder
+
+	RequestParams
+}
+
+type RequestParams interface {
 	// RequestRepeat is a count of repeat request, if request was failed.
 	RequestRepeat(count int) RequestHTTPBuilder
 	// RequestRepeatDelay is a time between repeat request, if request was failed.
@@ -175,22 +195,19 @@ type ExpectHTTPBuilder interface {
 	// Mark in allure as Broken
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
+	ControlTest
+}
+
+type ControlTest interface {
 	NextTest() NextTestBuilder
 
 	// ExecuteTest is a function for execute test
 	ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder
 }
 
+// NextTestBuilder is a scope of methods for processing response, after test
 type NextTestBuilder interface {
-	ProcessBody([]byte) NextTestBuilder
-	ProcessBodyT(T, []byte) NextTestBuilder
-
-	ProcessHeaders(headers http.Header) NextTestBuilder
-	ProcessHeadersT(T, headers http.Header) NextTestBuilder
-
-	ProcessBodyResponse(*http.Response) NextTestBuilder
-	ProcessBodyResponseT(T, *http.Response) NextTestBuilder
-
+	AfterTest
 	CreateBuilder
 }
 
@@ -198,10 +215,10 @@ type NextTestBuilder interface {
 type ResultsHTTPBuilder interface {
 	// GetHTTPResponse is a function, which returns http response
 	GetHTTPResponse() *http.Response
-	// GetErrors is a function, which returns errors
+	// GetErrors is a function, which returns all errors from test
 	GetErrors() []error
 
-	// TODO
+	// GetName is a function, which returns name test
 	GetName() string
 }
 

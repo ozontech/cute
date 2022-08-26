@@ -35,6 +35,7 @@ func TestExampleSingle(t *testing.T) {
 			json.Equal("$[0].email", "Eliseo@gardner.biz"),
 			json.Present("$[1].name"),
 			json.Present("$[0].passport"), // Example fail
+			CustomAssertBody(),
 		).
 		AssertBodyT(func(t cute.T, body []byte) error {
 			t.Step(allure.NewSimpleStep("inside Assert body. 1 ", allure.NewParameters("key", "value")...))

@@ -103,7 +103,7 @@ func createDefaultTest() *test {
 		request: &request{
 			repeat: new(requestRepeatPolitic),
 		},
-		expect: new(expect),
+		expect: new(Expect),
 	}
 }
 
@@ -417,48 +417,6 @@ func (it *cute) NextTest() NextTestBuilder {
 	it.countTests++ // async?
 
 	it.tests = append(it.tests, createDefaultTest())
-
-	return it
-}
-
-func (it *cute) ProcessBody(i []byte) NextTestBuilder {
-	//TODO implement me
-	panic("implement me")
-
-	return it
-}
-
-func (it *cute) ProcessBodyT(t T, i []byte) NextTestBuilder {
-	//TODO implement me
-	panic("implement me")
-
-	return it
-}
-
-func (it *cute) ProcessHeaders(headers http.Header) NextTestBuilder {
-	//TODO implement me
-	panic("implement me")
-
-	return it
-}
-
-func (it *cute) ProcessHeadersT(T, headers http.Header) NextTestBuilder {
-	//TODO implement me
-	panic("implement me")
-
-	return it
-}
-
-func (it *cute) ProcessBodyResponse(response *http.Response) NextTestBuilder {
-	//TODO implement me
-	panic("implement me")
-
-	return it
-}
-
-func (it *cute) ProcessBodyResponseT(t T, response *http.Response) NextTestBuilder {
-	//TODO implement me
-	panic("implement me")
 
 	return it
 }

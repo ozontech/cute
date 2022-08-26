@@ -51,7 +51,7 @@ type test struct {
 	allureStep *allureStep
 	middleware *middleware
 	request    *request
-	expect     *expect
+	expect     *Expect
 }
 
 type request struct {
@@ -104,7 +104,7 @@ type allureStep struct {
 	name string
 }
 
-type expect struct {
+type Expect struct {
 	executeTime time.Duration
 
 	code           int

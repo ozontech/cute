@@ -13,14 +13,17 @@ func (it *cute) executeWithStep(t internalT, stepName string, execute func(t T) 
 
 	t.WithNewStep(stepName, func(stepCtx provider.StepCtx) {
 		errs = execute(stepCtx)
-		it.processStepErrors(stepCtx.CurrentStep(), errs)
+		it.processStepErrors(stepCtx, errs)
 	})
 
 	return errs
 }
 
-func (it *cute) processStepErrors(step *allure.Step, errs []error) {
-	var statuses = make([]allure.Status, 0)
+func (it *cute) processStepErrors(stepCtx provider.StepCtx, errs []error) {
+	var (
+		step     = stepCtx.CurrentStep()
+		statuses = make([]allure.Status, 0)
+	)
 
 	if len(errs) == 0 {
 		return
@@ -65,5 +68,4 @@ func (it *cute) processStepErrors(step *allure.Step, errs []error) {
 			break
 		}
 	}
-
 }
