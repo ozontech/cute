@@ -18,15 +18,9 @@ func TestCreateRequest(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "http://go.com", nil)
 	require.NoError(t, err)
 
-	ht := cute{
-		countTests:  1,
-		correctTest: 0,
-		tests: []*test{
-			{
-				request: &request{
-					base: req,
-				},
-			},
+	ht := &test{
+		request: &request{
+			base: req,
 		},
 	}
 
@@ -50,19 +44,13 @@ func TestCreateRequestBuilder(t *testing.T) {
 
 	req.Header = headers
 
-	ht := cute{
-		countTests:  1,
-		correctTest: 0,
-		tests: []*test{
-			{
-				request: &request{
-					builders: []requestBuilder{
-						WithURI(url),
-						WithMethod("GET"),
-						WithHeaders(headers),
-						WithBody(body),
-					},
-				},
+	ht := &test{
+		request: &request{
+			builders: []requestBuilder{
+				WithURI(url),
+				WithMethod("GET"),
+				WithHeaders(headers),
+				WithBody(body),
 			},
 		},
 	}
@@ -81,16 +69,10 @@ func TestCreateRequestBuilder_MarshalBody(t *testing.T) {
 		}
 	)
 
-	ht := cute{
-		countTests:  1,
-		correctTest: 0,
-		tests: []*test{
-			{
-				request: &request{
-					builders: []requestBuilder{
-						WithMarshalBody(str),
-					},
-				},
+	ht := &test{
+		request: &request{
+			builders: []requestBuilder{
+				WithMarshalBody(str),
 			},
 		},
 	}
@@ -105,13 +87,13 @@ func TestCreateRequestBuilder_MarshalBody(t *testing.T) {
 }
 
 func TestValidateRequestEmptyUrl(t *testing.T) {
-	ht := cute{}
+	ht := &test{}
 
 	require.Error(t, ht.validateRequest(&http.Request{}))
 }
 
 func TestValidateRequestEmptyMethod(t *testing.T) {
-	ht := cute{}
+	ht := &test{}
 	u, _ := url.Parse("https://go.com")
 
 	require.Error(t, ht.validateRequest(&http.Request{
@@ -120,13 +102,10 @@ func TestValidateRequestEmptyMethod(t *testing.T) {
 }
 
 func TestValidateResponseEmpty(t *testing.T) {
-	ht := cute{
-		tests: []*test{
-			{
-				expect: new(Expect),
-			},
-		},
+	ht := &test{
+		expect: new(Expect),
 	}
+
 	temp := common.NewT(t)
 
 	errs := ht.validateResponse(temp, &http.Response{})
@@ -134,12 +113,8 @@ func TestValidateResponseEmpty(t *testing.T) {
 }
 
 func TestValidateResponseCode(t *testing.T) {
-	ht := cute{
-		tests: []*test{
-			{
-				expect: &Expect{Code: 200},
-			},
-		},
+	ht := &test{
+		expect: &Expect{Code: 200},
 	}
 	temp := common.NewT(t)
 
@@ -149,24 +124,20 @@ func TestValidateResponseCode(t *testing.T) {
 
 func TestValidateResponseWithErrors(t *testing.T) {
 	var (
-		ht = cute{
-			tests: []*test{
-				{
-					expect: &Expect{
-						Code: 200,
-						AssertHeaders: []AssertHeaders{
-							func(headers http.Header) error {
-								return errors.New("two error")
-							},
-						},
-						AssertResponse: []AssertResponse{
-							func(response *http.Response) error {
-								if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
-									return errors.New("bad response")
-								}
-								return nil
-							},
-						},
+		ht = &test{
+			expect: &Expect{
+				Code: 200,
+				AssertHeaders: []AssertHeaders{
+					func(headers http.Header) error {
+						return errors.New("two error")
+					},
+				},
+				AssertResponse: []AssertResponse{
+					func(response *http.Response) error {
+						if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
+							return errors.New("bad response")
+						}
+						return nil
 					},
 				},
 			},

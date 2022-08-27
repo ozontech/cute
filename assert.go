@@ -33,10 +33,10 @@ type AssertHeadersT func(t T, headers http.Header) error
 // AssertResponseT ...
 type AssertResponseT func(t T, response *http.Response) error
 
-func (it *cute) assertHeaders(t internalT, headers http.Header) []error {
+func (it *test) assertHeaders(t internalT, headers http.Header) []error {
 	var (
-		assertHeaders  = it.tests[it.countTests].expect.AssertHeaders
-		assertHeadersT = it.tests[it.countTests].expect.AssertHeadersT
+		assertHeaders  = it.expect.AssertHeaders
+		assertHeadersT = it.expect.AssertHeadersT
 
 		errs = make([]error, 0)
 	)
@@ -91,10 +91,10 @@ func (it *cute) assertHeaders(t internalT, headers http.Header) []error {
 	return errs
 }
 
-func (it *cute) assertResponse(t internalT, response *http.Response) []error {
+func (it *test) assertResponse(t internalT, response *http.Response) []error {
 	var (
-		assertResponse  = it.tests[it.countTests].expect.AssertResponse
-		assertResponseT = it.tests[it.countTests].expect.AssertResponseT
+		assertResponse  = it.expect.AssertResponse
+		assertResponseT = it.expect.AssertResponseT
 
 		errs = make([]error, 0)
 	)
@@ -149,10 +149,10 @@ func (it *cute) assertResponse(t internalT, response *http.Response) []error {
 	return errs
 }
 
-func (it *cute) assertBody(t internalT, body []byte) []error {
+func (it *test) assertBody(t internalT, body []byte) []error {
 	var (
-		assertBody  = it.tests[it.countTests].expect.AssertBody
-		assertBodyT = it.tests[it.countTests].expect.AssertBodyT
+		assertBody  = it.expect.AssertBody
+		assertBodyT = it.expect.AssertBodyT
 
 		errs = make([]error, 0)
 	)

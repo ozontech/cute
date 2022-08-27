@@ -83,7 +83,7 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 // NewTestBuilder is a function for initialization foundation for cute
 func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
 	tests := make([]*test, 1, 1)
-	tests[0] = createDefaultTest()
+	tests[0] = createDefaultTest(m.httpClient)
 
 	return &cute{
 		httpClient:   m.httpClient,
@@ -96,8 +96,9 @@ func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
 	}
 }
 
-func createDefaultTest() *test {
+func createDefaultTest(httpClient *http.Client) *test {
 	return &test{
+		httpClient: httpClient,
 		allureStep: new(allureStep),
 		middleware: new(middleware),
 		request: &request{
@@ -275,6 +276,18 @@ func (it *cute) AfterExecuteT(fs ...AfterExecuteT) Middleware {
 	return it
 }
 
+func (it *cute) AfterTestExecute(fs ...AfterExecute) NextTestBuilder {
+	it.tests[it.countTests].middleware.after = append(it.tests[it.countTests].middleware.after, fs...)
+
+	return it
+}
+
+func (it *cute) AfterTestExecuteT(fs ...AfterExecuteT) NextTestBuilder {
+	it.tests[it.countTests].middleware.afterT = append(it.tests[it.countTests].middleware.afterT, fs...)
+
+	return it
+}
+
 func (it *cute) RequestRepeat(count int) RequestHTTPBuilder {
 	it.tests[it.countTests].request.repeat.count = count
 
@@ -432,7 +445,7 @@ func (it *cute) PutTest(name string, r *http.Request, expect *Expect) TableTest 
 		}
 	}
 
-	newTest := createDefaultTest()
+	newTest := createDefaultTest(it.httpClient)
 	newTest.expect = expect
 	newTest.name = name
 	newTest.request.base = r
@@ -453,7 +466,7 @@ func (it *cute) PutTests(params ...*TableTestParam) TableTest {
 func (it *cute) NextTest() NextTestBuilder {
 	it.countTests++ // async?
 
-	it.tests = append(it.tests, createDefaultTest())
+	it.tests = append(it.tests, createDefaultTest(it.httpClient))
 
 	return it
 }

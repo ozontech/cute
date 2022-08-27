@@ -231,7 +231,11 @@ type ControlTest interface {
 
 // NextTestBuilder is a scope of methods for processing response, after test
 type NextTestBuilder interface {
-	AfterTest
+	// AfterTestExecute is function will run after test
+	AfterTestExecute(...AfterExecute) NextTestBuilder
+	// AfterTestExecuteT is function will run after test
+	AfterTestExecuteT(...AfterExecuteT) NextTestBuilder
+
 	CreateBuilder
 }
 

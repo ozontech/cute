@@ -77,3 +77,29 @@ func TestExample_TwoSteps_Example_2(t *testing.T) {
 			ExecuteTest(context.Background(), t)
 	})
 }
+
+func TestExample_TwoSteps_Example_3(t *testing.T) {
+	responseCode := 0
+
+	cute.NewTestBuilder().
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+			cute.WithMethod(http.MethodGet),
+		).
+		ExpectStatus(http.StatusOK).
+		NextTest().
+		AfterTestExecute(func(response *http.Response, errors []error) error {
+			responseCode = response.StatusCode
+
+			return nil
+		}).
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/2/comments"),
+			cute.WithMethod(http.MethodDelete),
+		).
+		ExecuteTest(context.Background(), t)
+
+	fmt.Println("Response code from first request", responseCode)
+}
