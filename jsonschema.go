@@ -16,12 +16,12 @@ func (it *cute) validateJSONSchema(t internalT, body []byte) []error {
 	)
 
 	switch {
-	case it.tests[it.correctTest].expect.jsSchemaString != "":
-		expect = gojsonschema.NewStringLoader(it.tests[it.correctTest].expect.jsSchemaString)
-	case it.tests[it.correctTest].expect.jsSchemaByte != nil:
-		expect = gojsonschema.NewBytesLoader(it.tests[it.correctTest].expect.jsSchemaByte)
-	case it.tests[it.correctTest].expect.jsSchemaFile != "":
-		expect = gojsonschema.NewReferenceLoader(it.tests[it.correctTest].expect.jsSchemaFile)
+	case it.tests[it.correctTest].expect.JSONSchemaString != "":
+		expect = gojsonschema.NewStringLoader(it.tests[it.correctTest].expect.JSONSchemaString)
+	case it.tests[it.correctTest].expect.JSONSchemaByte != nil:
+		expect = gojsonschema.NewBytesLoader(it.tests[it.correctTest].expect.JSONSchemaByte)
+	case it.tests[it.correctTest].expect.JSONSchemaFile != "":
+		expect = gojsonschema.NewReferenceLoader(it.tests[it.correctTest].expect.JSONSchemaFile)
 	default:
 		return nil
 	}

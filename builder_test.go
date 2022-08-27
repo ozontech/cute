@@ -157,11 +157,11 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, epic, resHt.allureLabels.epic)
 	require.Equal(t, stepName, resHt.tests[0].allureStep.name)
 	require.Equal(t, req, resHt.tests[0].request.base)
-	require.Equal(t, executeTime, resHt.tests[0].expect.executeTime)
-	require.Equal(t, status, resHt.tests[0].expect.code)
-	require.Equal(t, schemaBt, resHt.tests[0].expect.jsSchemaByte)
-	require.Equal(t, schemaStg, resHt.tests[0].expect.jsSchemaString)
-	require.Equal(t, schemaFile, resHt.tests[0].expect.jsSchemaFile)
+	require.Equal(t, executeTime, resHt.tests[0].expect.ExecuteTime)
+	require.Equal(t, status, resHt.tests[0].expect.Code)
+	require.Equal(t, schemaBt, resHt.tests[0].expect.JSONSchemaByte)
+	require.Equal(t, schemaStg, resHt.tests[0].expect.JSONSchemaString)
+	require.Equal(t, schemaFile, resHt.tests[0].expect.JSONSchemaFile)
 	require.Equal(t, id, resHt.allureLabels.id)
 	require.Equal(t, addSuiteLabel, resHt.allureLabels.suiteLabel)
 	require.Equal(t, addSubSuite, resHt.allureLabels.subSuite)
@@ -177,14 +177,14 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, repeatCount, resHt.tests[0].request.repeat.count)
 	require.Equal(t, repeatDelay, resHt.tests[0].request.repeat.delay)
 
-	require.Equal(t, len(assertHeaders), len(resHt.tests[0].expect.assertHeaders))
-	require.Equal(t, len(assertHeadersT), len(resHt.tests[0].expect.assertHeadersT))
+	require.Equal(t, len(assertHeaders), len(resHt.tests[0].expect.AssertHeaders))
+	require.Equal(t, len(assertHeadersT), len(resHt.tests[0].expect.AssertHeadersT))
 
-	require.Equal(t, len(assertBody), len(resHt.tests[0].expect.assertBody))
-	require.Equal(t, len(assertBodyT), len(resHt.tests[0].expect.assertBodyT))
+	require.Equal(t, len(assertBody), len(resHt.tests[0].expect.AssertBody))
+	require.Equal(t, len(assertBodyT), len(resHt.tests[0].expect.AssertBodyT))
 
-	require.Equal(t, len(assertResponse), len(resHt.tests[0].expect.assertResponse))
-	require.Equal(t, len(assertResponseT), len(resHt.tests[0].expect.assertResponseT))
+	require.Equal(t, len(assertResponse), len(resHt.tests[0].expect.AssertResponse))
+	require.Equal(t, len(assertResponseT), len(resHt.tests[0].expect.AssertResponseT))
 }
 
 func TestCreateHTTPTestMakerWithHttpClient(t *testing.T) {

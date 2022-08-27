@@ -59,6 +59,7 @@ type StepBuilder interface {
 	StepName(name string) Middleware
 }
 
+// CreateBuilder is functions for create test or table tests
 type CreateBuilder interface {
 	// Create is a function for save main information about allure and start write tests
 	Create() Middleware
@@ -68,8 +69,20 @@ type CreateBuilder interface {
 	CreateWithStep() StepBuilder
 	// CreateStep is a function for create step inside suite for test
 	CreateStep(string) Middleware
+
+	// CreateTableTest is function for create table test
+	CreateTableTest() MiddlewareTable
 }
 
+// MiddlewareTable is functions for create table test
+type MiddlewareTable interface {
+	TableTest
+
+	BeforeTest
+	AfterTest
+}
+
+// Middleware is function for create test
 type Middleware interface {
 	RequestHTTPBuilder
 
@@ -77,6 +90,7 @@ type Middleware interface {
 	AfterTest
 }
 
+// BeforeTest is function for processing request before execute
 type BeforeTest interface {
 	// BeforeExecute is function for processing request before createRequest request
 	BeforeExecute(...BeforeExecute) Middleware
@@ -84,6 +98,7 @@ type BeforeTest interface {
 	BeforeExecuteT(...BeforeExecuteT) Middleware
 }
 
+// AfterTest is function for processing request after execute test
 type AfterTest interface {
 	// AfterExecute is function will run after allureProvider asserts
 	AfterExecute(...AfterExecute) Middleware
@@ -91,12 +106,20 @@ type AfterTest interface {
 	AfterExecuteT(...AfterExecuteT) Middleware
 }
 
-// TableTest todo
+// TableTest is function for put request and assert for table tests
 type TableTest interface {
-	// PutTest todo
-	PutTest(name string, r *http.Request, expect *Expect)
-
+	// PutTest is function for put request and assert for table test
+	PutTest(name string, r *http.Request, expect *Expect) TableTest
+	// PutTests is function for put requests and asserts for table test
+	PutTests(params ...*TableTestParam) TableTest
 	ControlTest
+}
+
+// TableTestParam is parameters for table tests
+type TableTestParam struct {
+	Name    string
+	Request *http.Request
+	Expect  *Expect
 }
 
 // RequestHTTPBuilder is a scope of methods for create HTTP requests
@@ -198,6 +221,7 @@ type ExpectHTTPBuilder interface {
 	ControlTest
 }
 
+// ControlTest is function for manipulating tests
 type ControlTest interface {
 	NextTest() NextTestBuilder
 

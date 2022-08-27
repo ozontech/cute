@@ -300,114 +300,151 @@ func (it *cute) RequestBuilder(r ...requestBuilder) ExpectHTTPBuilder {
 }
 
 func (it *cute) ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.executeTime = t
+	it.tests[it.countTests].expect.ExecuteTime = t
 
 	return it
 }
 
 func (it *cute) ExpectStatus(code int) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.code = code
+	it.tests[it.countTests].expect.Code = code
 
 	return it
 }
 
 func (it *cute) ExpectJSONSchemaString(schema string) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.jsSchemaString = schema
+	it.tests[it.countTests].expect.JSONSchemaString = schema
 
 	return it
 }
 
 func (it *cute) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.jsSchemaByte = schema
+	it.tests[it.countTests].expect.JSONSchemaByte = schema
 
 	return it
 }
 
 func (it *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.jsSchemaFile = filePath
+	it.tests[it.countTests].expect.JSONSchemaFile = filePath
 
 	return it
 }
 
 func (it *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.assertBody = append(it.tests[it.countTests].expect.assertBody, asserts...)
+	it.tests[it.countTests].expect.AssertBody = append(it.tests[it.countTests].expect.AssertBody, asserts...)
 
 	return it
 }
 
 func (it *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.tests[it.countTests].expect.assertBody = append(it.tests[it.countTests].expect.assertBody, optionalAssertBody(assert))
+		it.tests[it.countTests].expect.AssertBody = append(it.tests[it.countTests].expect.AssertBody, optionalAssertBody(assert))
 	}
 
 	return it
 }
 
 func (it *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.assertHeaders = append(it.tests[it.countTests].expect.assertHeaders, asserts...)
+	it.tests[it.countTests].expect.AssertHeaders = append(it.tests[it.countTests].expect.AssertHeaders, asserts...)
 
 	return it
 }
 
 func (it *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.tests[it.countTests].expect.assertHeaders = append(it.tests[it.countTests].expect.assertHeaders, optionalAssertHeaders(assert))
+		it.tests[it.countTests].expect.AssertHeaders = append(it.tests[it.countTests].expect.AssertHeaders, optionalAssertHeaders(assert))
 	}
 
 	return it
 }
 
 func (it *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.assertResponse = append(it.tests[it.countTests].expect.assertResponse, asserts...)
+	it.tests[it.countTests].expect.AssertResponse = append(it.tests[it.countTests].expect.AssertResponse, asserts...)
 
 	return it
 }
 
 func (it *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.tests[it.countTests].expect.assertResponse = append(it.tests[it.countTests].expect.assertResponse, optionalAssertResponse(assert))
+		it.tests[it.countTests].expect.AssertResponse = append(it.tests[it.countTests].expect.AssertResponse, optionalAssertResponse(assert))
 	}
 
 	return it
 }
 
 func (it *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.assertBodyT = append(it.tests[it.countTests].expect.assertBodyT, asserts...)
+	it.tests[it.countTests].expect.AssertBodyT = append(it.tests[it.countTests].expect.AssertBodyT, asserts...)
 
 	return it
 }
 
 func (it *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.tests[it.countTests].expect.assertBodyT = append(it.tests[it.countTests].expect.assertBodyT, optionalAssertBodyT(assert))
+		it.tests[it.countTests].expect.AssertBodyT = append(it.tests[it.countTests].expect.AssertBodyT, optionalAssertBodyT(assert))
 	}
 
 	return it
 }
 
 func (it *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.assertHeadersT = append(it.tests[it.countTests].expect.assertHeadersT, asserts...)
+	it.tests[it.countTests].expect.AssertHeadersT = append(it.tests[it.countTests].expect.AssertHeadersT, asserts...)
 
 	return it
 }
 
 func (it *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.tests[it.countTests].expect.assertHeadersT = append(it.tests[it.countTests].expect.assertHeadersT, optionalAssertHeadersT(assert))
+		it.tests[it.countTests].expect.AssertHeadersT = append(it.tests[it.countTests].expect.AssertHeadersT, optionalAssertHeadersT(assert))
 	}
 
 	return it
 }
 
 func (it *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
-	it.tests[it.countTests].expect.assertResponseT = append(it.tests[it.countTests].expect.assertResponseT, asserts...)
+	it.tests[it.countTests].expect.AssertResponseT = append(it.tests[it.countTests].expect.AssertResponseT, asserts...)
 
 	return it
 }
 
 func (it *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
-		it.tests[it.countTests].expect.assertResponseT = append(it.tests[it.countTests].expect.assertResponseT, optionalAssertResponseT(assert))
+		it.tests[it.countTests].expect.AssertResponseT = append(it.tests[it.countTests].expect.AssertResponseT, optionalAssertResponseT(assert))
+	}
+
+	return it
+}
+
+func (it *cute) CreateTableTest() MiddlewareTable {
+	it.isTableTest = true
+
+	return it
+}
+
+func (it *cute) PutTest(name string, r *http.Request, expect *Expect) TableTest {
+	// Validate, that first step is empty
+	if it.countTests == 0 {
+		if it.tests[0].request.base == nil &&
+			len(it.tests[0].request.builders) == 0 {
+			it.tests[0].expect = expect
+			it.tests[0].name = name
+			it.tests[0].request.base = r
+
+			return it
+		}
+	}
+
+	newTest := createDefaultTest()
+	newTest.expect = expect
+	newTest.name = name
+	newTest.request.base = r
+	it.tests = append(it.tests, newTest)
+	it.countTests++ // async?
+
+	return it
+}
+
+func (it *cute) PutTests(params ...*TableTestParam) TableTest {
+	for _, param := range params {
+		it.PutTest(param.Name, param.Request, param.Expect)
 	}
 
 	return it

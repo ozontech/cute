@@ -14,10 +14,10 @@ github.com/jtolds/gls v4.20.0+incompatible h1:xdiiI2gbIgH/gLH7ADydsJ1uDOEzR8yvV7
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
 github.com/moul/http2curl v1.0.0 h1:dRMWoAtb+ePxMlLkrCbAqh4TlPHXvoGUSQ323/9Zahs=
 github.com/moul/http2curl v1.0.0/go.mod h1:8UbvGypXm98wA/IqH45anm5Y2Z6ep6O31QGOAZ3H0fQ=
-github.com/ozontech/allure-go/pkg/allure v0.6.1 h1:GllGjBvw8D5AlLjkfpkfqa8+2/CL7KSee12WjZcMr58=
-github.com/ozontech/allure-go/pkg/allure v0.6.1/go.mod h1:xyVZ+6tLDzQ4pr19eqLR0EckaI51kYUC1A5ihsDTygo=
-github.com/ozontech/allure-go/pkg/framework v0.6.12 h1:BWPcalCLtIWzPchPuorzv1cEBUK2iUURwYVEWZrznSY=
-github.com/ozontech/allure-go/pkg/framework v0.6.12/go.mod h1:F0UM6PeKlFdvq2Gt2orrXXV1Caw71C9ibwPearYIKcM=
+github.com/ozontech/allure-go/pkg/allure v0.6.3 h1:+nGs+2Kq+XprmONt4xww+MEDjnShkLK6kPtfOknernY=
+github.com/ozontech/allure-go/pkg/allure v0.6.3/go.mod h1:xyVZ+6tLDzQ4pr19eqLR0EckaI51kYUC1A5ihsDTygo=
+github.com/ozontech/allure-go/pkg/framework v0.6.17 h1:XCnysk4udjqR4EzJzYFRvmTtwNDkyiLYBo4mnYi80C8=
+github.com/ozontech/allure-go/pkg/framework v0.6.17/go.mod h1:RxbhHdppAf70AST+S0G3iMDxkHcNb11ygMaXISF3m1A=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

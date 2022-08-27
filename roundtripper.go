@@ -82,12 +82,12 @@ func (it *cute) doRequest(t T, req *http.Request) (*http.Response, error) {
 }
 
 func (it *cute) validateResponseCode(resp *http.Response) error {
-	if it.tests[it.correctTest].expect.code != 0 && it.tests[it.correctTest].expect.code != resp.StatusCode {
+	if it.tests[it.correctTest].expect.Code != 0 && it.tests[it.correctTest].expect.Code != resp.StatusCode {
 		return cuteErrors.NewAssertError(
 			"Assert response code",
-			fmt.Sprintf("Response code expect %v, but was %v", it.tests[it.correctTest].expect.code, resp.StatusCode),
+			fmt.Sprintf("Response code expect %v, but was %v", it.tests[it.correctTest].expect.Code, resp.StatusCode),
 			resp.StatusCode,
-			it.tests[it.correctTest].expect.code)
+			it.tests[it.correctTest].expect.Code)
 	}
 
 	return nil

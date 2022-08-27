@@ -44,10 +44,13 @@ type cute struct {
 	countTests  int // Общее количество тестов.
 	correctTest int // Тест которые в данный момент выполняется.
 
-	tests []*test
+	isTableTest bool
+	tests       []*test
 }
 
 type test struct {
+	name string
+
 	allureStep *allureStep
 	middleware *middleware
 	request    *request
@@ -105,20 +108,20 @@ type allureStep struct {
 }
 
 type Expect struct {
-	executeTime time.Duration
+	ExecuteTime time.Duration
 
-	code           int
-	jsSchemaString string
-	jsSchemaByte   []byte
-	jsSchemaFile   string
+	Code             int
+	JSONSchemaString string
+	JSONSchemaByte   []byte
+	JSONSchemaFile   string
 
-	assertBody     []AssertBody
-	assertHeaders  []AssertHeaders
-	assertResponse []AssertResponse
+	AssertBody     []AssertBody
+	AssertHeaders  []AssertHeaders
+	AssertResponse []AssertResponse
 
-	assertBodyT     []AssertBodyT
-	assertHeadersT  []AssertHeadersT
-	assertResponseT []AssertResponseT
+	AssertBodyT     []AssertBodyT
+	AssertHeadersT  []AssertHeadersT
+	AssertResponseT []AssertResponseT
 }
 
 func (it *cute) ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder {
@@ -171,39 +174,54 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 	// set labels
 	it.setAllureInformation(allureProvider)
 
-	allureProvider.Logf("Test start %v", allureProvider.Name())
-
 	// Cycle for change number of test
 	for i := 0; i <= it.countTests; i++ {
-		var (
-			resp *http.Response
-			errs []error
-			name = allureProvider.Name() + "_" + strconv.Itoa(i)
-		)
-
 		it.correctTest = i
 
-		if it.tests[it.correctTest].allureStep.name != "" {
-			// Test with step
-			name = it.tests[it.correctTest].allureStep.name
-
-			allureProvider.Logf("Start step %v", name)
-
-			resp, errs = it.testWithStep(ctx, allureProvider)
-			it.processTestErrors(allureProvider, errs)
-
-			allureProvider.Logf("Finish step %v", name)
-
+		// Execute by new T for table tests
+		if it.isTableTest {
+			tableTestName := it.tests[it.correctTest].name
+			allureProvider.Run(tableTestName, func(inT provider.T) {
+				inT.Logf("Test start %v", tableTestName)
+				res = it.startTest(ctx, inT)
+				inT.Logf("Test finished %v", tableTestName)
+			})
 		} else {
-			// Test without step
-			resp, errs = it.test(ctx, allureProvider)
-			it.processTestErrors(allureProvider, errs)
+			allureProvider.Logf("Test start %v", allureProvider.Name())
+			res = it.startTest(ctx, allureProvider)
+			allureProvider.Logf("Test finished %v", allureProvider.Name())
 		}
-
-		res = append(res, newTestResult(name, resp, errs))
 	}
 
-	allureProvider.Logf("Test finished %v", allureProvider.Name())
+	return res
+}
+
+func (it *cute) startTest(ctx context.Context, allureProvider allureProvider) []ResultsHTTPBuilder {
+	var (
+		res  = make([]ResultsHTTPBuilder, 0)
+		resp *http.Response
+		errs []error
+		name = allureProvider.Name() + "_" + strconv.Itoa(it.correctTest)
+	)
+
+	if it.tests[it.correctTest].allureStep.name != "" {
+		// Test with step
+		name = it.tests[it.correctTest].allureStep.name
+
+		allureProvider.Logf("Start step %v", name)
+
+		resp, errs = it.testWithStep(ctx, allureProvider)
+		it.processTestErrors(allureProvider, errs)
+
+		allureProvider.Logf("Finish step %v", name)
+
+	} else {
+		// Test without step
+		resp, errs = it.test(ctx, allureProvider)
+		it.processTestErrors(allureProvider, errs)
+	}
+
+	res = append(res, newTestResult(name, resp, errs))
 
 	return res
 }
@@ -266,10 +284,11 @@ func (it *cute) test(ctx context.Context, t internalT) (*http.Response, []error)
 	)
 
 	// CreateWithStep execute timer
-	if it.tests[it.correctTest].expect.executeTime == 0 {
-		it.tests[it.correctTest].expect.executeTime = defaultExecuteTestTime
+	if it.tests[it.correctTest].expect.ExecuteTime == 0 {
+		it.tests[it.correctTest].expect.ExecuteTime = defaultExecuteTestTime
 	}
-	ctx, cancel := context.WithTimeout(ctx, it.tests[it.correctTest].expect.executeTime)
+
+	ctx, cancel := context.WithTimeout(ctx, it.tests[it.correctTest].expect.ExecuteTime)
 	defer cancel()
 
 	// CreateWithStep request

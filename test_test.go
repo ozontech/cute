@@ -137,7 +137,7 @@ func TestValidateResponseCode(t *testing.T) {
 	ht := cute{
 		tests: []*test{
 			{
-				expect: &Expect{code: 200},
+				expect: &Expect{Code: 200},
 			},
 		},
 	}
@@ -153,13 +153,13 @@ func TestValidateResponseWithErrors(t *testing.T) {
 			tests: []*test{
 				{
 					expect: &Expect{
-						code: 200,
-						assertHeaders: []AssertHeaders{
+						Code: 200,
+						AssertHeaders: []AssertHeaders{
 							func(headers http.Header) error {
 								return errors.New("two error")
 							},
 						},
-						assertResponse: []AssertResponse{
+						AssertResponse: []AssertResponse{
 							func(response *http.Response) error {
 								if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
 									return errors.New("bad response")

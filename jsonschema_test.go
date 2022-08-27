@@ -32,7 +32,7 @@ func TestValidateJSONSchemaFromString(t *testing.T) {
 	}
 	`)
 
-	tBuilder.tests[0].expect.jsSchemaString = `
+	tBuilder.tests[0].expect.JSONSchemaString = `
 {
   "$id": "https://example.com/person.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -72,7 +72,7 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 	}
 	`)
 
-	tBuilder.tests[0].expect.jsSchemaString = `
+	tBuilder.tests[0].expect.JSONSchemaString = `
 	{
 	  "$id": "https://example.com/person.schema.json",
 	  "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -121,7 +121,7 @@ func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 	}
 	`)
 
-	tBuilder.tests[0].expect.jsSchemaString = `
+	tBuilder.tests[0].expect.JSONSchemaString = `
 	{
 	  "$id": "https://example.com/person.schema.json",
 	  "$schema": "https://json-schema.org/draft/2020-12/schema",
