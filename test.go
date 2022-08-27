@@ -332,7 +332,7 @@ func (it *cute) afterTest(t internalT, resp *http.Response, errs []error) []erro
 		return nil
 	}
 
-	return it.executeWithStep(t, "After", func(t T) []error {
+	return executeWithStep(t, "After", func(t T) []error {
 		scope := make([]error, 0)
 
 		for _, execute := range it.tests[it.correctTest].middleware.after {
@@ -348,7 +348,7 @@ func (it *cute) afterTest(t internalT, resp *http.Response, errs []error) []erro
 		}
 
 		return scope
-	})
+	}, false)
 }
 
 func (it *cute) beforeTest(t internalT, req *http.Request) []error {
@@ -356,7 +356,7 @@ func (it *cute) beforeTest(t internalT, req *http.Request) []error {
 		return nil
 	}
 
-	return it.executeWithStep(t, "Before", func(t T) []error {
+	return executeWithStep(t, "Before", func(t T) []error {
 		scope := make([]error, 0)
 
 		for _, execute := range it.tests[it.correctTest].middleware.before {
@@ -372,7 +372,7 @@ func (it *cute) beforeTest(t internalT, req *http.Request) []error {
 		}
 
 		return scope
-	})
+	}, false)
 }
 
 func (it *cute) createRequest(ctx context.Context) (*http.Request, error) {

@@ -6,20 +6,20 @@ import (
 	"github.com/ozontech/cute/errors"
 )
 
-func (it *cute) executeWithStep(t internalT, stepName string, execute func(t T) []error) []error {
+func executeWithStep(t internalT, stepName string, execute func(t T) []error, skipCreateNewStep bool) []error {
 	var (
 		errs []error
 	)
 
 	t.WithNewStep(stepName, func(stepCtx provider.StepCtx) {
 		errs = execute(stepCtx)
-		it.processStepErrors(stepCtx, errs)
+		processStepErrors(stepCtx, errs, skipCreateNewStep)
 	})
 
 	return errs
 }
 
-func (it *cute) processStepErrors(stepCtx provider.StepCtx, errs []error) {
+func processStepErrors(stepCtx provider.StepCtx, errs []error, skipCreateNewStep bool) {
 	var (
 		step     = stepCtx.CurrentStep()
 		statuses = make([]allure.Status, 0)
@@ -40,9 +40,14 @@ func (it *cute) processStepErrors(stepCtx provider.StepCtx, errs []error) {
 		}
 
 		if tErr, ok := err.(errors.WithNameError); ok {
-			currentStep = allure.NewSimpleStep(tErr.GetName())
-			currentStep.Status = currentStatus
-			currentStep.WithParent(step)
+			if skipCreateNewStep {
+				currentStep.Name = tErr.GetName()
+
+			} else {
+				currentStep = allure.NewSimpleStep(tErr.GetName())
+				currentStep.Status = currentStatus
+				currentStep.WithParent(step)
+			}
 		}
 
 		if tErr, ok := err.(errors.WithFields); ok {

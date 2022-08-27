@@ -26,11 +26,11 @@ func (it *cute) validateJSONSchema(t internalT, body []byte) []error {
 		return nil
 	}
 
-	it.executeWithStep(t, "Validate body by JSON schema", func(t T) []error {
+	executeWithStep(t, "Validate body by JSON schema", func(t T) []error {
 		scope = checkJSONSchema(expect, body)
 
 		return scope
-	})
+	}, false)
 
 	return scope
 }

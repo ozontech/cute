@@ -32,14 +32,14 @@ func (it *cute) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	}
 
 	for i := 1; i <= countRepeat; i++ {
-		it.executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
+		executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
 			resp, err = it.doRequest(t, req)
 			if err != nil {
 				return []error{err}
 			}
 
 			return nil
-		})
+		}, false)
 
 		if err == nil {
 			break
@@ -72,7 +72,7 @@ func (it *cute) doRequest(t T, req *http.Request) (*http.Response, error) {
 		// Add information (code, body, headers) about response to Allure step
 		addInformationResponse(t, resp)
 
-		err = it.validateResponseCode(resp)
+		err = it.validateResponseCode(t, resp)
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +81,7 @@ func (it *cute) doRequest(t T, req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (it *cute) validateResponseCode(resp *http.Response) error {
+func (it *cute) validateResponseCode(t T, resp *http.Response) error {
 	if it.tests[it.correctTest].expect.Code != 0 && it.tests[it.correctTest].expect.Code != resp.StatusCode {
 		return cuteErrors.NewAssertError(
 			"Assert response code",
