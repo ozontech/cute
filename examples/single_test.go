@@ -32,10 +32,10 @@ func TestExampleSingle(t *testing.T) {
 		ExpectExecuteTimeout(10*time.Second).
 		ExpectStatus(http.StatusOK).
 		AssertBody(
-		//json.Equal("$[0].email", "Eliseo@gardner.biz"),
-		//json.Present("$[1].name"),
-		//json.Present("$[0].passport"), // Example fail
-		//CustomAssertBody(),
+			json.Present("$[1].name"),
+			json.Present("$[0].passport"), // Example fail
+			json.Equal("$[0].email", "Eliseo@gardner.biz"),
+			CustomAssertBody(),
 		).
 		AssertBodyT(func(t cute.T, body []byte) error {
 			t.Step(allure.NewSimpleStep("inside Assert body. 1 ", allure.NewParameters("key", "value")...))

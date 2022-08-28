@@ -108,9 +108,6 @@ func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
 		internalT = allureT
 	}
 
-	// Set exampty fielnd
-	it.initEmptyFields()
-
 	internalT.Run(it.Name, func(inT provider.T) {
 		res = it.execute(ctx, inT)
 	})
@@ -135,6 +132,9 @@ func (it *Test) initEmptyFields() {
 	if it.Request.Repeat == nil {
 		it.Request.Repeat = new(RequestRepeatPolitic)
 	}
+	if it.Expect.JSONSchema == nil {
+		it.Expect.JSONSchema = new(ExpectJSONSchema)
+	}
 }
 
 func (it *Test) execute(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
@@ -143,6 +143,9 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 		errs []error
 		name = allureProvider.Name() + "_" + it.Name
 	)
+
+	// Set empty fields in test
+	it.initEmptyFields()
 
 	if it.AllureStep.Name != "" {
 		// Test with step

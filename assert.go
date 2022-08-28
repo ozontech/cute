@@ -81,11 +81,14 @@ func (it *Test) assertHeaders(t internalT, headers http.Header) []error {
 			}, true)
 		}
 
-		if isOption && isOptionT {
-			stepCtx.CurrentStep().Status = allure.Skipped
-		} else {
-			stepCtx.CurrentStep().Status = allure.Failed
+		if len(errs) > 0 {
+			if isOption && isOptionT {
+				stepCtx.CurrentStep().Status = allure.Skipped
+			} else {
+				stepCtx.CurrentStep().Status = allure.Failed
+			}
 		}
+
 	})
 
 	return errs
@@ -139,10 +142,12 @@ func (it *Test) assertResponse(t internalT, response *http.Response) []error {
 			}, true)
 		}
 
-		if isOption && isOptionT {
-			stepCtx.CurrentStep().Status = allure.Skipped
-		} else {
-			stepCtx.CurrentStep().Status = allure.Failed
+		if len(errs) > 0 {
+			if isOption && isOptionT {
+				stepCtx.CurrentStep().Status = allure.Skipped
+			} else {
+				stepCtx.CurrentStep().Status = allure.Failed
+			}
 		}
 	})
 
@@ -197,10 +202,12 @@ func (it *Test) assertBody(t internalT, body []byte) []error {
 			}, true)
 		}
 
-		if isOption && isOptionT {
-			stepCtx.CurrentStep().Status = allure.Skipped
-		} else {
-			stepCtx.CurrentStep().Status = allure.Failed
+		if len(errs) > 0 {
+			if isOption && isOptionT {
+				stepCtx.CurrentStep().Status = allure.Skipped
+			} else {
+				stepCtx.CurrentStep().Status = allure.Failed
+			}
 		}
 	})
 

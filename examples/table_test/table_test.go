@@ -29,9 +29,12 @@ func TestTableExample(t *testing.T) {
 	}
 	cute.NewTestBuilder().
 		CreateTableTest().
-		PutNewTest("Execute validation 1", req, &cute.Expect{
-			Code: 201,
-		}).
+		PutNewTest(
+			"Execute validation 1",
+			req,
+			&cute.Expect{
+				Code: 201,
+			}).
 		PutNewTest(
 			"Execute validation 2",
 			req,
