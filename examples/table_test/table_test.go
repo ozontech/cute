@@ -9,15 +9,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"testing"
-	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/core/allure_manager/manager"
-	"github.com/ozontech/allure-go/pkg/framework/core/common"
-	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute"
 	"github.com/ozontech/cute/asserts/json"
+	"github.com/ozontech/cute/errors"
 )
 
 func init() {
@@ -32,54 +28,76 @@ func TestTableExample(t *testing.T) {
 		"some_auth_token": []string{fmt.Sprint(11111)},
 	}
 	cute.NewTestBuilder().
-		//Title("Example table test").
 		CreateTableTest().
-		PutTest("Execute validation 1", req, &cute.Expect{
+		PutNewTest("Execute validation 1", req, &cute.Expect{
 			Code: 201,
 		}).
-		PutTest(
+		PutNewTest(
 			"Execute validation 2",
 			req,
 			&cute.Expect{
 				AssertBody: []cute.AssertBody{
 					json.Equal("$[0].email", "Eliseo@gardner.biz"),
-					json.Present("$[1].nam1e"),
+					json.Present("$[1].name"),
 				},
 			},
 		).
 		ExecuteTest(context.Background(), t)
 }
 
-func TestExampleProblem(t *testing.T) {
-	allureT := createAllureT(t)
+func TestTableExample_cuteTest_one(t *testing.T) {
+	test := &cute.Test{
+		Name: "test_1",
+		Request: &cute.Request{
+			Builders: []cute.RequestBuilder{
+				cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+				cute.WithMethod(http.MethodGet),
+			},
+		},
+		Expect: nil,
+	}
 
-	allureT.Title("Title")
-
-	allureT.Logf("First log")
-
-	allureT.Run("insideRun", func(inT provider.T) {
-		inT.Logf("First log from inside")
-		time.Sleep(time.Second)
-		inT.Logf("Last log from inside")
-	})
-
-	allureT.Logf("Last log")
+	test.Execute(context.Background(), t)
 }
 
-func createAllureT(t *testing.T) *common.Common {
-	var (
-		newT        = common.NewT(t)
-		callers     = strings.Split(t.Name(), "/")
-		providerCfg = manager.NewProviderConfig().
-				WithFullName("t.Name()").
-				WithPackageName("package").
-				WithRunner(callers[0])
-		newProvider = manager.NewProvider(providerCfg)
-	)
-	newProvider.NewTest(t.Name(), "package")
+func TestTableExample_cuteTest_multi(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name:       "test_1",
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+					cute.WithMethod(http.MethodPost),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 200,
+			},
+		},
+		{
+			Name:       "test_2",
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 200,
+				AssertBody: []cute.AssertBody{
+					json.Equal("$[0].email", "Eliseo@gardner.biz"),
+					json.Present("$[1].name"),
+					func(body []byte) error {
+						return errors.NewAssertError("example error", "example message", nil, nil)
+					},
+				},
+			},
+		},
+	}
 
-	newT.SetProvider(newProvider)
-	newT.Provider.TestContext()
-
-	return newT
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
 }

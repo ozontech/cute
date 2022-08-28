@@ -16,7 +16,7 @@ func TestResult(t *testing.T) {
 			Status:     "OK",
 			StatusCode: 200,
 		}
-		name = "name"
+		name = "Name"
 
 		testResults ResultsHTTPBuilder = &testResults{
 			name: name,

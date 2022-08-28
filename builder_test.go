@@ -17,9 +17,9 @@ func TestNewTestBuilder(t *testing.T) {
 
 	require.NotNil(t, ht.tests)
 	require.Len(t, ht.tests, 1)
-	require.NotNil(t, ht.tests[0].request)
-	require.NotNil(t, ht.tests[0].middleware)
-	require.NotNil(t, ht.tests[0].allureStep)
+	require.NotNil(t, ht.tests[0].Request)
+	require.NotNil(t, ht.tests[0].Middleware)
+	require.NotNil(t, ht.tests[0].AllureStep)
 	require.NotNil(t, ht.allureInfo)
 	require.NotNil(t, ht.httpClient)
 }
@@ -155,13 +155,13 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, desc, resHt.allureInfo.description)
 	require.Equal(t, feature, resHt.allureLabels.feature)
 	require.Equal(t, epic, resHt.allureLabels.epic)
-	require.Equal(t, stepName, resHt.tests[0].allureStep.name)
-	require.Equal(t, req, resHt.tests[0].request.base)
-	require.Equal(t, executeTime, resHt.tests[0].expect.ExecuteTime)
-	require.Equal(t, status, resHt.tests[0].expect.Code)
-	require.Equal(t, schemaBt, resHt.tests[0].expect.JSONSchemaByte)
-	require.Equal(t, schemaStg, resHt.tests[0].expect.JSONSchemaString)
-	require.Equal(t, schemaFile, resHt.tests[0].expect.JSONSchemaFile)
+	require.Equal(t, stepName, resHt.tests[0].AllureStep.name)
+	require.Equal(t, req, resHt.tests[0].Request.Base)
+	require.Equal(t, executeTime, resHt.tests[0].Expect.ExecuteTime)
+	require.Equal(t, status, resHt.tests[0].Expect.Code)
+	require.Equal(t, schemaBt, resHt.tests[0].Expect.JSONSchemaByte)
+	require.Equal(t, schemaStg, resHt.tests[0].Expect.JSONSchemaString)
+	require.Equal(t, schemaFile, resHt.tests[0].Expect.JSONSchemaFile)
 	require.Equal(t, id, resHt.allureLabels.id)
 	require.Equal(t, addSuiteLabel, resHt.allureLabels.suiteLabel)
 	require.Equal(t, addSubSuite, resHt.allureLabels.subSuite)
@@ -174,17 +174,64 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, setIssue, resHt.allureLinks.issue)
 	require.Equal(t, setTestCase, resHt.allureLinks.testCase)
 	require.Equal(t, link, resHt.allureLinks.link)
-	require.Equal(t, repeatCount, resHt.tests[0].request.repeat.count)
-	require.Equal(t, repeatDelay, resHt.tests[0].request.repeat.delay)
+	require.Equal(t, repeatCount, resHt.tests[0].Request.Repeat.Count)
+	require.Equal(t, repeatDelay, resHt.tests[0].Request.Repeat.Delay)
 
-	require.Equal(t, len(assertHeaders), len(resHt.tests[0].expect.AssertHeaders))
-	require.Equal(t, len(assertHeadersT), len(resHt.tests[0].expect.AssertHeadersT))
+	require.Equal(t, len(assertHeaders), len(resHt.tests[0].Expect.AssertHeaders))
+	require.Equal(t, len(assertHeadersT), len(resHt.tests[0].Expect.AssertHeadersT))
 
-	require.Equal(t, len(assertBody), len(resHt.tests[0].expect.AssertBody))
-	require.Equal(t, len(assertBodyT), len(resHt.tests[0].expect.AssertBodyT))
+	require.Equal(t, len(assertBody), len(resHt.tests[0].Expect.AssertBody))
+	require.Equal(t, len(assertBodyT), len(resHt.tests[0].Expect.AssertBodyT))
 
-	require.Equal(t, len(assertResponse), len(resHt.tests[0].expect.AssertResponse))
-	require.Equal(t, len(assertResponseT), len(resHt.tests[0].expect.AssertResponseT))
+	require.Equal(t, len(assertResponse), len(resHt.tests[0].Expect.AssertResponse))
+	require.Equal(t, len(assertResponseT), len(resHt.tests[0].Expect.AssertResponseT))
+}
+
+func TestCreateDefaultTest(t *testing.T) {
+	defaultClient := http.DefaultClient
+
+	resTest := createDefaultTest(defaultClient)
+	require.Equal(t, &Test{
+		httpClient: http.DefaultClient,
+		Name:       "",
+		AllureStep: new(AllureStep),
+		Middleware: new(Middleware),
+		Request: &Request{
+			Repeat: new(RequestRepeatPolitic),
+		},
+		Expect: new(Expect),
+	}, resTest)
+}
+
+func TestCreateTableTest(t *testing.T) {
+	c := &cute{}
+	c.CreateTableTest()
+
+	require.True(t, c.isTableTest)
+}
+
+func TestPutNewTest(t *testing.T) {
+	tests := make([]*Test, 1, 1)
+	tests[0] = createDefaultTest(http.DefaultClient)
+
+	var (
+		c            = &cute{tests: tests}
+		reqOne, _    = http.NewRequest("GET", "URL_1", nil)
+		expectOne    = &Expect{Code: 200}
+		reqSecond, _ = http.NewRequest("POST", "URL_1", nil)
+		expectSecond = &Expect{Code: 400}
+	)
+
+	c.PutNewTest("name_1", reqOne, expectOne)
+	c.PutNewTest("name_2", reqSecond, expectSecond)
+
+	require.Equal(t, c.tests[0].Name, "name_1")
+	require.Equal(t, c.tests[0].Expect, expectOne)
+	require.Equal(t, c.tests[0].Request.Base, reqOne)
+
+	require.Equal(t, c.tests[1].Name, "name_2")
+	require.Equal(t, c.tests[1].Expect, expectSecond)
+	require.Equal(t, c.tests[1].Request.Base, reqSecond)
 }
 
 func TestCreateHTTPTestMakerWithHttpClient(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"net/url"
 )
 
-type requestBuilder func(o *requestOptions)
+type RequestBuilder func(o *requestOptions)
 
 type requestOptions struct {
 	method      string

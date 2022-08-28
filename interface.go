@@ -17,8 +17,8 @@ type AllureBuilder interface {
 
 	CreateBuilder
 
-	// Parallel signals that this test is to be run in parallel with (and only with) other parallel tests.
-	// This function is not thread save. If you use multiply parallel with one T test will panic.
+	// Parallel signals that this Test is to be run in parallel with (and only with) other parallel tests.
+	// This function is not thread save. If you use multiply parallel with one T Test will panic.
 	Parallel() AllureBuilder
 }
 
@@ -55,26 +55,26 @@ type AllureLabelsBuilder interface {
 // StepBuilder is a scope of methods for set step information
 // Deprecated.
 type StepBuilder interface {
-	// StepName is a function to wrap a test in new steps with name
-	StepName(name string) Middleware
+	// StepName is a function to wrap a Test in new steps with Name
+	StepName(name string) MiddlewareRequest
 }
 
-// CreateBuilder is functions for create test or table tests
+// CreateBuilder is functions for create Test or table tests
 type CreateBuilder interface {
 	// Create is a function for save main information about allure and start write tests
-	Create() Middleware
+	Create() MiddlewareRequest
 
 	// CreateWithStep is a function for create step and log some information inside
 	// Deprecated use CreateStep(string)
 	CreateWithStep() StepBuilder
-	// CreateStep is a function for create step inside suite for test
-	CreateStep(string) Middleware
+	// CreateStep is a function for create step inside suite for Test
+	CreateStep(string) MiddlewareRequest
 
-	// CreateTableTest is function for create table test
+	// CreateTableTest is function for create table Test
 	CreateTableTest() MiddlewareTable
 }
 
-// MiddlewareTable is functions for create table test
+// MiddlewareTable is functions for create table Test
 type MiddlewareTable interface {
 	TableTest
 
@@ -82,8 +82,8 @@ type MiddlewareTable interface {
 	AfterTest
 }
 
-// Middleware is function for create test
-type Middleware interface {
+// MiddlewareRequest is function for create requests or add After/before functions
+type MiddlewareRequest interface {
 	RequestHTTPBuilder
 
 	BeforeTest
@@ -92,34 +92,27 @@ type Middleware interface {
 
 // BeforeTest is function for processing request before execute
 type BeforeTest interface {
-	// BeforeExecute is function for processing request before createRequest request
-	BeforeExecute(...BeforeExecute) Middleware
-	// BeforeExecuteT is function for processing request before createRequest request
-	BeforeExecuteT(...BeforeExecuteT) Middleware
+	// BeforeExecute is function for processing request before createRequest Request
+	BeforeExecute(...BeforeExecute) MiddlewareRequest
+	// BeforeExecuteT is function for processing request before createRequest Request
+	BeforeExecuteT(...BeforeExecuteT) MiddlewareRequest
 }
 
-// AfterTest is function for processing request after execute test
+// AfterTest is function for processing request After execute Test
 type AfterTest interface {
-	// AfterExecute is function will run after allureProvider asserts
-	AfterExecute(...AfterExecute) Middleware
-	// AfterExecuteT is function will run after allureProvider asserts
-	AfterExecuteT(...AfterExecuteT) Middleware
+	// AfterExecute is function will run After allureProvider asserts
+	AfterExecute(...AfterExecute) MiddlewareRequest
+	// AfterExecuteT is function will run After allureProvider asserts
+	AfterExecuteT(...AfterExecuteT) MiddlewareRequest
 }
 
 // TableTest is function for put request and assert for table tests
 type TableTest interface {
-	// PutTest is function for put request and assert for table test
-	PutTest(name string, r *http.Request, expect *Expect) TableTest
-	// PutTests is function for put requests and asserts for table test
-	PutTests(params ...*TableTestParam) TableTest
+	// PutNewTest is function for put request and assert for table Test
+	PutNewTest(name string, r *http.Request, expect *Expect) TableTest
+	// PutTests is function for put requests and asserts for table Test
+	PutTests(params ...*Test) TableTest
 	ControlTest
-}
-
-// TableTestParam is parameters for table tests
-type TableTestParam struct {
-	Name    string
-	Request *http.Request
-	Expect  *Expect
 }
 
 // RequestHTTPBuilder is a scope of methods for create HTTP requests
@@ -135,7 +128,7 @@ type RequestHTTPBuilder interface {
 	// WithMarshalBody
 	// WithBody
 	// WithURI
-	RequestBuilder(r ...requestBuilder) ExpectHTTPBuilder
+	RequestBuilder(r ...RequestBuilder) ExpectHTTPBuilder
 
 	RequestParams
 }
@@ -225,15 +218,15 @@ type ExpectHTTPBuilder interface {
 type ControlTest interface {
 	NextTest() NextTestBuilder
 
-	// ExecuteTest is a function for execute test
+	// ExecuteTest is a function for execute Test
 	ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder
 }
 
-// NextTestBuilder is a scope of methods for processing response, after test
+// NextTestBuilder is a scope of methods for processing response, After Test
 type NextTestBuilder interface {
-	// AfterTestExecute is function will run after test
+	// AfterTestExecute is function will run After Test
 	AfterTestExecute(...AfterExecute) NextTestBuilder
-	// AfterTestExecuteT is function will run after test
+	// AfterTestExecuteT is function will run After Test
 	AfterTestExecuteT(...AfterExecuteT) NextTestBuilder
 
 	CreateBuilder
@@ -246,7 +239,7 @@ type ResultsHTTPBuilder interface {
 	// GetErrors is a function, which returns all errors from test
 	GetErrors() []error
 
-	// GetName is a function, which returns name test
+	// GetName is a function, which returns name Test
 	GetName() string
 }
 

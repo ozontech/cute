@@ -24,7 +24,7 @@ type cute struct {
 	countTests int // Общее количество тестов.
 
 	isTableTest bool
-	tests       []*test
+	tests       []*Test
 }
 
 type allureInformation struct {
@@ -105,25 +105,27 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 	// set labels
 	it.setAllureInformation(allureProvider)
 
-	// Cycle for change number of test
+	// Cycle for change number of Test
 	for i := 0; i <= it.countTests; i++ {
 		currentTest := it.tests[i]
 
 		// Execute by new T for table tests
 		if it.isTableTest {
-			tableTestName := currentTest.name
+			tableTestName := currentTest.Name
 
 			allureProvider.Run(tableTestName, func(inT provider.T) {
 				inT.Logf("Test start %v", tableTestName)
-				res = currentTest.execute(ctx, inT)
+				resT := currentTest.execute(ctx, inT)
+				res = append(res, resT)
 				inT.Logf("Test finished %v", tableTestName)
 			})
 		} else {
-			currentTest.name = allureProvider.Name()
+			currentTest.Name = allureProvider.Name()
 
-			allureProvider.Logf("Test start %v", currentTest.name)
-			res = currentTest.execute(ctx, allureProvider)
-			allureProvider.Logf("Test finished %v", currentTest.name)
+			allureProvider.Logf("Test start %v", currentTest.Name)
+			resT := currentTest.execute(ctx, allureProvider)
+			res = append(res, resT)
+			allureProvider.Logf("Test finished %v", currentTest.Name)
 		}
 	}
 

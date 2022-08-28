@@ -18,9 +18,9 @@ func TestCreateRequest(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "http://go.com", nil)
 	require.NoError(t, err)
 
-	ht := &test{
-		request: &request{
-			base: req,
+	ht := &Test{
+		Request: &Request{
+			Base: req,
 		},
 	}
 
@@ -44,9 +44,9 @@ func TestCreateRequestBuilder(t *testing.T) {
 
 	req.Header = headers
 
-	ht := &test{
-		request: &request{
-			builders: []requestBuilder{
+	ht := &Test{
+		Request: &Request{
+			Builders: []RequestBuilder{
 				WithURI(url),
 				WithMethod("GET"),
 				WithHeaders(headers),
@@ -69,9 +69,9 @@ func TestCreateRequestBuilder_MarshalBody(t *testing.T) {
 		}
 	)
 
-	ht := &test{
-		request: &request{
-			builders: []requestBuilder{
+	ht := &Test{
+		Request: &Request{
+			Builders: []RequestBuilder{
 				WithMarshalBody(str),
 			},
 		},
@@ -87,13 +87,13 @@ func TestCreateRequestBuilder_MarshalBody(t *testing.T) {
 }
 
 func TestValidateRequestEmptyUrl(t *testing.T) {
-	ht := &test{}
+	ht := &Test{}
 
 	require.Error(t, ht.validateRequest(&http.Request{}))
 }
 
 func TestValidateRequestEmptyMethod(t *testing.T) {
-	ht := &test{}
+	ht := &Test{}
 	u, _ := url.Parse("https://go.com")
 
 	require.Error(t, ht.validateRequest(&http.Request{
@@ -102,8 +102,8 @@ func TestValidateRequestEmptyMethod(t *testing.T) {
 }
 
 func TestValidateResponseEmpty(t *testing.T) {
-	ht := &test{
-		expect: new(Expect),
+	ht := &Test{
+		Expect: new(Expect),
 	}
 
 	temp := common.NewT(t)
@@ -113,8 +113,8 @@ func TestValidateResponseEmpty(t *testing.T) {
 }
 
 func TestValidateResponseCode(t *testing.T) {
-	ht := &test{
-		expect: &Expect{Code: 200},
+	ht := &Test{
+		Expect: &Expect{Code: 200},
 	}
 	temp := common.NewT(t)
 
@@ -124,8 +124,8 @@ func TestValidateResponseCode(t *testing.T) {
 
 func TestValidateResponseWithErrors(t *testing.T) {
 	var (
-		ht = &test{
-			expect: &Expect{
+		ht = &Test{
+			Expect: &Expect{
 				Code: 200,
 				AssertHeaders: []AssertHeaders{
 					func(headers http.Header) error {

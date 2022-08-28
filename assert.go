@@ -33,10 +33,10 @@ type AssertHeadersT func(t T, headers http.Header) error
 // AssertResponseT ...
 type AssertResponseT func(t T, response *http.Response) error
 
-func (it *test) assertHeaders(t internalT, headers http.Header) []error {
+func (it *Test) assertHeaders(t internalT, headers http.Header) []error {
 	var (
-		assertHeaders  = it.expect.AssertHeaders
-		assertHeadersT = it.expect.AssertHeadersT
+		assertHeaders  = it.Expect.AssertHeaders
+		assertHeadersT = it.Expect.AssertHeadersT
 
 		errs = make([]error, 0)
 	)
@@ -91,10 +91,10 @@ func (it *test) assertHeaders(t internalT, headers http.Header) []error {
 	return errs
 }
 
-func (it *test) assertResponse(t internalT, response *http.Response) []error {
+func (it *Test) assertResponse(t internalT, response *http.Response) []error {
 	var (
-		assertResponse  = it.expect.AssertResponse
-		assertResponseT = it.expect.AssertResponseT
+		assertResponse  = it.Expect.AssertResponse
+		assertResponseT = it.Expect.AssertResponseT
 
 		errs = make([]error, 0)
 	)
@@ -149,10 +149,10 @@ func (it *test) assertResponse(t internalT, response *http.Response) []error {
 	return errs
 }
 
-func (it *test) assertBody(t internalT, body []byte) []error {
+func (it *Test) assertBody(t internalT, body []byte) []error {
 	var (
-		assertBody  = it.expect.AssertBody
-		assertBodyT = it.expect.AssertBodyT
+		assertBody  = it.Expect.AssertBody
+		assertBodyT = it.Expect.AssertBodyT
 
 		errs = make([]error, 0)
 	)
