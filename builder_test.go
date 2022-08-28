@@ -236,6 +236,44 @@ func TestPutNewTest(t *testing.T) {
 	require.Equal(t, c.tests[1].Request.Base, reqSecond)
 }
 
+func TestPutTests(t *testing.T) {
+	var (
+		tests        = createDefaultTests(http.DefaultClient)
+		c            = &cute{tests: tests}
+		reqOne, _    = http.NewRequest("GET", "URL_1", nil)
+		expectOne    = &Expect{Code: 200}
+		reqSecond, _ = http.NewRequest("POST", "URL_1", nil)
+		expectSecond = &Expect{Code: 400}
+	)
+
+	tests = append(tests,
+		&Test{
+			Name: "name_1",
+			Request: &Request{
+				Base: reqOne,
+			},
+			Expect: expectOne,
+		},
+		&Test{
+			Name: "name_2",
+			Request: &Request{
+				Base: reqSecond,
+			},
+			Expect: expectSecond,
+		},
+	)
+
+	c.PutTests(tests...)
+
+	require.Equal(t, c.tests[0].Name, "name_1")
+	require.Equal(t, c.tests[0].Expect, expectOne)
+	require.Equal(t, c.tests[0].Request.Base, reqOne)
+
+	require.Equal(t, c.tests[1].Name, "name_2")
+	require.Equal(t, c.tests[1].Expect, expectSecond)
+	require.Equal(t, c.tests[1].Request.Base, reqSecond)
+}
+
 func TestCreateHTTPTestMakerWithHttpClient(t *testing.T) {
 	cli := &http.Client{
 		Transport:     nil,

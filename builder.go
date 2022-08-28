@@ -82,8 +82,7 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 
 // NewTestBuilder is a function for initialization foundation for cute
 func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
-	tests := make([]*Test, 1)
-	tests[0] = createDefaultTest(m.httpClient)
+	tests := createDefaultTests(m.httpClient)
 
 	return &cute{
 		httpClient:   m.httpClient,
@@ -94,6 +93,13 @@ func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
 		allureLabels: new(allureLabels),
 		parallel:     false,
 	}
+}
+
+func createDefaultTests(client *http.Client) []*Test {
+	tests := make([]*Test, 1)
+	tests[0] = createDefaultTest(client)
+
+	return tests
 }
 
 func createDefaultTest(httpClient *http.Client) *Test {
