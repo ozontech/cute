@@ -27,6 +27,7 @@ var (
 	errorRequestURLEmpty    = errors.New("url request must be not empty")
 )
 
+// Test TODO
 type Test struct {
 	httpClient *http.Client
 
@@ -38,35 +39,39 @@ type Test struct {
 	Expect     *Expect
 }
 
+// Request TODO
 type Request struct {
 	Base     *http.Request
 	Builders []RequestBuilder
 	Repeat   *RequestRepeatPolitic
 }
 
+// RequestRepeatPolitic TODO
 type RequestRepeatPolitic struct {
 	Count int
 	Delay time.Duration
 }
 
+// Middleware TODO
 type Middleware struct {
 	After   []AfterExecute
-	afterT  []AfterExecuteT
-	before  []BeforeExecute
-	beforeT []BeforeExecuteT
+	AfterT  []AfterExecuteT
+	Before  []BeforeExecute
+	BeforeT []BeforeExecuteT
 }
 
+// AllureStep TODO
 type AllureStep struct {
-	name string
+	Name string
 }
 
+// Expect TODO
 type Expect struct {
 	ExecuteTime time.Duration
 
-	Code             int
-	JSONSchemaString string
-	JSONSchemaByte   []byte
-	JSONSchemaFile   string
+	Code int
+
+	JSONSchema *ExpectJSONSchema
 
 	AssertBody     []AssertBody
 	AssertHeaders  []AssertHeaders
@@ -75,6 +80,13 @@ type Expect struct {
 	AssertBodyT     []AssertBodyT
 	AssertHeadersT  []AssertHeadersT
 	AssertResponseT []AssertResponseT
+}
+
+// ExpectJSONSchema TODO
+type ExpectJSONSchema struct {
+	String string
+	Byte   []byte
+	File   string
 }
 
 func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
@@ -86,7 +98,7 @@ func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
 	tOriginal, ok := t.(*testing.T)
 	if ok {
 		newT := createAllureT(tOriginal)
-		defer newT.FinishTest()
+		defer newT.FinishTest() //nolint
 
 		internalT = newT
 	}
@@ -132,9 +144,9 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 		name = allureProvider.Name() + "_" + it.Name
 	)
 
-	if it.AllureStep.name != "" {
+	if it.AllureStep.Name != "" {
 		// Test with step
-		name = it.AllureStep.name
+		name = it.AllureStep.Name
 
 		// Execute Test
 		allureProvider.Logf("Start step %v", name)
@@ -191,7 +203,7 @@ func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Respo
 		errs []error
 	)
 
-	t.WithNewStep(it.AllureStep.name, func(stepCtx provider.StepCtx) {
+	t.WithNewStep(it.AllureStep.Name, func(stepCtx provider.StepCtx) {
 		resp, errs = it.startTest(ctx, stepCtx)
 
 		if len(errs) != 0 {
@@ -222,7 +234,7 @@ func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []e
 		return resp, []error{err}
 	}
 
-	// Execute before
+	// Execute Before
 	if errs := it.beforeTest(t, req); len(errs) > 0 {
 		return nil, errs
 	}
@@ -253,7 +265,7 @@ func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []e
 }
 
 func (it *Test) afterTest(t internalT, resp *http.Response, errs []error) []error {
-	if len(it.Middleware.After) == 0 && len(it.Middleware.afterT) == 0 {
+	if len(it.Middleware.After) == 0 && len(it.Middleware.AfterT) == 0 {
 		return nil
 	}
 
@@ -266,7 +278,7 @@ func (it *Test) afterTest(t internalT, resp *http.Response, errs []error) []erro
 			}
 		}
 
-		for _, executeSuite := range it.Middleware.afterT {
+		for _, executeSuite := range it.Middleware.AfterT {
 			if err := executeSuite(t, resp, errs); err != nil {
 				scope = append(scope, err)
 			}
@@ -277,20 +289,20 @@ func (it *Test) afterTest(t internalT, resp *http.Response, errs []error) []erro
 }
 
 func (it *Test) beforeTest(t internalT, req *http.Request) []error {
-	if len(it.Middleware.before) == 0 && len(it.Middleware.beforeT) == 0 {
+	if len(it.Middleware.Before) == 0 && len(it.Middleware.BeforeT) == 0 {
 		return nil
 	}
 
 	return executeWithStep(t, "Before", func(t T) []error {
 		scope := make([]error, 0)
 
-		for _, execute := range it.Middleware.before {
+		for _, execute := range it.Middleware.Before {
 			if err := execute(req); err != nil {
 				scope = append(scope, err)
 			}
 		}
 
-		for _, executeT := range it.Middleware.beforeT {
+		for _, executeT := range it.Middleware.BeforeT {
 			if err := executeT(t, req); err != nil {
 				scope = append(scope, err)
 			}

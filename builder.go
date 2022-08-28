@@ -82,7 +82,7 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 
 // NewTestBuilder is a function for initialization foundation for cute
 func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
-	tests := make([]*Test, 1, 1)
+	tests := make([]*Test, 1)
 	tests[0] = createDefaultTest(m.httpClient)
 
 	return &cute{
@@ -104,7 +104,7 @@ func createDefaultTest(httpClient *http.Client) *Test {
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
-		Expect: new(Expect),
+		Expect: &Expect{JSONSchema: new(ExpectJSONSchema)},
 	}
 }
 
@@ -231,7 +231,7 @@ func (it *cute) Create() MiddlewareRequest {
 }
 
 func (it *cute) CreateStep(name string) MiddlewareRequest {
-	it.tests[it.countTests].AllureStep.name = name
+	it.tests[it.countTests].AllureStep.Name = name
 
 	return it
 }
@@ -247,19 +247,19 @@ func (it *cute) CreateRequest() RequestHTTPBuilder {
 }
 
 func (it *cute) StepName(name string) MiddlewareRequest {
-	it.tests[it.countTests].AllureStep.name = name
+	it.tests[it.countTests].AllureStep.Name = name
 
 	return it
 }
 
 func (it *cute) BeforeExecute(fs ...BeforeExecute) MiddlewareRequest {
-	it.tests[it.countTests].Middleware.before = append(it.tests[it.countTests].Middleware.before, fs...)
+	it.tests[it.countTests].Middleware.Before = append(it.tests[it.countTests].Middleware.Before, fs...)
 
 	return it
 }
 
 func (it *cute) BeforeExecuteT(fs ...BeforeExecuteT) MiddlewareRequest {
-	it.tests[it.countTests].Middleware.beforeT = append(it.tests[it.countTests].Middleware.beforeT, fs...)
+	it.tests[it.countTests].Middleware.BeforeT = append(it.tests[it.countTests].Middleware.BeforeT, fs...)
 
 	return it
 }
@@ -271,7 +271,7 @@ func (it *cute) AfterExecute(fs ...AfterExecute) MiddlewareRequest {
 }
 
 func (it *cute) AfterExecuteT(fs ...AfterExecuteT) MiddlewareRequest {
-	it.tests[it.countTests].Middleware.afterT = append(it.tests[it.countTests].Middleware.afterT, fs...)
+	it.tests[it.countTests].Middleware.AfterT = append(it.tests[it.countTests].Middleware.AfterT, fs...)
 
 	return it
 }
@@ -283,7 +283,7 @@ func (it *cute) AfterTestExecute(fs ...AfterExecute) NextTestBuilder {
 }
 
 func (it *cute) AfterTestExecuteT(fs ...AfterExecuteT) NextTestBuilder {
-	it.tests[it.countTests].Middleware.afterT = append(it.tests[it.countTests].Middleware.afterT, fs...)
+	it.tests[it.countTests].Middleware.AfterT = append(it.tests[it.countTests].Middleware.AfterT, fs...)
 
 	return it
 }
@@ -325,19 +325,19 @@ func (it *cute) ExpectStatus(code int) ExpectHTTPBuilder {
 }
 
 func (it *cute) ExpectJSONSchemaString(schema string) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.JSONSchemaString = schema
+	it.tests[it.countTests].Expect.JSONSchema.String = schema
 
 	return it
 }
 
 func (it *cute) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.JSONSchemaByte = schema
+	it.tests[it.countTests].Expect.JSONSchema.Byte = schema
 
 	return it
 }
 
 func (it *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.JSONSchemaFile = filePath
+	it.tests[it.countTests].Expect.JSONSchema.File = filePath
 
 	return it
 }

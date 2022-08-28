@@ -126,7 +126,8 @@ func TestValidateResponseWithErrors(t *testing.T) {
 	var (
 		ht = &Test{
 			Expect: &Expect{
-				Code: 200,
+				Code:       200,
+				JSONSchema: new(ExpectJSONSchema),
 				AssertHeaders: []AssertHeaders{
 					func(headers http.Header) error {
 						return errors.New("two error")

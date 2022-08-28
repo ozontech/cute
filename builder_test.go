@@ -155,13 +155,13 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, desc, resHt.allureInfo.description)
 	require.Equal(t, feature, resHt.allureLabels.feature)
 	require.Equal(t, epic, resHt.allureLabels.epic)
-	require.Equal(t, stepName, resHt.tests[0].AllureStep.name)
+	require.Equal(t, stepName, resHt.tests[0].AllureStep.Name)
 	require.Equal(t, req, resHt.tests[0].Request.Base)
 	require.Equal(t, executeTime, resHt.tests[0].Expect.ExecuteTime)
 	require.Equal(t, status, resHt.tests[0].Expect.Code)
-	require.Equal(t, schemaBt, resHt.tests[0].Expect.JSONSchemaByte)
-	require.Equal(t, schemaStg, resHt.tests[0].Expect.JSONSchemaString)
-	require.Equal(t, schemaFile, resHt.tests[0].Expect.JSONSchemaFile)
+	require.Equal(t, schemaBt, resHt.tests[0].Expect.JSONSchema.Byte)
+	require.Equal(t, schemaStg, resHt.tests[0].Expect.JSONSchema.String)
+	require.Equal(t, schemaFile, resHt.tests[0].Expect.JSONSchema.File)
 	require.Equal(t, id, resHt.allureLabels.id)
 	require.Equal(t, addSuiteLabel, resHt.allureLabels.suiteLabel)
 	require.Equal(t, addSubSuite, resHt.allureLabels.subSuite)
@@ -199,7 +199,9 @@ func TestCreateDefaultTest(t *testing.T) {
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
-		Expect: new(Expect),
+		Expect: &Expect{
+			JSONSchema: new(ExpectJSONSchema),
+		},
 	}, resTest)
 }
 
@@ -211,7 +213,7 @@ func TestCreateTableTest(t *testing.T) {
 }
 
 func TestPutNewTest(t *testing.T) {
-	tests := make([]*Test, 1, 1)
+	tests := make([]*Test, 1)
 	tests[0] = createDefaultTest(http.DefaultClient)
 
 	var (

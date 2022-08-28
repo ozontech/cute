@@ -16,12 +16,12 @@ func (it *Test) validateJSONSchema(t internalT, body []byte) []error {
 	)
 
 	switch {
-	case it.Expect.JSONSchemaString != "":
-		expect = gojsonschema.NewStringLoader(it.Expect.JSONSchemaString)
-	case it.Expect.JSONSchemaByte != nil:
-		expect = gojsonschema.NewBytesLoader(it.Expect.JSONSchemaByte)
-	case it.Expect.JSONSchemaFile != "":
-		expect = gojsonschema.NewReferenceLoader(it.Expect.JSONSchemaFile)
+	case it.Expect.JSONSchema.String != "":
+		expect = gojsonschema.NewStringLoader(it.Expect.JSONSchema.String)
+	case it.Expect.JSONSchema.Byte != nil:
+		expect = gojsonschema.NewBytesLoader(it.Expect.JSONSchema.Byte)
+	case it.Expect.JSONSchema.File != "":
+		expect = gojsonschema.NewReferenceLoader(it.Expect.JSONSchema.File)
 	default:
 		return nil
 	}

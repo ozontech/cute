@@ -82,7 +82,7 @@ type MiddlewareTable interface {
 	AfterTest
 }
 
-// MiddlewareRequest is function for create requests or add After/before functions
+// MiddlewareRequest is function for create requests or add After/Before functions
 type MiddlewareRequest interface {
 	RequestHTTPBuilder
 
@@ -90,11 +90,11 @@ type MiddlewareRequest interface {
 	AfterTest
 }
 
-// BeforeTest is function for processing request before execute
+// BeforeTest is function for processing request Before execute
 type BeforeTest interface {
-	// BeforeExecute is function for processing request before createRequest Request
+	// BeforeExecute is function for processing request Before createRequest Request
 	BeforeExecute(...BeforeExecute) MiddlewareRequest
-	// BeforeExecuteT is function for processing request before createRequest Request
+	// BeforeExecuteT is function for processing request Before createRequest Request
 	BeforeExecuteT(...BeforeExecuteT) MiddlewareRequest
 }
 
@@ -239,7 +239,7 @@ type ResultsHTTPBuilder interface {
 	// GetErrors is a function, which returns all errors from test
 	GetErrors() []error
 
-	// GetName is a function, which returns name Test
+	// GetName is a function, which returns Name Test
 	GetName() string
 }
 
