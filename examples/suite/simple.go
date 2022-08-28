@@ -18,7 +18,7 @@ import (
 
 */
 
-func (i *ExampleSuite) TestExample_Simple(t provider.T) {
+func (i *ExampleSuite) Test_Simple(t provider.T) {
 	var (
 		testMaker   = cute.NewHTTPTestMaker()
 		testBuilder = testMaker.NewTestBuilder()
@@ -27,8 +27,8 @@ func (i *ExampleSuite) TestExample_Simple(t provider.T) {
 	u, _ := url.Parse("https://jsonplaceholder.typicode.com/posts/1/comments")
 
 	testBuilder.
-		Title("TestExample_Simple").
-		Tags("simple", "some_local_tag", "json").
+		Title("Super simple test").
+		Tags("simple", "suite", "some_local_tag", "json").
 		Parallel().
 		Create().
 		RequestBuilder(

@@ -13,9 +13,10 @@ import (
 	"github.com/ozontech/cute"
 )
 
-func TestAsyncTestOne(t *testing.T) {
+func Test_Async_1(t *testing.T) {
 	cute.NewTestBuilder().
-		Title("Title test 1").
+		Title("Title async test 1").
+		Tags("parallel_test").
 		Parallel().
 		Create().
 		BeforeExecuteT(
@@ -47,9 +48,10 @@ func TestAsyncTestOne(t *testing.T) {
 		ExecuteTest(context.Background(), t)
 }
 
-func TestAsyncTestTwo(t *testing.T) {
+func Test_Async_2(t *testing.T) {
 	cute.NewTestBuilder().
-		Title("Title test 2").
+		Title("Title async test 2").
+		Tags("parallel_test").
 		Parallel().
 		Create().
 		BeforeExecuteT(

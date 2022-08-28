@@ -17,10 +17,10 @@ import (
 	"github.com/ozontech/cute"
 )
 
-func TestExample_TwoSteps_Example_1(t *testing.T) {
+func Test_TwoSteps_1(t *testing.T) {
 	cute.NewTestBuilder().
-		Title("TestExample_TwoSteps_Example_1").
-		Tags("TestExample_TwoSteps_Example_1", "some_tag").
+		Title("Test with two requests.").
+		Tags("two_steps").
 		Parallel().
 		CreateStep("Creat entry /posts/1").
 
@@ -46,10 +46,11 @@ func TestExample_TwoSteps_Example_1(t *testing.T) {
 		ExecuteTest(context.Background(), t)
 }
 
-func TestExample_TwoSteps_Example_2(t *testing.T) {
+func Test_TwoSteps_2_AllureRunner(t *testing.T) {
 	runner.Run(t, "Test with two steps", func(t provider.T) {
 		test := cute.NewTestBuilder().
-			Title("Two steps").
+			Title("Test with two requests executed by allure-go").
+			Tag("two_steps").
 			Description("some_description").
 			CreateStep("Request 1").
 			RequestBuilder(
@@ -78,10 +79,12 @@ func TestExample_TwoSteps_Example_2(t *testing.T) {
 	})
 }
 
-func TestExample_TwoSteps_Example_3(t *testing.T) {
+func Test_TwoSteps_3(t *testing.T) {
 	responseCode := 0
 
 	cute.NewTestBuilder().
+		Title("Test with two requests and parse body.").
+		Tag("two_steps").
 		Create().
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),

@@ -24,7 +24,7 @@ import (
 
 */
 
-func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
+func (i *ExampleSuite) Test_TwoSteps(t provider.T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()
 
@@ -67,8 +67,8 @@ func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
 	}
 
 	testBuilder.
-		Title("TestExample_TwoSteps").
-		Tags("TestExample_TwoSteps", "some_tag").
+		Title("Test in suite with two steps").
+		Tags("suite", "some_tag").
 		Parallel().
 		CreateStep("Creat entry /posts/1").
 

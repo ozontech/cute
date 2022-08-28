@@ -456,7 +456,20 @@ func (it *cute) PutNewTest(name string, r *http.Request, expect *Expect) TableTe
 }
 
 func (it *cute) PutTests(params ...*Test) TableTest {
-	it.tests = append(it.tests, params...)
+	for _, param := range params {
+		// Validate, that first step is empty
+		if it.countTests == 0 {
+			if it.tests[0].Request.Base == nil &&
+				len(it.tests[0].Request.Builders) == 0 {
+				it.tests[0] = param
+
+				continue
+			}
+		}
+
+		it.tests = append(it.tests, param)
+		it.countTests++
+	}
 
 	return it
 }

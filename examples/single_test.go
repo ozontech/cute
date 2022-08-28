@@ -19,9 +19,10 @@ import (
 	"github.com/ozontech/cute/asserts/json"
 )
 
-func TestExampleSingle(t *testing.T) {
+func Test_Single_1(t *testing.T) {
 	cute.NewTestBuilder().
-		Title("Only T").
+		Title("Single test with default T").
+		Tag("single_test").
 		Description("some_description").
 		Parallel().
 		Create().
@@ -45,8 +46,8 @@ func TestExampleSingle(t *testing.T) {
 		ExecuteTest(context.Background(), t)
 }
 
-func TestExampleSingleTest_AllureRunner(t *testing.T) {
-	runner.Run(t, "Single test", func(t provider.T) {
+func Test_Single_2_AllureRunner(t *testing.T) {
+	runner.Run(t, "Single test with allure-go Runner", func(t provider.T) {
 		var (
 			testMaker   = cute.NewHTTPTestMaker()
 			testBuilder = testMaker.NewTestBuilder()
@@ -56,7 +57,8 @@ func TestExampleSingleTest_AllureRunner(t *testing.T) {
 		u.Path = path.Join(u.Path, "/posts/1/comments")
 
 		testBuilder.
-			Title("AllureRunner").
+			Title("Single test with allure.T and repeat errors").
+			Tag("single_test").
 			Description("some_description").
 			Create().
 			RequestRepeatDelay(3*time.Second). // delay before new try

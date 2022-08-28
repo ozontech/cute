@@ -61,7 +61,9 @@ func (it *cute) ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuil
 	tOriginal, ok := t.(*testing.T)
 	if ok {
 		newT := createAllureT(tOriginal)
-		defer newT.FinishTest() //nolint
+		if !it.isTableTest {
+			defer newT.FinishTest() //nolint
+		}
 
 		internalT = newT
 	}
