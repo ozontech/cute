@@ -60,8 +60,8 @@ type parametersProvider interface {
 }
 
 type infoAllureProvider interface {
-	Title(title string)
-	Description(description string)
+	Title(args ...interface{})
+	Description(description ...interface{})
 }
 
 type labelsAllureProvider interface {
