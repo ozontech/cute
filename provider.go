@@ -46,7 +46,7 @@ type logProvider interface {
 
 type stepProvider interface {
 	Step(step *allure.Step)
-	WithNewStep(stepName string, step func(ctx provider.StepCtx), params ...allure.Parameter)
+	WithNewStep(stepName string, step func(ctx provider.StepCtx), params ...*allure.Parameter)
 }
 
 type attachmentProvider interface {
@@ -55,7 +55,7 @@ type attachmentProvider interface {
 }
 
 type parametersProvider interface {
-	WithParameters(parameters ...allure.Parameter)
+	WithParameters(parameters ...*allure.Parameter)
 	WithNewParameters(kv ...interface{})
 }
 
@@ -66,6 +66,7 @@ type infoAllureProvider interface {
 
 type labelsAllureProvider interface {
 	ID(value string)
+	AllureID(value string)
 	Epic(value string)
 	AddSuiteLabel(value string)
 	AddSubSuite(value string)
@@ -77,12 +78,12 @@ type labelsAllureProvider interface {
 	Severity(value allure.SeverityType)
 	Owner(value string)
 	Lead(value string)
-	Label(label allure.Label)
-	Labels(labels ...allure.Label)
+	Label(label *allure.Label)
+	Labels(labels ...*allure.Label)
 }
 
 type linksAllureProvider interface {
 	SetIssue(issue string)
 	SetTestCase(testCase string)
-	Link(link allure.Link)
+	Link(link *allure.Link)
 }

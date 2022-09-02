@@ -84,14 +84,15 @@ type allureLabels struct {
 	severity    allure.SeverityType
 	owner       string
 	lead        string
-	label       allure.Label
-	labels      []allure.Label
+	label       *allure.Label
+	labels      []*allure.Label
+	allureID    string
 }
 
 type allureLinks struct {
 	issue    string
 	testCase string
-	link     allure.Link
+	link     *allure.Link
 }
 
 type allureStep struct {

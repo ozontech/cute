@@ -45,19 +45,20 @@ func TestHTTPTestMaker(t *testing.T) {
 		addParentSuite = "AddParentSuite"
 		story          = "Story"
 		tag            = "Tag"
+		allureID       = "AllureID"
 		owner          = "Owner"
 		lead           = "Lead"
-		label          = allure.Label{"kek", "lol"}
+		label          = &allure.Label{"kek", "lol"}
 		setIssue       = "SetIssue"
 		setTestCase    = "SetTestCase"
 		repeatCount    = 10
 		repeatDelay    = time.Duration(10)
-		link           = allure.Link{
+		link           = &allure.Link{
 			Name: "link",
 			Type: "type",
 			URL:  "http://go.go",
 		}
-		labels = []allure.Label{
+		labels = []*allure.Label{
 			{
 				Name:  "label_1",
 				Value: "value_1",
@@ -123,6 +124,7 @@ func TestHTTPTestMaker(t *testing.T) {
 		Story(story).
 		Tag(tag).
 		Severity(allure.CRITICAL).
+		AllureID(allureID).
 		Owner(owner).
 		Lead(lead).
 		Label(label).
@@ -171,6 +173,7 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, owner, resHt.allureLabels.owner)
 	require.Equal(t, lead, resHt.allureLabels.lead)
 	require.Equal(t, label, resHt.allureLabels.label)
+	require.Equal(t, allureID, resHt.allureLabels.allureID)
 	require.Equal(t, setIssue, resHt.allureLinks.issue)
 	require.Equal(t, setTestCase, resHt.allureLinks.testCase)
 	require.Equal(t, link, resHt.allureLinks.link)
