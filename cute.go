@@ -104,9 +104,6 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 		res = make([]ResultsHTTPBuilder, 0)
 	)
 
-	// set labels
-	it.setAllureInformation(allureProvider)
-
 	// Cycle for change number of Test
 	for i := 0; i <= it.countTests; i++ {
 		currentTest := it.tests[i]
@@ -116,12 +113,19 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 			tableTestName := currentTest.Name
 
 			allureProvider.Run(tableTestName, func(inT provider.T) {
+				// Copy allure labels from common allure test
+				it.setAllureInformation(inT)
+				inT.Title(tableTestName) // set current test name
+
 				inT.Logf("Test start %v", tableTestName)
 				resT := currentTest.execute(ctx, inT)
 				res = append(res, resT)
 				inT.Logf("Test finished %v", tableTestName)
 			})
 		} else {
+			// set labels
+			it.setAllureInformation(allureProvider)
+
 			currentTest.Name = allureProvider.Name()
 
 			allureProvider.Logf("Test start %v", currentTest.Name)

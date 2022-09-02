@@ -82,6 +82,7 @@ func Test_TwoSteps_2_AllureRunner(t *testing.T) {
 func Test_TwoSteps_3(t *testing.T) {
 	responseCode := 0
 
+	// First step.
 	cute.NewTestBuilder().
 		Title("Test with two requests and parse body.").
 		Tag("two_steps").
@@ -92,11 +93,12 @@ func Test_TwoSteps_3(t *testing.T) {
 		).
 		ExpectStatus(http.StatusOK).
 		NextTest().
-		AfterTestExecute(func(response *http.Response, errors []error) error {
+		AfterTestExecute(func(response *http.Response, errors []error) error { // Execute after first step
 			responseCode = response.StatusCode
 
 			return nil
 		}).
+		// Second step
 		Create().
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/2/comments"),

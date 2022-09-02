@@ -97,10 +97,7 @@ func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
 
 	tOriginal, ok := t.(*testing.T)
 	if ok {
-		newT := createAllureT(tOriginal)
-		//defer newT.FinishTest() //nolint
-
-		internalT = newT
+		internalT = createAllureT(tOriginal)
 	}
 
 	allureT, ok := t.(provider.T)
