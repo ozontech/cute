@@ -133,6 +133,12 @@ func (it *test) ID(value string) AllureBuilder {
 	return it
 }
 
+func (it *test) AllureID(value string) AllureBuilder {
+	it.allureLabels.allureID = value
+
+	return it
+}
+
 func (it *test) AddSuiteLabel(value string) AllureBuilder {
 	it.allureLabels.suiteLabel = value
 

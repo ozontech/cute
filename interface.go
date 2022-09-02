@@ -39,6 +39,7 @@ type AllureLinksBuilder interface {
 type AllureLabelsBuilder interface {
 	Feature(feature string) AllureBuilder
 	Epic(epic string) AllureBuilder
+	AllureID(value string) AllureBuilder
 	Tags(tags ...string) AllureBuilder
 	ID(value string) AllureBuilder
 	AddSuiteLabel(value string) AllureBuilder

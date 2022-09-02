@@ -38,6 +38,9 @@ func (it *test) setLabelsAllure(t labelsAllureProvider) {
 	if it.allureLabels.tag != "" {
 		t.Tag(it.allureLabels.tag)
 	}
+	if it.allureLabels.allureID != "" {
+		t.AllureID(it.allureLabels.allureID)
+	}
 	if it.allureLabels.severity != "" {
 		t.Severity(it.allureLabels.severity)
 	}

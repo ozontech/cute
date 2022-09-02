@@ -86,6 +86,7 @@ type allureLabels struct {
 	lead        string
 	label       *allure.Label
 	labels      []*allure.Label
+	allureID    string
 }
 
 type allureLinks struct {
