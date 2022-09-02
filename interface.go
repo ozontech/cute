@@ -33,7 +33,7 @@ type AllureInfoBuilder interface {
 type AllureLinksBuilder interface {
 	SetIssue(issue string) AllureBuilder
 	SetTestCase(testCase string) AllureBuilder
-	Link(link allure.Link) AllureBuilder
+	Link(link *allure.Link) AllureBuilder
 }
 
 type AllureLabelsBuilder interface {
@@ -49,8 +49,8 @@ type AllureLabelsBuilder interface {
 	Severity(value allure.SeverityType) AllureBuilder
 	Owner(value string) AllureBuilder
 	Lead(value string) AllureBuilder
-	Label(label allure.Label) AllureBuilder
-	Labels(labels ...allure.Label) AllureBuilder
+	Label(label *allure.Label) AllureBuilder
+	Labels(labels ...*allure.Label) AllureBuilder
 }
 
 // StepBuilder is a scope of methods for set step information

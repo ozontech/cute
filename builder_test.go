@@ -47,17 +47,17 @@ func TestHTTPTestMaker(t *testing.T) {
 		tag            = "Tag"
 		owner          = "Owner"
 		lead           = "Lead"
-		label          = allure.Label{"kek", "lol"}
+		label          = &allure.Label{"kek", "lol"}
 		setIssue       = "SetIssue"
 		setTestCase    = "SetTestCase"
 		repeatCount    = 10
 		repeatDelay    = time.Duration(10)
-		link           = allure.Link{
+		link           = &allure.Link{
 			Name: "link",
 			Type: "type",
 			URL:  "http://go.go",
 		}
-		labels = []allure.Label{
+		labels = []*allure.Label{
 			{
 				Name:  "label_1",
 				Value: "value_1",

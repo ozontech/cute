@@ -121,7 +121,7 @@ func (it *test) SetTestCase(testCase string) AllureBuilder {
 	return it
 }
 
-func (it *test) Link(link allure.Link) AllureBuilder {
+func (it *test) Link(link *allure.Link) AllureBuilder {
 	it.allureLinks.link = link
 
 	return it
@@ -181,13 +181,13 @@ func (it *test) Lead(value string) AllureBuilder {
 	return it
 }
 
-func (it *test) Label(label allure.Label) AllureBuilder {
+func (it *test) Label(label *allure.Label) AllureBuilder {
 	it.allureLabels.label = label
 
 	return it
 }
 
-func (it *test) Labels(labels ...allure.Label) AllureBuilder {
+func (it *test) Labels(labels ...*allure.Label) AllureBuilder {
 	it.allureLabels.labels = labels
 
 	return it

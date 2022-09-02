@@ -14,7 +14,7 @@ func (it *test) setLinksAllure(t linksAllureProvider) {
 	if it.allureLinks.testCase != "" {
 		t.SetTestCase(it.allureLinks.testCase)
 	}
-	if it.allureLinks.link.Name != "" {
+	if it.allureLinks.link != nil {
 		t.Link(it.allureLinks.link)
 	}
 }
@@ -47,7 +47,7 @@ func (it *test) setLabelsAllure(t labelsAllureProvider) {
 	if it.allureLabels.lead != "" {
 		t.Lead(it.allureLabels.lead)
 	}
-	if it.allureLabels.label.Name != "" {
+	if it.allureLabels.label != nil {
 		t.Label(it.allureLabels.label)
 	}
 	if len(it.allureLabels.labels) != 0 {

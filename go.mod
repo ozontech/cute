@@ -5,8 +5,8 @@ go 1.17
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/moul/http2curl v1.0.0
-	github.com/ozontech/allure-go/pkg/allure v0.6.3
-	github.com/ozontech/allure-go/pkg/framework v0.6.17
+	github.com/ozontech/allure-go/pkg/allure v0.6.4
+	github.com/ozontech/allure-go/pkg/framework v0.6.18
 	github.com/stretchr/testify v1.7.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 )
