@@ -120,7 +120,7 @@ See full example [here](examples/single_test.go)
 
 Suite provides a structure in which you can describe tests by grouping them into test suites. This can be useful if you have a lot of different tests and it is difficult to navigate through them without having additional "layers nesting levels" of test calls.
 
-You can read about `Allure.Suite` [here](https://github.com/ozontech/allure-go/blob/master/README_en.md#configure-suite)
+You can read about `Allure.Suite` [here](https://github.com/ozontech/allure-go#suite)
 
 1) Declare a structure with `suite.Suite` and `*cute.HTTPTestMaker`
 
@@ -465,7 +465,7 @@ func customAssertBody() asserts.AssertBody {
 
 ### <a name="asserts_custom_t"/>T
 
-Types for creating custom assertions using Allure [Actions](https://github.com/ozontech/allure-go#configure-suite) and [testing.TB](https://pkg.go.dev/testing#TB). \
+Types for creating custom assertions using Allure [Actions](https://github.com/ozontech/allure-go#suite) and [testing.TB](https://pkg.go.dev/testing#TB). \
 You can log some information to Allure. \
 Also you can log error on Allure yourself or just return error.
 
