@@ -138,7 +138,7 @@ func (it *cute) SetTestCase(testCase string) AllureBuilder {
 	return it
 }
 
-func (it *cute) Link(link allure.Link) AllureBuilder {
+func (it *cute) Link(link *allure.Link) AllureBuilder {
 	it.allureLinks.link = link
 
 	return it
@@ -146,6 +146,12 @@ func (it *cute) Link(link allure.Link) AllureBuilder {
 
 func (it *cute) ID(value string) AllureBuilder {
 	it.allureLabels.id = value
+
+	return it
+}
+
+func (it *cute) AllureID(value string) AllureBuilder {
+	it.allureLabels.allureID = value
 
 	return it
 }
@@ -198,13 +204,13 @@ func (it *cute) Lead(value string) AllureBuilder {
 	return it
 }
 
-func (it *cute) Label(label allure.Label) AllureBuilder {
+func (it *cute) Label(label *allure.Label) AllureBuilder {
 	it.allureLabels.label = label
 
 	return it
 }
 
-func (it *cute) Labels(labels ...allure.Label) AllureBuilder {
+func (it *cute) Labels(labels ...*allure.Label) AllureBuilder {
 	it.allureLabels.labels = labels
 
 	return it

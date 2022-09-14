@@ -69,8 +69,7 @@ type AllureStep struct {
 type Expect struct {
 	ExecuteTime time.Duration
 
-	Code int
-
+	Code       int
 	JSONSchema *ExpectJSONSchema
 
 	AssertBody     []AssertBody
