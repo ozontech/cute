@@ -53,7 +53,7 @@ func Test_Table(t *testing.T) {
 func Test_Table_Array(t *testing.T) {
 	tests := []*cute.Test{
 		{
-			Name:       "test_1",
+			Name:       "Create something",
 			Middleware: nil,
 			Request: &cute.Request{
 				Builders: []cute.RequestBuilder{
@@ -66,7 +66,7 @@ func Test_Table_Array(t *testing.T) {
 			},
 		},
 		{
-			Name:       "test_2",
+			Name:       "Delete something",
 			Middleware: nil,
 			Request: &cute.Request{
 				Builders: []cute.RequestBuilder{
@@ -96,7 +96,7 @@ func Test_Table_Array(t *testing.T) {
 		ExecuteTest(context.Background(), t)
 }
 
-func Test_Execute(t *testing.T) {
+func Test_One_Execute(t *testing.T) {
 	test := &cute.Test{
 		Name: "test_1",
 		Request: &cute.Request{
@@ -111,7 +111,7 @@ func Test_Execute(t *testing.T) {
 	test.Execute(context.Background(), t)
 }
 
-func Test_Execute_Array(t *testing.T) {
+func Test_Array(t *testing.T) {
 	tests := []*cute.Test{
 		{
 			Name:       "test_1",

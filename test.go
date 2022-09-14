@@ -27,7 +27,8 @@ var (
 	errorRequestURLEmpty    = errors.New("url request must be not empty")
 )
 
-// Test TODO
+// Test is a main struct of test.
+// You may field Request and Expect for create simple test
 type Test struct {
 	httpClient *http.Client
 
@@ -39,20 +40,22 @@ type Test struct {
 	Expect     *Expect
 }
 
-// Request TODO
+// Request is struct with HTTP request.
+// You may use your *http.Request or create new with help Builders
 type Request struct {
 	Base     *http.Request
 	Builders []RequestBuilder
 	Repeat   *RequestRepeatPolitic
 }
 
-// RequestRepeatPolitic TODO
+// RequestRepeatPolitic is struct for repeat politic
+// If response.Code != Expect.Code, than request will repeat Count counts with Delay delay.
 type RequestRepeatPolitic struct {
 	Count int
 	Delay time.Duration
 }
 
-// Middleware TODO
+// Middleware is struct for execute something before or after test
 type Middleware struct {
 	After   []AfterExecute
 	AfterT  []AfterExecuteT
@@ -60,12 +63,12 @@ type Middleware struct {
 	BeforeT []BeforeExecuteT
 }
 
-// AllureStep TODO
+// AllureStep is struct with test name
 type AllureStep struct {
 	Name string
 }
 
-// Expect TODO
+// Expect is structs with validate politics for response
 type Expect struct {
 	ExecuteTime time.Duration
 
@@ -81,7 +84,7 @@ type Expect struct {
 	AssertResponseT []AssertResponseT
 }
 
-// ExpectJSONSchema TODO
+// ExpectJSONSchema is structs with JSON politics for response
 type ExpectJSONSchema struct {
 	String string
 	Byte   []byte
@@ -113,6 +116,7 @@ func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
 
 func (it *Test) initEmptyFields() {
 	it.httpClient = http.DefaultClient
+
 	if it.AllureStep == nil {
 		it.AllureStep = new(AllureStep)
 	}
