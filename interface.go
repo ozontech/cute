@@ -66,7 +66,7 @@ type CreateBuilder interface {
 	Create() MiddlewareRequest
 
 	// CreateWithStep is a function for create step and log some information inside
-	// Deprecated use CreateStep(string)
+	// Deprecated, please use CreateStep(string)
 	CreateWithStep() StepBuilder
 	// CreateStep is a function for create step inside suite for Test
 	CreateStep(string) MiddlewareRequest
