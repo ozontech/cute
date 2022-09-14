@@ -84,8 +84,24 @@ func greaterThan(data []byte, expression string, minimumLength int) error {
 	}
 
 	v := reflect.ValueOf(value)
-	if v.Len() < minimumLength {
+	if v.Len() <= minimumLength {
 		return errors.NewAssertError("GreaterThan", fmt.Sprintf("on path %v. %v is greater than %v", expression, v.Len(), minimumLength), v.Len(), minimumLength)
+	}
+
+	return nil
+}
+
+// GreaterOrEqualThan is a function to asserts that value is greater or equal than the given length
+// About expression - https://goessner.net/articles/JsonPath/
+func greaterOrEqualThan(data []byte, expression string, minimumLength int) error {
+	value, err := GetValueFromJSON(data, expression)
+	if err != nil {
+		return err
+	}
+
+	v := reflect.ValueOf(value)
+	if v.Len() < minimumLength {
+		return errors.NewAssertError("GreaterOrEqualThan", fmt.Sprintf("on path %v. %v is greater or equal than %v", expression, v.Len(), minimumLength), v.Len(), minimumLength)
 	}
 
 	return nil
@@ -100,8 +116,24 @@ func lessThan(data []byte, expression string, maximumLength int) error {
 	}
 
 	v := reflect.ValueOf(value)
-	if v.Len() > maximumLength {
+	if v.Len() >= maximumLength {
 		return errors.NewAssertError("LessThan", fmt.Sprintf("on path %v. %v is less than %v", expression, v.Len(), maximumLength), v.Len(), maximumLength)
+	}
+
+	return nil
+}
+
+// LessOrEqualThan is a function to asserts that value is less or equal than the given length
+// About expression - https://goessner.net/articles/JsonPath/
+func lessOrEqualThan(data []byte, expression string, maximumLength int) error {
+	value, err := GetValueFromJSON(data, expression)
+	if err != nil {
+		return err
+	}
+
+	v := reflect.ValueOf(value)
+	if v.Len() > maximumLength {
+		return errors.NewAssertError("LessThan", fmt.Sprintf("on path %v. %v is less or equal than %v", expression, v.Len(), maximumLength), v.Len(), maximumLength)
 	}
 
 	return nil
@@ -125,7 +157,6 @@ func present(data []byte, expression string) error {
 	_, err := GetValueFromJSON(data, expression)
 	if err != nil {
 		return errors.NewAssertError("Present", fmt.Sprintf("on path %v. value not present", expression), nil, nil)
-
 	}
 
 	return nil
