@@ -16,6 +16,7 @@ type T interface {
 type allureProvider interface {
 	internalT
 	Parallel()
+	Run(testName string, testBody func(provider.T), tags ...string) (res *allure.Result)
 
 	infoAllureProvider
 	labelsAllureProvider
@@ -42,6 +43,9 @@ type tProvider interface {
 type logProvider interface {
 	Log(args ...interface{})
 	Logf(format string, args ...interface{})
+
+	LogStep(args ...interface{})
+	LogfStep(format string, args ...interface{})
 }
 
 type stepProvider interface {
@@ -61,7 +65,10 @@ type parametersProvider interface {
 
 type infoAllureProvider interface {
 	Title(args ...interface{})
-	Description(description ...interface{})
+	Titlef(format string, args ...interface{})
+
+	Description(args ...interface{})
+	Descriptionf(format string, args ...interface{})
 }
 
 type labelsAllureProvider interface {

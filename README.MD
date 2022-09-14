@@ -22,6 +22,10 @@ Three steps for testing your HTTP service:
 5. [Examples](#examples)
    1. [Single test with Allure](#example_single_test)
    2. [Suite tests](#example_suite_test)
+   3. [Multi-step test](#example_multi_step_test)
+   4. [Table tests](#example_table_tests)
+      1. [Builder](#example_table_tests_builder)
+      2. [Array](#example_table_tests_builder)
 6. [Asserts](#asserts)
    1. [JSON asserts](#asserts_json)
    2. [Headers asserts](#asserts_headers)
@@ -217,6 +221,183 @@ See full example [here](examples/suite)
 **Allure:**
 
 ![one_step.png](.images/one_step.png)
+
+
+## <a name="example_multi_step_test"/>Multi-step test
+
+```go
+import (
+    "context"
+    "fmt"
+    "net/http"
+    "testing"
+
+    "github.com/ozontech/cute"
+)
+    
+func Test_TwoSteps(t *testing.T) {
+    responseCode := 0
+
+    // First step.
+    cute.NewTestBuilder().
+        Title("Test with two requests and parse body.").
+        Tag("two_steps").
+        Create().
+        RequestBuilder(
+            cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+            cute.WithMethod(http.MethodGet),
+        ).
+        ExpectStatus(http.StatusOK).
+        NextTest().
+
+        // Execute after first step and parse response code
+        AfterTestExecute(func(response *http.Response, errors []error) error { 
+            responseCode = response.StatusCode
+
+            return nil
+        }).
+
+        // Second step
+        Create().
+        RequestBuilder(
+            cute.WithURI("https://jsonplaceholder.typicode.com/posts/2/comments"),
+            cute.WithMethod(http.MethodDelete),
+        ).
+        ExecuteTest(context.Background(), t)
+
+        fmt.Println("Response code from first request", responseCode)
+}
+```
+See full example [here](examples/two_step_test.go)
+
+**Allure:**
+
+![multistep_test.png](.images/multistep_test.png)
+
+
+## <a name="example_table_tests"/>Table tests
+
+One step to table tests... 
+
+You have 2 ways to create table test. These ways have same allure reports. 
+
+### <a name="example_table_tests_builder"/>Builder table tests
+
+```go
+import (
+    "context"
+    "fmt"
+    "net/http"
+    "testing"
+
+    "github.com/ozontech/cute"
+)
+
+func Test_Table_Array(t *testing.T) {
+    tests := []*cute.Test{
+        {
+            Name:       "test_1",
+            Middleware: nil,
+            Request: &cute.Request{
+                Builders: []cute.RequestBuilder{
+                    cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+                    cute.WithMethod(http.MethodPost),
+                },
+            },
+            Expect: &cute.Expect{
+                Code: 200,
+            },
+        },
+        {
+            Name:       "test_2",
+            Middleware: nil,
+            Request: &cute.Request{
+                Builders: []cute.RequestBuilder{
+                    cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+                    cute.WithMethod(http.MethodGet),
+                },
+            },
+            Expect: &cute.Expect{
+                Code: 200,
+                AssertBody: []cute.AssertBody{
+                    json.Equal("$[0].email", "Eliseo@gardner.biz"),
+                    json.Present("$[1].name"),
+                    func(body []byte) error {
+                        return errors.NewAssertError("example error", "example message", nil, nil)
+                    },
+                },
+            },
+        },
+    }
+
+    cute.NewTestBuilder().
+        Title("Example table test").
+        Tag("table_test").
+        Description("Execute array tests").
+        CreateTableTest().
+        PutTests(tests...).
+        ExecuteTest(context.Background(), t)
+}
+```
+
+
+### <a name="example_table_tests_array"/>Array tests
+
+```go
+func Test_Execute_Array(t *testing.T) {
+    tests := []*cute.Test{
+        {
+            Name:       "test_1",
+            Middleware: nil,
+            Request: &cute.Request{
+                Builders: []cute.RequestBuilder{
+                    cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+                    cute.WithMethod(http.MethodPost),
+                },
+            },
+            Expect: &cute.Expect{
+                Code: 200,
+            },
+        },
+        {
+            Name:       "test_2",
+            Middleware: nil,
+            Request: &cute.Request{
+                Builders: []cute.RequestBuilder{
+                    cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+                    cute.WithMethod(http.MethodGet),
+                },
+            },
+            Expect: &cute.Expect{
+                Code: 200,
+                AssertBody: []cute.AssertBody{
+                    json.Equal("$[0].email", "Eliseo@gardner.biz"),
+                    json.Present("$[1].name"),
+                    func(body []byte) error {
+                        return errors.NewAssertError("example error", "example message", nil, nil)
+                    },
+                },
+            },
+        },
+    }
+
+    for _, test := range tests {
+        test.Execute(context.Background(), t)
+    }
+}
+```
+
+See full example [here](examples/table_test/table_test.go)
+
+**Common allure for all table tests:**
+
+Report has **2 different** tests/suites:
+
+![table_tests_execute_array.png](.images/table_tests_execute_array.png)
+
+**Main report:**
+
+![table_tests_execute_array_test_1.png](.images/table_tests_execute_array_test_1.png)
 
 ## <a name="asserts"/>Asserts
 

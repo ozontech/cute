@@ -63,7 +63,7 @@ Response:
 
 */
 
-func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
+func (i *ExampleSuite) Test_OneStep(t provider.T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()
 	)
@@ -72,14 +72,13 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
 	u.Path = path.Join(u.Path, "/posts/1/comments")
 
 	testBuilder.
-		Title("TestExample_OneStep").
-		Tags("one_stp", "some_local_tag", "json").
+		Title("Test with one step").
+		Tags("one_stp", "some_local_tag", "suite", "json").
 		Feature("some_feature").
 		Epic("some_epic").
 		Description("some_description").
 		Parallel().
-		CreateWithStep().
-		StepName("Example GET json request").
+		CreateStep("Example GET json request").
 		AfterExecuteT(func(t cute.T, resp *http.Response, errs []error) error {
 			if len(errs) != 0 {
 				return nil

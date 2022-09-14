@@ -14,17 +14,16 @@ import (
 	"github.com/ozontech/cute/examples"
 )
 
-func (i *ExampleSuite) TestExample_OneStep_Errors(t provider.T) {
+func (i *ExampleSuite) Test_OneStep_Errors(t provider.T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()
 	)
 
 	testBuilder.
-		Title("TestExample_OneStep_Errors").
-		Tags("one_step", "some_local_tag", "json").
+		Title("Test with errors").
+		Tags("one_step", "some_local_tag", "suite", "json").
 		Parallel().
-		CreateWithStep().
-		StepName("Example GET json request").
+		CreateStep("Example GET json request").
 		RequestBuilder(
 			cute.WithHeaders(map[string][]string{
 				"some_header":       []string{"something"},

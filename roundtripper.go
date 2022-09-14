@@ -13,7 +13,7 @@ import (
 	"github.com/ozontech/cute/internal/utils"
 )
 
-func (it *test) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {
+func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {
 	var (
 		delay       = defaultDelayRepeat
 		countRepeat = 1
@@ -23,23 +23,23 @@ func (it *test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 		scope = make([]error, 0)
 	)
 
-	if it.request.repeat.delay != 0 {
-		delay = it.request.repeat.delay
+	if it.Request.Repeat.Delay != 0 {
+		delay = it.Request.Repeat.Delay
 	}
 
-	if it.request.repeat.count != 0 {
-		countRepeat = it.request.repeat.count
+	if it.Request.Repeat.Count != 0 {
+		countRepeat = it.Request.Repeat.Count
 	}
 
 	for i := 1; i <= countRepeat; i++ {
-		it.executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
+		executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
 			resp, err = it.doRequest(t, req)
 			if err != nil {
 				return []error{err}
 			}
 
 			return nil
-		})
+		}, false)
 
 		if err == nil {
 			break
@@ -54,7 +54,7 @@ func (it *test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	return resp, scope
 }
 
-func (it *test) doRequest(t T, req *http.Request) (*http.Response, error) {
+func (it *Test) doRequest(t T, req *http.Request) (*http.Response, error) {
 	// Add information (method, host, curl) about request to Allure step
 	err := addInformationRequest(t, req)
 	if err != nil {
@@ -72,7 +72,7 @@ func (it *test) doRequest(t T, req *http.Request) (*http.Response, error) {
 		// Add information (code, body, headers) about response to Allure step
 		addInformationResponse(t, resp)
 
-		err = it.validateResponseCode(resp)
+		err = it.validateResponseCode(t, resp)
 		if err != nil {
 			return nil, err
 		}
@@ -81,13 +81,13 @@ func (it *test) doRequest(t T, req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (it *test) validateResponseCode(resp *http.Response) error {
-	if it.expect.code != 0 && it.expect.code != resp.StatusCode {
+func (it *Test) validateResponseCode(t T, resp *http.Response) error {
+	if it.Expect.Code != 0 && it.Expect.Code != resp.StatusCode {
 		return cuteErrors.NewAssertError(
 			"Assert response code",
-			fmt.Sprintf("Response code expect %v, but was %v", it.expect.code, resp.StatusCode),
+			fmt.Sprintf("Response code expect %v, but was %v", it.Expect.Code, resp.StatusCode),
 			resp.StatusCode,
-			it.expect.code)
+			it.Expect.Code)
 	}
 
 	return nil
@@ -105,7 +105,7 @@ func addInformationRequest(t T, req *http.Request) error {
 		return err
 	}
 
-	t.Log(curl)
+	t.Log("[Request]" + curl.String())
 
 	headers, err := utils.ToJSON(req.Header)
 	if err != nil {
@@ -151,6 +151,7 @@ func addInformationResponse(t T, response *http.Response) {
 	}
 
 	t.WithNewParameters("response_code", fmt.Sprint(response.StatusCode))
+	t.Log("[Response] Status: " + response.Status)
 
 	if response.Body == nil {
 		return

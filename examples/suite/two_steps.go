@@ -24,7 +24,7 @@ import (
 
 */
 
-func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
+func (i *ExampleSuite) Test_TwoSteps(t provider.T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()
 
@@ -67,14 +67,13 @@ func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
 	}
 
 	testBuilder.
-		Title("TestExample_TwoSteps").
-		Tags("TestExample_TwoSteps", "some_tag").
+		Title("Test in suite with two steps").
+		Tags("suite", "some_tag").
 		Parallel().
-		CreateWithStep().
+		CreateStep("Creat entry /posts/1").
 
 		// CreateWithStep first step
 
-		StepName("Creat entry /posts/1").
 		Request(req).
 		ExpectExecuteTimeout(10*time.Second).
 		ExpectStatus(http.StatusCreated).
@@ -82,12 +81,10 @@ func (i *ExampleSuite) TestExample_TwoSteps(t provider.T) {
 			// Custom assert body
 			examples.CustomAssertBody(),
 		).
-		ExecuteTest(context.Background(), t).
+		NextTest().
+		CreateStep("Delete entry").
 
 		// CreateWithStep second step for delete
-
-		NextTestWithStep().
-		StepName("Delete entry").
 		RequestBuilder(
 			cute.WithURL(u),
 			cute.WithMethod(http.MethodDelete),

@@ -6,21 +6,24 @@ import (
 	"github.com/ozontech/cute/errors"
 )
 
-func (it *test) executeWithStep(t internalT, stepName string, execute func(t T) []error) []error {
+func executeWithStep(t internalT, stepName string, execute func(t T) []error, skipCreateNewStep bool) []error {
 	var (
 		errs []error
 	)
 
 	t.WithNewStep(stepName, func(stepCtx provider.StepCtx) {
 		errs = execute(stepCtx)
-		it.processStepErrors(stepCtx.CurrentStep(), errs)
+		processStepErrors(stepCtx, errs, skipCreateNewStep)
 	})
 
 	return errs
 }
 
-func (it *test) processStepErrors(step *allure.Step, errs []error) {
-	var statuses = make([]allure.Status, 0)
+func processStepErrors(stepCtx provider.StepCtx, errs []error, skipCreateNewStep bool) {
+	var (
+		step     = stepCtx.CurrentStep()
+		statuses = make([]allure.Status, 0)
+	)
 
 	if len(errs) == 0 {
 		return
@@ -37,9 +40,14 @@ func (it *test) processStepErrors(step *allure.Step, errs []error) {
 		}
 
 		if tErr, ok := err.(errors.WithNameError); ok {
-			currentStep = allure.NewSimpleStep(tErr.GetName())
-			currentStep.Status = currentStatus
-			currentStep.WithParent(step)
+			if skipCreateNewStep {
+				currentStep.Name = tErr.GetName()
+
+			} else {
+				currentStep = allure.NewSimpleStep(tErr.GetName())
+				currentStep.Status = currentStatus
+				currentStep.WithParent(step)
+			}
 		}
 
 		if tErr, ok := err.(errors.WithFields); ok {
@@ -65,5 +73,4 @@ func (it *test) processStepErrors(step *allure.Step, errs []error) {
 			break
 		}
 	}
-
 }

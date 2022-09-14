@@ -9,28 +9,28 @@ import (
 
 // Validate is a function to validate json by json schema.
 // Automatically add information about validation to allure.
-func (it *test) validateJSONSchema(t internalT, body []byte) []error {
+func (it *Test) validateJSONSchema(t internalT, body []byte) []error {
 	var (
 		scope  = make([]error, 0)
 		expect gojsonschema.JSONLoader
 	)
 
 	switch {
-	case it.expect.jsSchemaString != "":
-		expect = gojsonschema.NewStringLoader(it.expect.jsSchemaString)
-	case it.expect.jsSchemaByte != nil:
-		expect = gojsonschema.NewBytesLoader(it.expect.jsSchemaByte)
-	case it.expect.jsSchemaFile != "":
-		expect = gojsonschema.NewReferenceLoader(it.expect.jsSchemaFile)
+	case it.Expect.JSONSchema.String != "":
+		expect = gojsonschema.NewStringLoader(it.Expect.JSONSchema.String)
+	case it.Expect.JSONSchema.Byte != nil:
+		expect = gojsonschema.NewBytesLoader(it.Expect.JSONSchema.Byte)
+	case it.Expect.JSONSchema.File != "":
+		expect = gojsonschema.NewReferenceLoader(it.Expect.JSONSchema.File)
 	default:
 		return nil
 	}
 
-	it.executeWithStep(t, "Validate body by JSON schema", func(t T) []error {
+	executeWithStep(t, "Validate body by JSON schema", func(t T) []error {
 		scope = checkJSONSchema(expect, body)
 
 		return scope
-	})
+	}, false)
 
 	return scope
 }
