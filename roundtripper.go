@@ -119,7 +119,7 @@ func addInformationRequest(t T, req *http.Request) error {
 			"method", req.Method,
 			"host", req.Host,
 			"headers", headers,
-			"curl", curl,
+			"curl", curl.String(),
 		)...,
 	)
 
