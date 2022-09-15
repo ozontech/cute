@@ -1,6 +1,6 @@
 module github.com/ozontech/cute
 
-go 1.17
+go 1.18
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1

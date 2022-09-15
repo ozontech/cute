@@ -288,7 +288,7 @@ func (it *Test) afterTest(t internalT, resp *http.Response, errs []error) []erro
 		}
 
 		return scope
-	}, false)
+	})
 }
 
 func (it *Test) beforeTest(t internalT, req *http.Request) []error {
@@ -312,7 +312,7 @@ func (it *Test) beforeTest(t internalT, req *http.Request) []error {
 		}
 
 		return scope
-	}, false)
+	})
 }
 
 func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {

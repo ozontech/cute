@@ -39,7 +39,7 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 			}
 
 			return nil
-		}, false)
+		})
 
 		if err == nil {
 			break
@@ -105,7 +105,9 @@ func addInformationRequest(t T, req *http.Request) error {
 		return err
 	}
 
-	t.Log("[Request]" + curl.String())
+	if c := curl.String(); len(c) <= 2048 {
+		t.Log("[Request]" + c)
+	}
 
 	headers, err := utils.ToJSON(req.Header)
 	if err != nil {
@@ -117,7 +119,7 @@ func addInformationRequest(t T, req *http.Request) error {
 			"method", req.Method,
 			"host", req.Host,
 			"headers", headers,
-			"curl", curl.String(),
+			"curl", curl,
 		)...,
 	)
 

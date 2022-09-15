@@ -11,7 +11,6 @@ import (
 // Automatically add information about validation to allure.
 func (it *Test) validateJSONSchema(t internalT, body []byte) []error {
 	var (
-		scope  = make([]error, 0)
 		expect gojsonschema.JSONLoader
 	)
 
@@ -26,13 +25,9 @@ func (it *Test) validateJSONSchema(t internalT, body []byte) []error {
 		return nil
 	}
 
-	executeWithStep(t, "Validate body by JSON schema", func(t T) []error {
-		scope = checkJSONSchema(expect, body)
-
-		return scope
-	}, false)
-
-	return scope
+	return executeWithStep(t, "Validate body by JSON schema", func(t T) []error {
+		return checkJSONSchema(expect, body)
+	})
 }
 
 func checkJSONSchema(expect gojsonschema.JSONLoader, data []byte) []error {
