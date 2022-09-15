@@ -2,12 +2,7 @@ package cute
 
 import (
 	"net/http"
-	"reflect"
-	"runtime"
-	"strings"
 
-	"github.com/ozontech/allure-go/pkg/allure"
-	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute/errors"
 )
 
@@ -35,183 +30,98 @@ type AssertResponseT func(t T, response *http.Response) error
 
 func (it *Test) assertHeaders(t internalT, headers http.Header) []error {
 	var (
-		assertHeaders  = it.Expect.AssertHeaders
-		assertHeadersT = it.Expect.AssertHeadersT
-
-		errs = make([]error, 0)
+		asserts = it.Expect.AssertHeaders
+		assertT = it.Expect.AssertHeadersT
 	)
 
-	if len(assertHeaders) == 0 && len(assertHeadersT) == 0 {
+	if len(asserts) == 0 && len(assertT) == 0 {
 		return nil
 	}
 
-	t.WithNewStep("Assert headers", func(stepCtx provider.StepCtx) {
-		isOption := false
-		isOptionT := false
-
-		// Execute assert only body
-		for _, f := range assertHeaders {
-			executeWithStep(stepCtx, getFunctionName(f), func(t T) []error {
-				err := f(headers)
-				if err != nil {
-					errs = append(errs, err)
-
-					isOption = isOptionError(err)
-
-					return []error{err}
-				}
-
-				return nil
-			}, true)
-		}
-
-		// Execute assert for body with TB
-		for _, f := range assertHeadersT {
-			executeWithStep(stepCtx, getFunctionName(f), func(t T) []error {
-				err := f(t, headers)
-				if err != nil {
-					errs = append(errs, err)
-
-					isOptionT = isOptionError(err)
-
-					return []error{err}
-				}
-
-				return nil
-			}, true)
-		}
-
-		if len(errs) > 0 {
-			if isOption && isOptionT {
-				stepCtx.CurrentStep().Status = allure.Skipped
-			} else {
-				stepCtx.CurrentStep().Status = allure.Failed
+	return executeWithStep(t, "Assert headers", func(t T) []error {
+		errs := make([]error, 0)
+		// Execute assert only response
+		for _, f := range asserts {
+			err := f(headers)
+			if err != nil {
+				errs = append(errs, err)
 			}
 		}
 
-	})
+		// Execute assert for response with TB
+		for _, f := range assertT {
+			err := f(t, headers)
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
 
-	return errs
+		return errs
+	})
 }
 
-func (it *Test) assertResponse(t internalT, response *http.Response) []error {
+func (it *Test) assertResponse(t internalT, resp *http.Response) []error {
 	var (
-		assertResponse  = it.Expect.AssertResponse
-		assertResponseT = it.Expect.AssertResponseT
-
-		errs = make([]error, 0)
+		asserts = it.Expect.AssertResponse
+		assertT = it.Expect.AssertResponseT
 	)
 
-	if len(assertResponse) == 0 && len(assertResponseT) == 0 {
+	if len(asserts) == 0 && len(assertT) == 0 {
 		return nil
 	}
 
-	t.WithNewStep("Assert response", func(stepCtx provider.StepCtx) {
-		isOption := false
-		isOptionT := false
-
-		// Execute assert only body
-		for _, f := range assertResponse {
-			executeWithStep(stepCtx, getFunctionName(f), func(t T) []error {
-				err := f(response)
-				if err != nil {
-					errs = append(errs, err)
-
-					isOption = isOptionError(err)
-
-					return []error{err}
-				}
-
-				return nil
-			}, true)
-		}
-
-		// Execute assert for body with TB
-		for _, f := range assertResponseT {
-			executeWithStep(stepCtx, getFunctionName(f), func(t T) []error {
-				err := f(t, response)
-				if err != nil {
-					errs = append(errs, err)
-
-					isOptionT = isOptionError(err)
-
-					return []error{err}
-				}
-
-				return nil
-			}, true)
-		}
-
-		if len(errs) > 0 {
-			if isOption && isOptionT {
-				stepCtx.CurrentStep().Status = allure.Skipped
-			} else {
-				stepCtx.CurrentStep().Status = allure.Failed
+	return executeWithStep(t, "Assert response", func(t T) []error {
+		errs := make([]error, 0)
+		// Execute assert only response
+		for _, f := range asserts {
+			err := f(resp)
+			if err != nil {
+				errs = append(errs, err)
 			}
 		}
-	})
 
-	return errs
+		// Execute assert for response with TB
+		for _, f := range assertT {
+			err := f(t, resp)
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+
+		return errs
+	})
 }
 
 func (it *Test) assertBody(t internalT, body []byte) []error {
 	var (
-		assertBody  = it.Expect.AssertBody
-		assertBodyT = it.Expect.AssertBodyT
-
-		errs = make([]error, 0)
+		asserts = it.Expect.AssertBody
+		assertT = it.Expect.AssertBodyT
 	)
 
-	if len(assertBody) == 0 && len(assertBodyT) == 0 {
+	if len(asserts) == 0 && len(assertT) == 0 {
 		return nil
 	}
 
-	t.WithNewStep("Assert body", func(stepCtx provider.StepCtx) {
-		isOption := false
-		isOptionT := false
-
-		// Execute assert only body
-		for _, f := range assertBody {
-			executeWithStep(stepCtx, getFunctionName(f), func(t T) []error {
-				err := f(body)
-				if err != nil {
-					errs = append(errs, err)
-
-					isOption = isOptionError(err)
-
-					return []error{err}
-				}
-
-				return nil
-			}, true)
-		}
-
-		// Execute assert for body with TB
-		for _, f := range assertBodyT {
-			executeWithStep(stepCtx, getFunctionName(f), func(t T) []error {
-				err := f(t, body)
-				if err != nil {
-					errs = append(errs, err)
-
-					isOptionT = isOptionError(err)
-
-					return []error{err}
-				}
-
-				return nil
-			}, true)
-		}
-
-		if len(errs) > 0 {
-			if isOption && isOptionT {
-				stepCtx.CurrentStep().Status = allure.Skipped
-			} else {
-				stepCtx.CurrentStep().Status = allure.Failed
+	return executeWithStep(t, "Assert body", func(t T) []error {
+		errs := make([]error, 0)
+		// Execute assert only response
+		for _, f := range asserts {
+			err := f(body)
+			if err != nil {
+				errs = append(errs, err)
 			}
 		}
-	})
 
-	return errs
+		// Execute assert for response with TB
+		for _, f := range assertT {
+			err := f(t, body)
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+
+		return errs
+	})
 }
 
 func isOptionError(err error) bool {
@@ -220,11 +130,6 @@ func isOptionError(err error) bool {
 	}
 
 	return false
-}
-
-func getFunctionName(temp interface{}) string {
-	strs := strings.Split(runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name(), ".")
-	return strs[len(strs)-2]
 }
 
 func optionalAssertHeaders(assert AssertHeaders) AssertHeaders {
