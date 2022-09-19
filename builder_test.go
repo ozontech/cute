@@ -9,6 +9,99 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestBuilderAfterTest(t *testing.T) {
+	var (
+		maker = NewHTTPTestMaker()
+	)
+
+	ht := maker.NewTestBuilder().
+		Create().
+		RequestBuilder().
+		NextTest().
+		AfterTestExecute(
+			func(response *http.Response, errors []error) error {
+				return nil
+			},
+			func(response *http.Response, errors []error) error {
+				return nil
+			}).
+		AfterTestExecuteT(
+			func(t T, response *http.Response, errors []error) error {
+
+				return nil
+			},
+			func(t T, response *http.Response, errors []error) error {
+
+				return nil
+			},
+			func(t T, response *http.Response, errors []error) error {
+
+				return nil
+			},
+		)
+
+	res := ht.(*cute)
+	require.Len(t, res.tests[0].Middleware.After, 2)
+	require.Len(t, res.tests[0].Middleware.AfterT, 3)
+}
+
+func TestBuilderAfterTestTwoStep(t *testing.T) {
+	var (
+		maker = NewHTTPTestMaker()
+	)
+
+	ht :=
+		maker.NewTestBuilder().
+			Create().
+			RequestBuilder().
+			NextTest().
+			AfterTestExecute(
+				func(response *http.Response, errors []error) error {
+					return nil
+				},
+				func(response *http.Response, errors []error) error {
+					return nil
+				}).
+			AfterTestExecuteT(
+				func(t T, response *http.Response, errors []error) error {
+
+					return nil
+				},
+				func(t T, response *http.Response, errors []error) error {
+
+					return nil
+				},
+				func(t T, response *http.Response, errors []error) error {
+
+					return nil
+				},
+			).
+			Create().
+			AfterExecute(
+				func(response *http.Response, errors []error) error {
+
+					return nil
+				},
+			).
+			AfterExecuteT(func(t T, response *http.Response, errors []error) error {
+
+				return nil
+			}).
+			RequestBuilder().
+			NextTest().
+			AfterTestExecute(func(response *http.Response, errors []error) error {
+
+				return nil
+			},
+			)
+
+	res := ht.(*cute)
+	require.Len(t, res.tests[0].Middleware.After, 2)
+	require.Len(t, res.tests[0].Middleware.AfterT, 3)
+	require.Len(t, res.tests[1].Middleware.After, 2)
+	require.Len(t, res.tests[1].Middleware.AfterT, 1)
+}
+
 func TestNewTestBuilder(t *testing.T) {
 	var (
 		maker = NewHTTPTestMaker()

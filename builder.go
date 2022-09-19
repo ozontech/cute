@@ -289,13 +289,23 @@ func (it *cute) AfterExecuteT(fs ...AfterExecuteT) MiddlewareRequest {
 }
 
 func (it *cute) AfterTestExecute(fs ...AfterExecute) NextTestBuilder {
-	it.tests[it.countTests].Middleware.After = append(it.tests[it.countTests].Middleware.After, fs...)
+	previousTest := 0
+	if it.countTests != 0 {
+		previousTest = it.countTests - 1
+	}
+
+	it.tests[previousTest].Middleware.After = append(it.tests[previousTest].Middleware.After, fs...)
 
 	return it
 }
 
 func (it *cute) AfterTestExecuteT(fs ...AfterExecuteT) NextTestBuilder {
-	it.tests[it.countTests].Middleware.AfterT = append(it.tests[it.countTests].Middleware.AfterT, fs...)
+	previousTest := 0
+	if it.countTests != 0 {
+		previousTest = it.countTests - 1
+	}
+
+	it.tests[previousTest].Middleware.AfterT = append(it.tests[previousTest].Middleware.AfterT, fs...)
 
 	return it
 }
