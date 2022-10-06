@@ -142,7 +142,9 @@ func addInformationRequest(t T, req *http.Request) error {
 			return err
 		}
 
-		t.WithNewParameters("body", string(body))
+		if len(body) != 0 {
+			t.WithNewParameters("body", string(body))
+		}
 	}
 
 	return nil
@@ -190,6 +192,11 @@ func addInformationResponse(t T, response *http.Response) {
 	body, err := utils.GetBody(saveBody)
 	// if could not get body from response, no add to allure
 	if err != nil {
+		return
+	}
+
+	// if body is empty - skip
+	if len(body) == 0 {
 		return
 	}
 
