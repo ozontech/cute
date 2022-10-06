@@ -5,6 +5,8 @@ package examples
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -37,7 +39,7 @@ func Test_Single_1(t *testing.T) {
 			cute.WithMethod(http.MethodGet),
 		).
 		ExpectExecuteTimeout(10*time.Second).
-		ExpectStatus(http.StatusBadGateway).
+		ExpectStatus(http.StatusOK).
 		AssertBody(
 			json.Present("$[1].name"),
 			json.Present("$[0].passport"), // Example fail
@@ -49,6 +51,23 @@ func Test_Single_1(t *testing.T) {
 
 			return nil
 		}).
+		After(
+			func(response *http.Response, errors []error) error {
+				b, err := io.ReadAll(response.Body)
+				if err != nil {
+					return err
+				}
+
+				email, err := json.GetValueFromJSON(b, "$[0].email")
+				if err != nil {
+					return err
+				}
+
+				fmt.Println("Email from test", email)
+
+				return nil
+			},
+		).
 		ExecuteTest(context.Background(), t)
 }
 
