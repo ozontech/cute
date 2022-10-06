@@ -307,8 +307,8 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, len(assertResponse), len(resTest.Expect.AssertResponse))
 	require.Equal(t, len(assertResponseT), len(resTest.Expect.AssertResponseT))
 
-	require.Len(t, len(after), len(resTest.Middleware.After))
-	require.Len(t, len(afterT), len(resTest.Middleware.AfterT))
+	require.Equal(t, len(after), len(resTest.Middleware.After))
+	require.Equal(t, len(afterT), len(resTest.Middleware.AfterT))
 }
 
 func TestCreateDefaultTest(t *testing.T) {
