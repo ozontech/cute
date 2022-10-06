@@ -83,16 +83,18 @@ func TestBuilderAfterTestTwoStep(t *testing.T) {
 					return nil
 				},
 			).
-			AfterExecuteT(func(t T, response *http.Response, errors []error) error {
+			AfterExecuteT(
+				func(t T, response *http.Response, errors []error) error {
 
-				return nil
-			}).
+					return nil
+				}).
 			RequestBuilder().
 			NextTest().
-			AfterTestExecute(func(response *http.Response, errors []error) error {
+			AfterTestExecute(
+				func(response *http.Response, errors []error) error {
 
-				return nil
-			},
+					return nil
+				},
 			)
 
 	res := ht.(*cute)
@@ -204,6 +206,26 @@ func TestHTTPTestMaker(t *testing.T) {
 				return nil
 			},
 		}
+		after = []AfterExecute{
+			func(response *http.Response, errors []error) error {
+
+				return nil
+			},
+			func(response *http.Response, errors []error) error {
+
+				return nil
+			},
+		}
+		afterT = []AfterExecuteT{
+			func(t T, response *http.Response, errors []error) error {
+
+				return nil
+			},
+			func(t T, response *http.Response, errors []error) error {
+
+				return nil
+			},
+		}
 	)
 
 	ht.
@@ -227,8 +249,7 @@ func TestHTTPTestMaker(t *testing.T) {
 		SetTestCase(setTestCase).
 		Link(link).
 		Description(desc).
-		CreateWithStep().
-		StepName(stepName).
+		CreateStep(stepName).
 		RequestRepeat(repeatCount).
 		RequestRepeatDelay(repeatDelay).
 		Request(req).
@@ -242,21 +263,25 @@ func TestHTTPTestMaker(t *testing.T) {
 		AssertBody(assertBody...).
 		AssertBodyT(assertBodyT...).
 		AssertResponse(assertResponse...).
-		AssertResponseT(assertResponseT...)
+		AssertResponseT(assertResponseT...).
+		After(after...).
+		AfterT(afterT...)
 
 	resHt := ht.(*cute)
+	resTest := resHt.tests[0]
+
 	require.Equal(t, title, resHt.allureInfo.title)
 	require.Equal(t, tags, resHt.allureLabels.tags)
 	require.Equal(t, desc, resHt.allureInfo.description)
 	require.Equal(t, feature, resHt.allureLabels.feature)
 	require.Equal(t, epic, resHt.allureLabels.epic)
-	require.Equal(t, stepName, resHt.tests[0].AllureStep.Name)
-	require.Equal(t, req, resHt.tests[0].Request.Base)
-	require.Equal(t, executeTime, resHt.tests[0].Expect.ExecuteTime)
-	require.Equal(t, status, resHt.tests[0].Expect.Code)
-	require.Equal(t, schemaBt, resHt.tests[0].Expect.JSONSchema.Byte)
-	require.Equal(t, schemaStg, resHt.tests[0].Expect.JSONSchema.String)
-	require.Equal(t, schemaFile, resHt.tests[0].Expect.JSONSchema.File)
+	require.Equal(t, stepName, resTest.AllureStep.Name)
+	require.Equal(t, req, resTest.Request.Base)
+	require.Equal(t, executeTime, resTest.Expect.ExecuteTime)
+	require.Equal(t, status, resTest.Expect.Code)
+	require.Equal(t, schemaBt, resTest.Expect.JSONSchema.Byte)
+	require.Equal(t, schemaStg, resTest.Expect.JSONSchema.String)
+	require.Equal(t, schemaFile, resTest.Expect.JSONSchema.File)
 	require.Equal(t, id, resHt.allureLabels.id)
 	require.Equal(t, addSuiteLabel, resHt.allureLabels.suiteLabel)
 	require.Equal(t, addSubSuite, resHt.allureLabels.subSuite)
@@ -270,17 +295,20 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, setIssue, resHt.allureLinks.issue)
 	require.Equal(t, setTestCase, resHt.allureLinks.testCase)
 	require.Equal(t, link, resHt.allureLinks.link)
-	require.Equal(t, repeatCount, resHt.tests[0].Request.Repeat.Count)
-	require.Equal(t, repeatDelay, resHt.tests[0].Request.Repeat.Delay)
+	require.Equal(t, repeatCount, resTest.Request.Repeat.Count)
+	require.Equal(t, repeatDelay, resTest.Request.Repeat.Delay)
 
-	require.Equal(t, len(assertHeaders), len(resHt.tests[0].Expect.AssertHeaders))
-	require.Equal(t, len(assertHeadersT), len(resHt.tests[0].Expect.AssertHeadersT))
+	require.Equal(t, len(assertHeaders), len(resTest.Expect.AssertHeaders))
+	require.Equal(t, len(assertHeadersT), len(resTest.Expect.AssertHeadersT))
 
-	require.Equal(t, len(assertBody), len(resHt.tests[0].Expect.AssertBody))
-	require.Equal(t, len(assertBodyT), len(resHt.tests[0].Expect.AssertBodyT))
+	require.Equal(t, len(assertBody), len(resTest.Expect.AssertBody))
+	require.Equal(t, len(assertBodyT), len(resTest.Expect.AssertBodyT))
 
-	require.Equal(t, len(assertResponse), len(resHt.tests[0].Expect.AssertResponse))
-	require.Equal(t, len(assertResponseT), len(resHt.tests[0].Expect.AssertResponseT))
+	require.Equal(t, len(assertResponse), len(resTest.Expect.AssertResponse))
+	require.Equal(t, len(assertResponseT), len(resTest.Expect.AssertResponseT))
+
+	require.Len(t, len(after), len(resTest.Middleware.After))
+	require.Len(t, len(afterT), len(resTest.Middleware.AfterT))
 }
 
 func TestCreateDefaultTest(t *testing.T) {

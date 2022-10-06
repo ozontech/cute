@@ -26,12 +26,18 @@ func Test_Single_1(t *testing.T) {
 		Description("some_description").
 		Parallel().
 		Create().
+		RequestRepeat(3).
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+			cute.WithMarshalBody(struct {
+				Name string `json:"name"`
+			}{
+				Name: "Vasya Pupkin",
+			}),
 			cute.WithMethod(http.MethodGet),
 		).
 		ExpectExecuteTimeout(10*time.Second).
-		ExpectStatus(http.StatusOK).
+		ExpectStatus(http.StatusBadGateway).
 		AssertBody(
 			json.Present("$[1].name"),
 			json.Present("$[0].passport"), // Example fail

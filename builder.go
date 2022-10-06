@@ -276,6 +276,18 @@ func (it *cute) BeforeExecuteT(fs ...BeforeExecuteT) MiddlewareRequest {
 	return it
 }
 
+func (it *cute) After(fs ...AfterExecute) ExpectHTTPBuilder {
+	it.tests[it.countTests].Middleware.After = append(it.tests[it.countTests].Middleware.After, fs...)
+
+	return it
+}
+
+func (it *cute) AfterT(fs ...AfterExecuteT) ExpectHTTPBuilder {
+	it.tests[it.countTests].Middleware.AfterT = append(it.tests[it.countTests].Middleware.AfterT, fs...)
+
+	return it
+}
+
 func (it *cute) AfterExecute(fs ...AfterExecute) MiddlewareRequest {
 	it.tests[it.countTests].Middleware.After = append(it.tests[it.countTests].Middleware.After, fs...)
 
