@@ -91,20 +91,47 @@ type MiddlewareRequest interface {
 	AfterTest
 }
 
-// BeforeTest is function for processing request Before execute
+// BeforeTest are functions for processing request before test execution
+// Same functions:
+// Before
 type BeforeTest interface {
-	// BeforeExecute is function for processing request Before createRequest Request
+	// BeforeExecute is function for processing request before test execution
 	BeforeExecute(...BeforeExecute) MiddlewareRequest
-	// BeforeExecuteT is function for processing request Before createRequest Request
+	// BeforeExecuteT is function for processing request before test execution
 	BeforeExecuteT(...BeforeExecuteT) MiddlewareRequest
 }
 
-// AfterTest is function for processing request After execute Test
+// After are functions for processing response after test execution
+// Same functions:
+// AfterText
+// AfterTestExecute
+type After interface {
+	// After is function for processing response after test execution
+	After(...AfterExecute) ExpectHTTPBuilder
+	// AfterT is function for processing response after test execution
+	AfterT(...AfterExecuteT) ExpectHTTPBuilder
+}
+
+// AfterTest are functions for processing response after test execution
+// Same functions:
+// After
+// AfterTestExecute
 type AfterTest interface {
-	// AfterExecute is function will run After allureProvider asserts
+	// AfterExecute is function for processing response after test execution
 	AfterExecute(...AfterExecute) MiddlewareRequest
-	// AfterExecuteT is function will run After allureProvider asserts
+	// AfterExecuteT is function for processing response after test execution
 	AfterExecuteT(...AfterExecuteT) MiddlewareRequest
+}
+
+// AfterTestExecute are functions for processing response after test execution
+// Same functions:
+// After
+// AfterText
+type AfterTestExecute interface {
+	// AfterTestExecute is function for processing response after test execution
+	AfterTestExecute(...AfterExecute) NextTestBuilder
+	// AfterTestExecuteT is function for processing response after test execution
+	AfterTestExecuteT(...AfterExecuteT) NextTestBuilder
 }
 
 // TableTest is function for put request and assert for table tests
@@ -212,6 +239,7 @@ type ExpectHTTPBuilder interface {
 	// Mark in allure as Broken
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
+	After
 	ControlTest
 }
 
@@ -223,12 +251,9 @@ type ControlTest interface {
 	ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder
 }
 
-// NextTestBuilder is a scope of methods for processing response, After Test
+// NextTestBuilder is a scope of methods for processing response, after Test.
 type NextTestBuilder interface {
-	// AfterTestExecute is function will run After Test
-	AfterTestExecute(...AfterExecute) NextTestBuilder
-	// AfterTestExecuteT is function will run After Test
-	AfterTestExecuteT(...AfterExecuteT) NextTestBuilder
+	AfterTestExecute
 
 	CreateBuilder
 }

@@ -1,6 +1,7 @@
 package cute
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -54,9 +55,16 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	return resp, scope
 }
 
-func (it *Test) doRequest(t T, req *http.Request) (*http.Response, error) {
+func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
+	// copy request, because body can be read once
+	req, err := copyRequest(baseReq.Context(), baseReq)
+	if err != nil {
+
+		return nil, err
+	}
+
 	// Add information (method, host, curl) about request to Allure step
-	err := addInformationRequest(t, req)
+	err = addInformationRequest(t, req)
 	if err != nil {
 
 		return nil, err
@@ -134,10 +142,27 @@ func addInformationRequest(t T, req *http.Request) error {
 			return err
 		}
 
-		t.WithNewParameters("body", string(body))
+		if len(body) != 0 {
+			t.WithNewParameters("body", string(body))
+		}
 	}
 
 	return nil
+}
+
+func copyRequest(ctx context.Context, req *http.Request) (*http.Request, error) {
+	var (
+		err error
+
+		clone = req.Clone(ctx)
+	)
+
+	req.Body, clone.Body, err = utils.DrainBody(req.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return clone, nil
 }
 
 // UpdateStepWithResponse returns step based on already created step and grpc response.
@@ -167,6 +192,11 @@ func addInformationResponse(t T, response *http.Response) {
 	body, err := utils.GetBody(saveBody)
 	// if could not get body from response, no add to allure
 	if err != nil {
+		return
+	}
+
+	// if body is empty - skip
+	if len(body) == 0 {
 		return
 	}
 
