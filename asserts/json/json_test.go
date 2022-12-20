@@ -556,6 +556,12 @@ func TestEqual(t *testing.T) {
 			expression: "$.a",
 			expect:     []byte("not_correct"),
 		},
+		{
+			caseName:   "check 186135434",
+			data:       `{"a":186135434, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     186135434,
+		},
 	}
 
 	for _, test := range tests {

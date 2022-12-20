@@ -114,6 +114,15 @@ func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
 	return res
 }
 
+func (it *Test) clearFields() {
+	it.AllureStep = new(AllureStep)
+	it.Middleware = new(Middleware)
+	it.Expect = new(Expect)
+	it.Request = new(Request)
+	it.Request.Repeat = new(RequestRepeatPolitic)
+	it.Expect.JSONSchema = new(ExpectJSONSchema)
+}
+
 func (it *Test) initEmptyFields() {
 	it.httpClient = http.DefaultClient
 
@@ -162,6 +171,9 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 	}
 
 	processTestErrors(allureProvider, errs)
+
+	// Remove from base struct all asserts
+	it.clearFields()
 
 	return newTestResult(name, resp, errs)
 }
