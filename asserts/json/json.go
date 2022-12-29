@@ -40,33 +40,33 @@ func Length(expression string, expectLength int) cute.AssertBody {
 	}
 }
 
-// GreaterThan is a function to asserts that value is greater than the given length
+// LengthGreaterThan is a function to asserts that value is greater than the given length
 // About expression - https://goessner.net/articles/JsonPath/
-func GreaterThan(expression string, minimumLength int) cute.AssertBody {
+func LengthGreaterThan(expression string, minimumLength int) cute.AssertBody {
 	return func(body []byte) error {
 		return greaterThan(body, expression, minimumLength)
 	}
 }
 
-// GreaterOrEqualThan is a function to asserts that value is greater or equal than the given length
+// LengthGreaterOrEqualThan is a function to asserts that value is greater or equal than the given length
 // About expression - https://goessner.net/articles/JsonPath/
-func GreaterOrEqualThan(expression string, minimumLength int) cute.AssertBody {
+func LengthGreaterOrEqualThan(expression string, minimumLength int) cute.AssertBody {
 	return func(body []byte) error {
 		return greaterOrEqualThan(body, expression, minimumLength)
 	}
 }
 
-// LessThan is a function to asserts that value is less than the given length
+// LengthLessThan is a function to asserts that value is less than the given length
 // About expression - https://goessner.net/articles/JsonPath/
-func LessThan(expression string, maximumLength int) cute.AssertBody {
+func LengthLessThan(expression string, maximumLength int) cute.AssertBody {
 	return func(body []byte) error {
 		return lessThan(body, expression, maximumLength)
 	}
 }
 
-// LessOrEqualThan is a function to asserts that value is less or equal than the given length
+// LengthLessOrEqualThan is a function to asserts that value is less or equal than the given length
 // About expression - https://goessner.net/articles/JsonPath/
-func LessOrEqualThan(expression string, maximumLength int) cute.AssertBody {
+func LengthLessOrEqualThan(expression string, maximumLength int) cute.AssertBody {
 	return func(body []byte) error {
 		return lessOrEqualThan(body, expression, maximumLength)
 	}

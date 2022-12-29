@@ -174,6 +174,10 @@ func notPresent(data []byte, expression string) error {
 }
 
 func objectsAreEqual(expect, actual interface{}) bool {
+	if reflect.DeepEqual(expect, actual) {
+		return true
+	}
+
 	if expect == nil || actual == nil {
 		return expect == actual
 	}

@@ -154,16 +154,16 @@ func createDefaultTests(m *HTTPTestMaker) []*Test {
 }
 
 func createDefaultTest(m *HTTPTestMaker) *Test {
-	after := make([]AfterExecute, 0, 0)
+	after := make([]AfterExecute, 0)
 	copy(after, m.middleware.After)
 
-	afterT := make([]AfterExecuteT, 0, 0)
+	afterT := make([]AfterExecuteT, 0)
 	copy(afterT, m.middleware.AfterT)
 
-	before := make([]BeforeExecute, 0, 0)
+	before := make([]BeforeExecute, 0)
 	copy(before, m.middleware.Before)
 
-	beforeT := make([]BeforeExecuteT, 0, 0)
+	beforeT := make([]BeforeExecuteT, 0)
 	copy(beforeT, m.middleware.BeforeT)
 
 	middleware := &Middleware{

@@ -273,7 +273,7 @@ func TestGreaterThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := GreaterThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthGreaterThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
@@ -354,7 +354,7 @@ func TestGreaterOrEqualThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := GreaterOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthGreaterOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
@@ -414,7 +414,7 @@ func TestLessThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := LessThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthLessThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
@@ -495,7 +495,7 @@ func TestLessOrEqualThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := LessOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthLessOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
