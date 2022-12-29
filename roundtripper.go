@@ -114,7 +114,7 @@ func addInformationRequest(t T, req *http.Request) error {
 	}
 
 	if c := curl.String(); len(c) <= 2048 {
-		t.Log("[Request]" + c)
+		t.Log("[Request] " + c)
 	} else {
 		t.Log("[Request] Do request")
 	}

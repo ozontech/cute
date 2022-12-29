@@ -124,8 +124,9 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	}
 
 	m := &HTTPTestMaker{
-		httpClient: httpClient,
-		middleware: o.middleware,
+		hardValidation: o.hardValidation,
+		httpClient:     httpClient,
+		middleware:     o.middleware,
 	}
 
 	return m
@@ -154,17 +155,25 @@ func createDefaultTests(m *HTTPTestMaker) []*Test {
 }
 
 func createDefaultTest(m *HTTPTestMaker) *Test {
-	after := make([]AfterExecute, 0)
-	copy(after, m.middleware.After)
+	after := make([]AfterExecute, 0, len(m.middleware.After))
+	for _, execute := range m.middleware.After {
+		after = append(after, execute)
+	}
 
-	afterT := make([]AfterExecuteT, 0)
-	copy(afterT, m.middleware.AfterT)
+	afterT := make([]AfterExecuteT, 0, len(m.middleware.AfterT))
+	for _, executeT := range m.middleware.AfterT {
+		afterT = append(afterT, executeT)
+	}
 
-	before := make([]BeforeExecute, 0)
-	copy(before, m.middleware.Before)
+	before := make([]BeforeExecute, 0, len(m.middleware.Before))
+	for _, execute := range m.middleware.Before {
+		before = append(before, execute)
+	}
 
-	beforeT := make([]BeforeExecuteT, 0)
-	copy(beforeT, m.middleware.BeforeT)
+	beforeT := make([]BeforeExecuteT, 0, len(m.middleware.BeforeT))
+	for _, executeT := range m.middleware.BeforeT {
+		beforeT = append(beforeT, executeT)
+	}
 
 	middleware := &Middleware{
 		After:   after,

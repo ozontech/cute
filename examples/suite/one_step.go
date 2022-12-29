@@ -119,9 +119,9 @@ func (i *ExampleSuite) Test_OneStep(t provider.T) {
 			json.Equal("$[0].email", "Eliseo@gardner.biz"),
 			json.Present("$[1].name"),
 			json.NotPresent("$[1].some_not_present"),
-			json.GreaterThan("$", 3),
+			json.LengthGreaterThan("$", 3),
 			json.Length("$", 5),
-			json.LessThan("$", 100),
+			json.LengthLessThan("$", 100),
 			json.NotEqual("$[3].name", "kekekekeke"),
 
 			// Custom assert body

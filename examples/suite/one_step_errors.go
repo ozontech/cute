@@ -45,7 +45,7 @@ func (i *ExampleSuite) Test_OneStep_Errors(t provider.T) {
 		AssertBody(
 			json.Equal("$[0].email", "something"),
 			json.Present("$[1].not_present"),
-			json.GreaterThan("$", 99999),
+			json.LengthGreaterThan("$", 99999),
 			json.Length("$", 0),
 			// Custom assert body
 			examples.CustomAssertBody(),

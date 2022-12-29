@@ -11,7 +11,7 @@ import (
 
 func TestBuilderAfterTest(t *testing.T) {
 	var (
-		maker = NewHTTPTestMaker()
+		maker = NewHTTPTestMaker(WithHardValidation())
 	)
 
 	ht := maker.NewTestBuilder().
@@ -43,11 +43,43 @@ func TestBuilderAfterTest(t *testing.T) {
 	res := ht.(*cute)
 	require.Len(t, res.tests[0].Middleware.After, 2)
 	require.Len(t, res.tests[0].Middleware.AfterT, 3)
+	require.True(t, res.tests[0].HardValidation)
 }
 
 func TestBuilderAfterTestTwoStep(t *testing.T) {
 	var (
-		maker = NewHTTPTestMaker()
+		maker = NewHTTPTestMaker(
+			WithHardValidation(),
+			WithMiddlewareBefore(
+				func(request *http.Request) error {
+					return nil
+				},
+				func(request *http.Request) error {
+					return nil
+				},
+			),
+			WithMiddlewareBeforeT(
+				func(t T, request *http.Request) error {
+					return nil
+				},
+			),
+			WithMiddlewareAfter(
+				func(response *http.Response, errors []error) error {
+					return nil
+				},
+			),
+			WithMiddlewareAfterT(
+				func(t T, response *http.Response, errors []error) error {
+					return nil
+				},
+				func(t T, response *http.Response, errors []error) error {
+					return nil
+				},
+				func(t T, response *http.Response, errors []error) error {
+					return nil
+				},
+			),
+		)
 	)
 
 	ht :=
@@ -98,10 +130,17 @@ func TestBuilderAfterTestTwoStep(t *testing.T) {
 			)
 
 	res := ht.(*cute)
-	require.Len(t, res.tests[0].Middleware.After, 2)
-	require.Len(t, res.tests[0].Middleware.AfterT, 3)
-	require.Len(t, res.tests[1].Middleware.After, 2)
-	require.Len(t, res.tests[1].Middleware.AfterT, 1)
+	require.Len(t, res.tests[0].Middleware.After, 2+1)
+	require.Len(t, res.tests[0].Middleware.Before, 2)
+	require.Len(t, res.tests[0].Middleware.BeforeT, 1)
+	require.Len(t, res.tests[0].Middleware.AfterT, 3+3)
+	require.True(t, res.tests[0].HardValidation)
+
+	require.Len(t, res.tests[1].Middleware.After, 2+1)
+	require.Len(t, res.tests[1].Middleware.AfterT, 1+3)
+	require.Len(t, res.tests[1].Middleware.Before, 2)
+	require.Len(t, res.tests[1].Middleware.BeforeT, 1)
+	require.True(t, res.tests[1].HardValidation)
 }
 
 func TestNewTestBuilder(t *testing.T) {
