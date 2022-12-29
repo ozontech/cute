@@ -33,6 +33,8 @@ var (
 type Test struct {
 	httpClient *http.Client
 
+	HardValidation bool
+
 	Name string
 
 	AllureStep *AllureStep
@@ -171,7 +173,7 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 		resp, errs = it.startTest(ctx, allureProvider)
 	}
 
-	processTestErrors(allureProvider, errs)
+	it.processTestErrors(allureProvider, errs)
 
 	// Remove from base struct all asserts
 	it.clearFields()
@@ -179,7 +181,7 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 	return newTestResult(name, resp, errs)
 }
 
-func processTestErrors(t internalT, errs []error) {
+func (it *Test) processTestErrors(t internalT, errs []error) {
 	if len(errs) == 0 {
 		return
 	}
@@ -202,6 +204,9 @@ func processTestErrors(t internalT, errs []error) {
 
 	if len(resErrors) == 1 {
 		t.Errorf("[ERROR] %v", resErrors[0])
+		if it.HardValidation {
+			t.FailNow()
+		}
 
 		return
 	}
@@ -211,6 +216,10 @@ func processTestErrors(t internalT, errs []error) {
 	}
 
 	t.Errorf("Test finished with %v errors", len(resErrors))
+
+	if it.HardValidation {
+		t.FailNow()
+	}
 }
 
 func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {

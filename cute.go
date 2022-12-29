@@ -2,7 +2,6 @@ package cute
 
 import (
 	"context"
-	"net/http"
 	"strings"
 	"testing"
 
@@ -13,7 +12,7 @@ import (
 )
 
 type cute struct {
-	httpClient *http.Client
+	baseProps *HTTPTestMaker
 
 	parallel bool
 

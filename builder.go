@@ -10,13 +10,16 @@ import (
 const defaultHTTPTimeout = 30
 
 var (
-	errorFunctionIsNil = "Function must be not nil"
-	errorAssertIsNil   = "Assert must be not nil"
+	errorAssertIsNil = "Assert must be not nil"
 )
 
 // HTTPTestMaker is a creator tests
 type HTTPTestMaker struct {
 	httpClient *http.Client
+	middleware *Middleware
+
+	hardValidation bool
+
 	// todo add marshaler
 }
 
@@ -24,6 +27,10 @@ type options struct {
 	httpClient       *http.Client
 	httpTimeout      time.Duration
 	httpRoundTripper http.RoundTripper
+
+	middleware *Middleware
+
+	hardValidation bool
 }
 
 type Option func(*options)
@@ -49,10 +56,48 @@ func WithCustomHTTPRoundTripper(r http.RoundTripper) Option {
 	}
 }
 
+// WithMiddlewareAfter ...
+func WithMiddlewareAfter(after ...AfterExecute) Option {
+	return func(o *options) {
+		o.middleware.After = append(o.middleware.After, after...)
+	}
+}
+
+// WithMiddlewareAfterT ...
+func WithMiddlewareAfterT(after ...AfterExecuteT) Option {
+	return func(o *options) {
+		o.middleware.AfterT = append(o.middleware.AfterT, after...)
+	}
+}
+
+// WithMiddlewareBefore ...
+func WithMiddlewareBefore(before ...BeforeExecute) Option {
+	return func(o *options) {
+		o.middleware.Before = append(o.middleware.Before, before...)
+	}
+}
+
+// WithMiddlewareBeforeT ...
+func WithMiddlewareBeforeT(beforeT ...BeforeExecuteT) Option {
+	return func(o *options) {
+		o.middleware.BeforeT = append(o.middleware.BeforeT, beforeT...)
+	}
+}
+
+// WithHardValidation ...
+func WithHardValidation() Option {
+	return func(o *options) {
+		o.hardValidation = true
+	}
+}
+
 // NewHTTPTestMaker is function for set options for all cute.
 func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	var (
-		o            = new(options)
+		o = &options{
+			middleware: new(Middleware),
+		}
+
 		timeout      = defaultHTTPTimeout * time.Second
 		roundTripper = http.DefaultTransport
 	)
@@ -80,6 +125,7 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 
 	m := &HTTPTestMaker{
 		httpClient: httpClient,
+		middleware: o.middleware,
 	}
 
 	return m
@@ -87,10 +133,10 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 
 // NewTestBuilder is a function for initialization foundation for cute
 func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
-	tests := createDefaultTests(m.httpClient)
+	tests := createDefaultTests(m)
 
 	return &cute{
-		httpClient:   m.httpClient,
+		baseProps:    m,
 		countTests:   0,
 		tests:        tests,
 		allureInfo:   new(allureInformation),
@@ -100,18 +146,38 @@ func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
 	}
 }
 
-func createDefaultTests(client *http.Client) []*Test {
+func createDefaultTests(m *HTTPTestMaker) []*Test {
 	tests := make([]*Test, 1)
-	tests[0] = createDefaultTest(client)
+	tests[0] = createDefaultTest(m)
 
 	return tests
 }
 
-func createDefaultTest(httpClient *http.Client) *Test {
+func createDefaultTest(m *HTTPTestMaker) *Test {
+	after := make([]AfterExecute, 0, 0)
+	copy(after, m.middleware.After)
+
+	afterT := make([]AfterExecuteT, 0, 0)
+	copy(afterT, m.middleware.AfterT)
+
+	before := make([]BeforeExecute, 0, 0)
+	copy(before, m.middleware.Before)
+
+	beforeT := make([]BeforeExecuteT, 0, 0)
+	copy(beforeT, m.middleware.BeforeT)
+
+	middleware := &Middleware{
+		After:   after,
+		AfterT:  afterT,
+		Before:  before,
+		BeforeT: beforeT,
+	}
+
 	return &Test{
-		httpClient: httpClient,
-		AllureStep: new(AllureStep),
-		Middleware: new(Middleware),
+		HardValidation: m.hardValidation,
+		httpClient:     m.httpClient,
+		Middleware:     middleware,
+		AllureStep:     new(AllureStep),
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
@@ -236,10 +302,6 @@ func (it *cute) Tags(tags ...string) AllureBuilder {
 func (it *cute) Feature(feature string) AllureBuilder {
 	it.allureLabels.feature = feature
 
-	return it
-}
-
-func (it *cute) CreateWithStep() StepBuilder {
 	return it
 }
 
@@ -525,6 +587,12 @@ func (it *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBu
 	return it
 }
 
+func (it *cute) EnableHardValidation() ExpectHTTPBuilder {
+	it.tests[it.countTests].HardValidation = true
+
+	return it
+}
+
 func (it *cute) CreateTableTest() MiddlewareTable {
 	it.isTableTest = true
 
@@ -544,7 +612,7 @@ func (it *cute) PutNewTest(name string, r *http.Request, expect *Expect) TableTe
 		}
 	}
 
-	newTest := createDefaultTest(it.httpClient)
+	newTest := createDefaultTest(it.baseProps)
 	newTest.Expect = expect
 	newTest.Name = name
 	newTest.Request.Base = r
@@ -576,7 +644,7 @@ func (it *cute) PutTests(params ...*Test) TableTest {
 func (it *cute) NextTest() NextTestBuilder {
 	it.countTests++ // async?
 
-	it.tests = append(it.tests, createDefaultTest(it.httpClient))
+	it.tests = append(it.tests, createDefaultTest(it.baseProps))
 
 	return it
 }

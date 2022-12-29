@@ -53,21 +53,11 @@ type AllureLabelsBuilder interface {
 	Labels(labels ...*allure.Label) AllureBuilder
 }
 
-// StepBuilder is a scope of methods for set step information
-// Deprecated.
-type StepBuilder interface {
-	// StepName is a function to wrap a Test in new steps with Name
-	StepName(name string) MiddlewareRequest
-}
-
 // CreateBuilder is functions for create Test or table tests
 type CreateBuilder interface {
 	// Create is a function for save main information about allure and start write tests
 	Create() MiddlewareRequest
 
-	// CreateWithStep is a function for create step and log some information inside
-	// Deprecated, please use CreateStep(string)
-	CreateWithStep() StepBuilder
 	// CreateStep is a function for create step inside suite for Test
 	CreateStep(string) MiddlewareRequest
 
@@ -238,6 +228,10 @@ type ExpectHTTPBuilder interface {
 	// OptionalAssertResponseT is not a mandatory assert.
 	// Mark in allure as Broken
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
+
+	// EnableHardValidation is enabled hard validation,
+	// If one of assert was failed, test will stopped.
+	EnableHardValidation() ExpectHTTPBuilder
 
 	After
 	ControlTest
