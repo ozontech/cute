@@ -21,21 +21,6 @@ import (
 	"github.com/ozontech/cute/asserts/json"
 )
 
-func TestUploadfile(t *testing.T) {
-	cute.NewTestBuilder().
-		Title("Super test").
-		Create().
-		RequestBuilder(
-			cute.WithURI("http://localhost:7000/v1/admin/banner"),
-			cute.WithMethod("POST"),
-			cute.WithFormKV("body", []byte("{  \"banner\": {    \"companies\": [],    \"finish_date\": \"2023-10-02\",    \"start_date\": \"2021-01-08\",    \"priority\": 0,    \"url\": \"\",    \"users\": []  }}")),
-			cute.WithFileFormKV("image", &cute.File{
-				Path: "/Users/makarovserge/Downloads/gogogo.png",
-			}),
-		).
-		ExecuteTest(context.Background(), t)
-}
-
 func Test_Single_1(t *testing.T) {
 	cute.NewTestBuilder().
 		Title("Single test with default T").
@@ -102,7 +87,7 @@ func Test_Single_2_AllureRunner(t *testing.T) {
 			Description("some_description").
 			Create().
 			RequestRepeatDelay(3*time.Second). // delay before new try
-			RequestRepeat(3).                  // count attempts
+			RequestRepeat(3). // count attempts
 			RequestBuilder(
 				cute.WithURL(u),
 				cute.WithMethod(http.MethodGet),
