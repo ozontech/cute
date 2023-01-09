@@ -223,7 +223,7 @@ func TestLength(t *testing.T) {
 	}
 }
 
-func TestGreaterThan(t *testing.T) {
+func TestLengthGreaterThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -283,7 +283,7 @@ func TestGreaterThan(t *testing.T) {
 	}
 }
 
-func TestGreaterOrEqualThan(t *testing.T) {
+func TestLengthGreaterOrEqualThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -364,7 +364,7 @@ func TestGreaterOrEqualThan(t *testing.T) {
 	}
 }
 
-func TestLessThan(t *testing.T) {
+func TestLengthLessThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -424,7 +424,7 @@ func TestLessThan(t *testing.T) {
 	}
 }
 
-func TestLessOrEqualThan(t *testing.T) {
+func TestLengthLessOrEqualThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -561,6 +561,20 @@ func TestEqual(t *testing.T) {
 			data:       `{"a":186135434, "b":{"bs":"sb"}}`,
 			expression: "$.a",
 			expect:     186135434,
+		},
+		{
+			caseName:   "check float",
+			data:       `{"a":1.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     1.0000001,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check float 2",
+			data:       `{"a":999.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     999.0000001,
+			IsNilErr:   true,
 		},
 	}
 

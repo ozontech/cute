@@ -87,7 +87,7 @@ func Test_Single_2_AllureRunner(t *testing.T) {
 			Description("some_description").
 			Create().
 			RequestRepeatDelay(3*time.Second). // delay before new try
-			RequestRepeat(3). // count attempts
+			RequestRepeat(3).                  // count attempts
 			RequestBuilder(
 				cute.WithURL(u),
 				cute.WithMethod(http.MethodGet),
