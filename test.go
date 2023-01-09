@@ -7,8 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -31,6 +32,8 @@ var (
 // You may field Request and Expect for create simple test
 type Test struct {
 	httpClient *http.Client
+
+	HardValidation bool
 
 	Name string
 
@@ -114,6 +117,15 @@ func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
 	return res
 }
 
+func (it *Test) clearFields() {
+	it.AllureStep = new(AllureStep)
+	it.Middleware = new(Middleware)
+	it.Expect = new(Expect)
+	it.Request = new(Request)
+	it.Request.Repeat = new(RequestRepeatPolitic)
+	it.Expect.JSONSchema = new(ExpectJSONSchema)
+}
+
 func (it *Test) initEmptyFields() {
 	it.httpClient = http.DefaultClient
 
@@ -161,12 +173,15 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 		resp, errs = it.startTest(ctx, allureProvider)
 	}
 
-	processTestErrors(allureProvider, errs)
+	it.processTestErrors(allureProvider, errs)
+
+	// Remove from base struct all asserts
+	it.clearFields()
 
 	return newTestResult(name, resp, errs)
 }
 
-func processTestErrors(t internalT, errs []error) {
+func (it *Test) processTestErrors(t internalT, errs []error) {
 	if len(errs) == 0 {
 		return
 	}
@@ -189,6 +204,9 @@ func processTestErrors(t internalT, errs []error) {
 
 	if len(resErrors) == 1 {
 		t.Errorf("[ERROR] %v", resErrors[0])
+		if it.HardValidation {
+			t.FailNow()
+		}
 
 		return
 	}
@@ -198,6 +216,10 @@ func processTestErrors(t internalT, errs []error) {
 	}
 
 	t.Errorf("Test finished with %v errors", len(resErrors))
+
+	if it.HardValidation {
+		t.FailNow()
+	}
 }
 
 func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {
@@ -321,35 +343,10 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 		err error
 	)
 
-	// CreateWithStep Request
 	if req == nil {
-		o := new(requestOptions)
-
-		for _, builder := range it.Request.Builders {
-			builder(o)
-		}
-
-		url := o.uri
-		if o.url != nil {
-			url = o.url.String()
-		}
-
-		body := o.body
-		if o.bodyMarshal != nil {
-			body, err = json.Marshal(o.bodyMarshal) // TODO move marshaler to it struct
-
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		req, err = http.NewRequestWithContext(ctx, o.method, url, ioutil.NopCloser(bytes.NewReader(body)))
+		req, err = it.buildRequest(ctx)
 		if err != nil {
 			return nil, err
-		}
-
-		if len(o.headers) != 0 {
-			req.Header = o.headers
 		}
 	}
 
@@ -359,6 +356,129 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 	}
 
 	return req, nil
+}
+
+// buildRequest
+// Priority for create body:
+// 1. requestOptions.body <- low priority
+// 2. requestOptions.bodyMarshal
+// 3. requestOptions.forms and requestOptions.fileForms <- high priority.
+func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
+	var (
+		req *http.Request
+		err error
+		o   = newRequestOptions()
+	)
+
+	for _, builder := range it.Request.Builders {
+		builder(o)
+	}
+
+	url := o.uri
+	if o.url != nil {
+		url = o.url.String()
+	}
+
+	body := o.body
+	if o.bodyMarshal != nil {
+		body, err = json.Marshal(o.bodyMarshal) // TODO move marshaler to it struct
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(o.fileForms) != 0 || len(o.forms) != 0 {
+		var (
+			buffer = new(bytes.Buffer)
+			mp     = multipart.NewWriter(buffer)
+		)
+
+		// set file forms
+		for fieldName, file := range o.fileForms {
+			err = createFormFile(mp, fieldName, file)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// set forms
+		for fieldName, fieldBody := range o.forms {
+			err = createFormField(mp, fieldName, fieldBody)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if err = mp.Close(); err != nil {
+			return nil, err
+		}
+
+		req, err = http.NewRequestWithContext(ctx, o.method, url, buffer)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Add("Content-Type", mp.FormDataContentType())
+	} else {
+		req, err = http.NewRequestWithContext(ctx, o.method, url, io.NopCloser(bytes.NewReader(body)))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	for nameHeader, valuesHeader := range o.headers {
+		req.Header[nameHeader] = valuesHeader
+	}
+	return req, nil
+}
+
+func createFormFile(mp *multipart.Writer, fieldName string, file *File) error {
+	var (
+		data = file.Body
+		name = file.Name
+	)
+
+	// read file, if path is not empty
+	if len(file.Path) != 0 {
+		f, err := os.Open(file.Path)
+		if err != nil {
+			return err
+		}
+
+		data, err = io.ReadAll(f)
+		if err != nil {
+			return err
+		}
+
+		name = f.Name()
+	}
+
+	field, err := mp.CreateFormFile(fieldName, name)
+	if err != nil {
+		return fmt.Errorf("error when creating %v file form field, %w", fieldName, err)
+	}
+
+	_, err = field.Write(data)
+	if err != nil {
+		return fmt.Errorf("error when writing %v file form field, %w", fieldName, err)
+	}
+
+	return nil
+}
+
+func createFormField(mp *multipart.Writer, fieldName string, body []byte) error {
+	field, err := mp.CreateFormField(fieldName)
+	if err != nil {
+		return fmt.Errorf("error when creating %v form field, %w", fieldName, err)
+	}
+
+	_, err = field.Write(body)
+	if err != nil {
+		return fmt.Errorf("error when writing %v form field, %w", fieldName, err)
+	}
+
+	return nil
 }
 
 func (it *Test) validateRequest(req *http.Request) error {

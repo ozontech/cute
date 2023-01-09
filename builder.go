@@ -9,9 +9,17 @@ import (
 
 const defaultHTTPTimeout = 30
 
+var (
+	errorAssertIsNil = "Assert must be not nil"
+)
+
 // HTTPTestMaker is a creator tests
 type HTTPTestMaker struct {
 	httpClient *http.Client
+	middleware *Middleware
+
+	hardValidation bool
+
 	// todo add marshaler
 }
 
@@ -19,6 +27,10 @@ type options struct {
 	httpClient       *http.Client
 	httpTimeout      time.Duration
 	httpRoundTripper http.RoundTripper
+
+	middleware *Middleware
+
+	hardValidation bool
 }
 
 type Option func(*options)
@@ -44,10 +56,48 @@ func WithCustomHTTPRoundTripper(r http.RoundTripper) Option {
 	}
 }
 
+// WithMiddlewareAfter ...
+func WithMiddlewareAfter(after ...AfterExecute) Option {
+	return func(o *options) {
+		o.middleware.After = append(o.middleware.After, after...)
+	}
+}
+
+// WithMiddlewareAfterT ...
+func WithMiddlewareAfterT(after ...AfterExecuteT) Option {
+	return func(o *options) {
+		o.middleware.AfterT = append(o.middleware.AfterT, after...)
+	}
+}
+
+// WithMiddlewareBefore ...
+func WithMiddlewareBefore(before ...BeforeExecute) Option {
+	return func(o *options) {
+		o.middleware.Before = append(o.middleware.Before, before...)
+	}
+}
+
+// WithMiddlewareBeforeT ...
+func WithMiddlewareBeforeT(beforeT ...BeforeExecuteT) Option {
+	return func(o *options) {
+		o.middleware.BeforeT = append(o.middleware.BeforeT, beforeT...)
+	}
+}
+
+// WithHardValidation ...
+func WithHardValidation() Option {
+	return func(o *options) {
+		o.hardValidation = true
+	}
+}
+
 // NewHTTPTestMaker is function for set options for all cute.
 func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	var (
-		o            = new(options)
+		o = &options{
+			middleware: new(Middleware),
+		}
+
 		timeout      = defaultHTTPTimeout * time.Second
 		roundTripper = http.DefaultTransport
 	)
@@ -74,7 +124,9 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	}
 
 	m := &HTTPTestMaker{
-		httpClient: httpClient,
+		hardValidation: o.hardValidation,
+		httpClient:     httpClient,
+		middleware:     o.middleware,
 	}
 
 	return m
@@ -82,10 +134,10 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 
 // NewTestBuilder is a function for initialization foundation for cute
 func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
-	tests := createDefaultTests(m.httpClient)
+	tests := createDefaultTests(m)
 
 	return &cute{
-		httpClient:   m.httpClient,
+		baseProps:    m,
 		countTests:   0,
 		tests:        tests,
 		allureInfo:   new(allureInformation),
@@ -95,18 +147,38 @@ func (m *HTTPTestMaker) NewTestBuilder() AllureBuilder {
 	}
 }
 
-func createDefaultTests(client *http.Client) []*Test {
+func createDefaultTests(m *HTTPTestMaker) []*Test {
 	tests := make([]*Test, 1)
-	tests[0] = createDefaultTest(client)
+	tests[0] = createDefaultTest(m)
 
 	return tests
 }
 
-func createDefaultTest(httpClient *http.Client) *Test {
+func createDefaultTest(m *HTTPTestMaker) *Test {
+	after := make([]AfterExecute, 0, len(m.middleware.After))
+	after = append(after, m.middleware.After...)
+
+	afterT := make([]AfterExecuteT, 0, len(m.middleware.AfterT))
+	afterT = append(afterT, m.middleware.AfterT...)
+
+	before := make([]BeforeExecute, 0, len(m.middleware.Before))
+	before = append(before, m.middleware.Before...)
+
+	beforeT := make([]BeforeExecuteT, 0, len(m.middleware.BeforeT))
+	beforeT = append(beforeT, m.middleware.BeforeT...)
+
+	middleware := &Middleware{
+		After:   after,
+		AfterT:  afterT,
+		Before:  before,
+		BeforeT: beforeT,
+	}
+
 	return &Test{
-		httpClient: httpClient,
-		AllureStep: new(AllureStep),
-		Middleware: new(Middleware),
+		HardValidation: m.hardValidation,
+		httpClient:     m.httpClient,
+		Middleware:     middleware,
+		AllureStep:     new(AllureStep),
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
@@ -231,10 +303,6 @@ func (it *cute) Tags(tags ...string) AllureBuilder {
 func (it *cute) Feature(feature string) AllureBuilder {
 	it.allureLabels.feature = feature
 
-	return it
-}
-
-func (it *cute) CreateWithStep() StepBuilder {
 	return it
 }
 
@@ -377,6 +445,12 @@ func (it *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
 }
 
 func (it *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
+
 	it.tests[it.countTests].Expect.AssertBody = append(it.tests[it.countTests].Expect.AssertBody, asserts...)
 
 	return it
@@ -384,6 +458,10 @@ func (it *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 
 func (it *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
 		it.tests[it.countTests].Expect.AssertBody = append(it.tests[it.countTests].Expect.AssertBody, optionalAssertBody(assert))
 	}
 
@@ -391,6 +469,12 @@ func (it *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 }
 
 func (it *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
+
 	it.tests[it.countTests].Expect.AssertHeaders = append(it.tests[it.countTests].Expect.AssertHeaders, asserts...)
 
 	return it
@@ -398,6 +482,10 @@ func (it *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 
 func (it *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
 		it.tests[it.countTests].Expect.AssertHeaders = append(it.tests[it.countTests].Expect.AssertHeaders, optionalAssertHeaders(assert))
 	}
 
@@ -405,6 +493,12 @@ func (it *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilde
 }
 
 func (it *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
+
 	it.tests[it.countTests].Expect.AssertResponse = append(it.tests[it.countTests].Expect.AssertResponse, asserts...)
 
 	return it
@@ -412,6 +506,10 @@ func (it *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 
 func (it *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
 		it.tests[it.countTests].Expect.AssertResponse = append(it.tests[it.countTests].Expect.AssertResponse, optionalAssertResponse(assert))
 	}
 
@@ -419,6 +517,12 @@ func (it *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuil
 }
 
 func (it *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
+
 	it.tests[it.countTests].Expect.AssertBodyT = append(it.tests[it.countTests].Expect.AssertBodyT, asserts...)
 
 	return it
@@ -426,6 +530,10 @@ func (it *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 
 func (it *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
 		it.tests[it.countTests].Expect.AssertBodyT = append(it.tests[it.countTests].Expect.AssertBodyT, optionalAssertBodyT(assert))
 	}
 
@@ -433,6 +541,12 @@ func (it *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 }
 
 func (it *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
+
 	it.tests[it.countTests].Expect.AssertHeadersT = append(it.tests[it.countTests].Expect.AssertHeadersT, asserts...)
 
 	return it
@@ -440,6 +554,10 @@ func (it *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
 
 func (it *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
 		it.tests[it.countTests].Expect.AssertHeadersT = append(it.tests[it.countTests].Expect.AssertHeadersT, optionalAssertHeadersT(assert))
 	}
 
@@ -447,6 +565,12 @@ func (it *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuil
 }
 
 func (it *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
+
 	it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, asserts...)
 
 	return it
@@ -454,8 +578,18 @@ func (it *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 
 func (it *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
 		it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, optionalAssertResponseT(assert))
 	}
+
+	return it
+}
+
+func (it *cute) EnableHardValidation() ExpectHTTPBuilder {
+	it.tests[it.countTests].HardValidation = true
 
 	return it
 }
@@ -479,7 +613,7 @@ func (it *cute) PutNewTest(name string, r *http.Request, expect *Expect) TableTe
 		}
 	}
 
-	newTest := createDefaultTest(it.httpClient)
+	newTest := createDefaultTest(it.baseProps)
 	newTest.Expect = expect
 	newTest.Name = name
 	newTest.Request.Base = r
@@ -511,7 +645,7 @@ func (it *cute) PutTests(params ...*Test) TableTest {
 func (it *cute) NextTest() NextTestBuilder {
 	it.countTests++ // async?
 
-	it.tests = append(it.tests, createDefaultTest(it.httpClient))
+	it.tests = append(it.tests, createDefaultTest(it.baseProps))
 
 	return it
 }

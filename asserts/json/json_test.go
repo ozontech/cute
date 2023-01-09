@@ -223,7 +223,7 @@ func TestLength(t *testing.T) {
 	}
 }
 
-func TestGreaterThan(t *testing.T) {
+func TestLengthGreaterThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -273,7 +273,7 @@ func TestGreaterThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := GreaterThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthGreaterThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
@@ -283,7 +283,7 @@ func TestGreaterThan(t *testing.T) {
 	}
 }
 
-func TestGreaterOrEqualThan(t *testing.T) {
+func TestLengthGreaterOrEqualThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -354,7 +354,7 @@ func TestGreaterOrEqualThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := GreaterOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthGreaterOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
@@ -364,7 +364,7 @@ func TestGreaterOrEqualThan(t *testing.T) {
 	}
 }
 
-func TestLessThan(t *testing.T) {
+func TestLengthLessThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -414,7 +414,7 @@ func TestLessThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := LessThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthLessThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
@@ -424,7 +424,7 @@ func TestLessThan(t *testing.T) {
 	}
 }
 
-func TestLessOrEqualThan(t *testing.T) {
+func TestLengthLessOrEqualThan(t *testing.T) {
 	tests := []jsonTest{
 		{
 			caseName:   "correct check array",
@@ -495,7 +495,7 @@ func TestLessOrEqualThan(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		err := LessOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
+		err := LengthLessOrEqualThan(test.expression, test.expect.(int))([]byte(test.data))
 
 		if test.IsNilErr {
 			require.NoError(t, err, "failed test %v", test.caseName)
@@ -555,6 +555,26 @@ func TestEqual(t *testing.T) {
 			data:       `{"a":"as", "b":{"bs":"sb"}}`,
 			expression: "$.a",
 			expect:     []byte("not_correct"),
+		},
+		{
+			caseName:   "check 186135434",
+			data:       `{"a":186135434, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     186135434,
+		},
+		{
+			caseName:   "check float",
+			data:       `{"a":1.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     1.0000001,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check float 2",
+			data:       `{"a":999.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     999.0000001,
+			IsNilErr:   true,
 		},
 	}
 

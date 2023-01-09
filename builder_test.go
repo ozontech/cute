@@ -11,7 +11,7 @@ import (
 
 func TestBuilderAfterTest(t *testing.T) {
 	var (
-		maker = NewHTTPTestMaker()
+		maker = NewHTTPTestMaker(WithHardValidation())
 	)
 
 	ht := maker.NewTestBuilder().
@@ -43,11 +43,43 @@ func TestBuilderAfterTest(t *testing.T) {
 	res := ht.(*cute)
 	require.Len(t, res.tests[0].Middleware.After, 2)
 	require.Len(t, res.tests[0].Middleware.AfterT, 3)
+	require.True(t, res.tests[0].HardValidation)
 }
 
 func TestBuilderAfterTestTwoStep(t *testing.T) {
 	var (
-		maker = NewHTTPTestMaker()
+		maker = NewHTTPTestMaker(
+			WithHardValidation(),
+			WithMiddlewareBefore(
+				func(request *http.Request) error {
+					return nil
+				},
+				func(request *http.Request) error {
+					return nil
+				},
+			),
+			WithMiddlewareBeforeT(
+				func(t T, request *http.Request) error {
+					return nil
+				},
+			),
+			WithMiddlewareAfter(
+				func(response *http.Response, errors []error) error {
+					return nil
+				},
+			),
+			WithMiddlewareAfterT(
+				func(t T, response *http.Response, errors []error) error {
+					return nil
+				},
+				func(t T, response *http.Response, errors []error) error {
+					return nil
+				},
+				func(t T, response *http.Response, errors []error) error {
+					return nil
+				},
+			),
+		)
 	)
 
 	ht :=
@@ -98,10 +130,17 @@ func TestBuilderAfterTestTwoStep(t *testing.T) {
 			)
 
 	res := ht.(*cute)
-	require.Len(t, res.tests[0].Middleware.After, 2)
-	require.Len(t, res.tests[0].Middleware.AfterT, 3)
-	require.Len(t, res.tests[1].Middleware.After, 2)
-	require.Len(t, res.tests[1].Middleware.AfterT, 1)
+	require.Len(t, res.tests[0].Middleware.After, 2+1)
+	require.Len(t, res.tests[0].Middleware.Before, 2)
+	require.Len(t, res.tests[0].Middleware.BeforeT, 1)
+	require.Len(t, res.tests[0].Middleware.AfterT, 3+3)
+	require.True(t, res.tests[0].HardValidation)
+
+	require.Len(t, res.tests[1].Middleware.After, 2+1)
+	require.Len(t, res.tests[1].Middleware.AfterT, 1+3)
+	require.Len(t, res.tests[1].Middleware.Before, 2)
+	require.Len(t, res.tests[1].Middleware.BeforeT, 1)
+	require.True(t, res.tests[1].HardValidation)
 }
 
 func TestNewTestBuilder(t *testing.T) {
@@ -116,7 +155,7 @@ func TestNewTestBuilder(t *testing.T) {
 	require.NotNil(t, ht.tests[0].Middleware)
 	require.NotNil(t, ht.tests[0].AllureStep)
 	require.NotNil(t, ht.allureInfo)
-	require.NotNil(t, ht.httpClient)
+	require.NotNil(t, ht.baseProps.httpClient)
 }
 
 func TestHTTPTestMaker(t *testing.T) {
@@ -312,14 +351,18 @@ func TestHTTPTestMaker(t *testing.T) {
 }
 
 func TestCreateDefaultTest(t *testing.T) {
-	defaultClient := http.DefaultClient
+	resTest := createDefaultTest(&HTTPTestMaker{httpClient: http.DefaultClient, middleware: new(Middleware)})
 
-	resTest := createDefaultTest(defaultClient)
 	require.Equal(t, &Test{
 		httpClient: http.DefaultClient,
 		Name:       "",
 		AllureStep: new(AllureStep),
-		Middleware: new(Middleware),
+		Middleware: &Middleware{
+			After:   make([]AfterExecute, 0, 0),
+			AfterT:  make([]AfterExecuteT, 0, 0),
+			Before:  make([]BeforeExecute, 0, 0),
+			BeforeT: make([]BeforeExecuteT, 0, 0),
+		},
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
@@ -338,10 +381,12 @@ func TestCreateTableTest(t *testing.T) {
 
 func TestPutNewTest(t *testing.T) {
 	tests := make([]*Test, 1)
-	tests[0] = createDefaultTest(http.DefaultClient)
+	tests[0] = createDefaultTest(&HTTPTestMaker{httpClient: http.DefaultClient, middleware: new(Middleware)})
 
 	var (
-		c            = &cute{tests: tests}
+		c = &cute{tests: tests, baseProps: &HTTPTestMaker{
+			middleware: &Middleware{},
+		}}
 		reqOne, _    = http.NewRequest("GET", "URL_1", nil)
 		expectOne    = &Expect{Code: 200}
 		reqSecond, _ = http.NewRequest("POST", "URL_1", nil)
@@ -362,7 +407,7 @@ func TestPutNewTest(t *testing.T) {
 
 func TestPutTests(t *testing.T) {
 	var (
-		tests        = createDefaultTests(http.DefaultClient)
+		tests        = createDefaultTests(&HTTPTestMaker{httpClient: http.DefaultClient, middleware: new(Middleware)})
 		c            = &cute{tests: tests}
 		reqOne, _    = http.NewRequest("GET", "URL_1", nil)
 		expectOne    = &Expect{Code: 200}

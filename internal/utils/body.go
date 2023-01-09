@@ -33,5 +33,6 @@ func DrainBody(body io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	if err = body.Close(); err != nil {
 		return nil, body, err
 	}
+
 	return io.NopCloser(&buf), io.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
