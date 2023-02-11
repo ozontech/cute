@@ -142,10 +142,17 @@ type RequestHTTPBuilder interface {
 	// WithMethod
 	// WithURL
 	// WithHeaders
+	// WithHeadersKV
 	// WithBody
 	// WithMarshalBody
 	// WithBody
 	// WithURI
+	// WithQuery
+	// WithQueryKV
+	// WithFileForm
+	// WithFileFormKV
+	// WithForm
+	// WithFormKV
 	RequestBuilder(r ...RequestBuilder) ExpectHTTPBuilder
 
 	RequestParams
@@ -191,14 +198,18 @@ type ExpectHTTPBuilder interface {
 	// NotPresent is a function to asserts that jsonpath expression value is not present
 	// Also you can write you assert.
 	AssertBody(asserts ...AssertBody) ExpectHTTPBuilder
+	// RequireBody implements the same assertions as the `AssertBody`, but stops test execution when a test fails.
+	RequireBody(asserts ...AssertBody) ExpectHTTPBuilder
 	// OptionalAssertBody is not a mandatory assert.
-	// Mark in allure as Broken
+	// Mark in allure as Skipped
 	OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder
 	// AssertBodyT is function for validate response body with help testing.TB and allure allureProvider.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder
+	// RequireBodyT implements the same assertions as the `AssertBodyT`, but stops test execution when a test fails.
+	RequireBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder
 	// OptionalAssertBodyT is not a mandatory assert.
-	// Mark in allure as Broken
+	// Mark in allure as Skipped
 	OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder
 
 	// AssertHeaders is function for validate response headers
@@ -207,30 +218,39 @@ type ExpectHTTPBuilder interface {
 	// NotPresent is a function to asserts header is present
 	// Also you can write you assert.
 	AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder
+	// RequireHeaders implements the same assertions as the `AssertHeaders`, but stops test execution when a test fails.
+	RequireHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder
 	// OptionalAssertHeaders is not a mandatory assert.
-	// Mark in allure as Broken
+	// Mark in allure as Skipped
 	OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder
 	// AssertHeadersT is function for validate headers body with help testing.TB and allure allureProvider.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder
+	// RequireHeadersT implements the same assertions as the `AssertHeadersT`, but stops test execution when a test fails.
+	RequireHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder
 	// OptionalAssertHeadersT is not a mandatory assert.
-	// Mark in allure as Broken
+	// Mark in allure as Skipped
 	OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder
 
 	// AssertResponse is function for validate response
 	AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder
+	// RequireResponse implements the same assertions as the `AssertResponse`, but stops test execution when a test fails.
+	RequireResponse(asserts ...AssertResponse) ExpectHTTPBuilder
 	// OptionalAssertResponse is not a mandatory assert.
-	// Mark in allure as Broken
+	// Mark in allure as Skipped
 	OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder
 	// AssertResponseT is function for validate response with help testing.TB.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
+	// RequireResponseT implements the same assertions as the `AssertResponseT`, but stops test execution when a test fails.
+	RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 	// OptionalAssertResponseT is not a mandatory assert.
-	// Mark in allure as Broken
+	// Mark in allure as Skipped
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
 	// EnableHardValidation is enabled hard validation,
 	// If one of assert was failed, test will stopped.
+	// Deprecated. Please use require asserts.
 	EnableHardValidation() ExpectHTTPBuilder
 
 	After
@@ -258,9 +278,10 @@ type ResultsHTTPBuilder interface {
 	GetHTTPResponse() *http.Response
 	// GetErrors is a function, which returns all errors from test
 	GetErrors() []error
-
-	// GetName is a function, which returns Name Test
+	// GetName is a function, which returns name of Test
 	GetName() string
+	// IsFailed is a function, which returns flag about status of test
+	IsFailed() bool
 }
 
 // BeforeExecute ...

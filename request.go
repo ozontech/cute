@@ -16,10 +16,12 @@ type File struct {
 }
 
 type requestOptions struct {
-	method      string
-	url         *url.URL
+	method string
+	url    *url.URL
+
 	uri         string
 	headers     map[string][]string
+	query       map[string][]string
 	body        []byte
 	bodyMarshal interface{}
 	fileForms   map[string]*File
@@ -29,6 +31,7 @@ type requestOptions struct {
 func newRequestOptions() *requestOptions {
 	return &requestOptions{
 		headers:   make(map[string][]string),
+		query:     make(map[string][]string),
 		fileForms: make(map[string]*File),
 		forms:     make(map[string][]byte),
 	}
@@ -55,10 +58,12 @@ func WithURI(uri string) func(o *requestOptions) {
 	}
 }
 
-// WithHeaders is a function for set headers in request
+// WithHeaders is a function for set or merge headers in request
 func WithHeaders(headers map[string][]string) func(o *requestOptions) {
 	return func(o *requestOptions) {
-		o.headers = headers
+		for key, values := range headers {
+			o.headers[key] = append(o.headers[key], values...)
+		}
 	}
 }
 
@@ -66,6 +71,22 @@ func WithHeaders(headers map[string][]string) func(o *requestOptions) {
 func WithHeadersKV(name string, value string) func(o *requestOptions) {
 	return func(o *requestOptions) {
 		o.headers[name] = []string{value}
+	}
+}
+
+// WithQueryKV is a function for set query in request
+func WithQueryKV(name string, value string) func(o *requestOptions) {
+	return func(o *requestOptions) {
+		o.query[name] = []string{value}
+	}
+}
+
+// WithQuery is a function for set or merge query parameters in request
+func WithQuery(queries map[string][]string) func(o *requestOptions) {
+	return func(o *requestOptions) {
+		for key, values := range queries {
+			o.query[key] = values
+		}
 	}
 }
 

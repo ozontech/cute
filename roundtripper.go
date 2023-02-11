@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/moul/http2curl"
 	"github.com/ozontech/allure-go/pkg/allure"
 	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/ozontech/cute/internal/utils"
+	"moul.io/http2curl/v2"
 )
 
 func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {

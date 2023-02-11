@@ -5,16 +5,18 @@ import (
 )
 
 type testResults struct {
-	name   string
-	resp   *http.Response
-	errors []error
+	isFailed bool
+	name     string
+	resp     *http.Response
+	errors   []error
 }
 
-func newTestResult(name string, resp *http.Response, errs []error) ResultsHTTPBuilder {
+func newTestResult(name string, resp *http.Response, isFailed bool, errs []error) ResultsHTTPBuilder {
 	return &testResults{
-		name:   name,
-		resp:   resp,
-		errors: errs,
+		name:     name,
+		resp:     resp,
+		isFailed: isFailed,
+		errors:   errs,
 	}
 }
 
@@ -28,4 +30,8 @@ func (r *testResults) GetErrors() []error {
 
 func (r *testResults) GetName() string {
 	return r.name
+}
+
+func (r *testResults) IsFailed() bool {
+	return r.isFailed
 }

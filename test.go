@@ -9,6 +9,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -173,20 +174,27 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 		resp, errs = it.startTest(ctx, allureProvider)
 	}
 
-	it.processTestErrors(allureProvider, errs)
+	isFailedTest := it.processTestErrors(allureProvider, errs)
 
 	// Remove from base struct all asserts
 	it.clearFields()
 
-	return newTestResult(name, resp, errs)
+	return newTestResult(name, resp, isFailedTest, errs)
 }
 
-func (it *Test) processTestErrors(t internalT, errs []error) {
+// processTestErrors returns flag, which mean finish test or not.
+// true - need finish test
+// false - continue
+func (it *Test) processTestErrors(t internalT, errs []error) bool {
+	var (
+		countNotOptionalErrors = 0
+		failTest               = false
+	)
+
 	if len(errs) == 0 {
-		return
+		return false
 	}
 
-	resErrors := make([]error, 0)
 	for _, err := range errs {
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
@@ -195,31 +203,29 @@ func (it *Test) processTestErrors(t internalT, errs []error) {
 			}
 		}
 
-		resErrors = append(resErrors, err)
-	}
-
-	if len(resErrors) == 0 {
-		return
-	}
-
-	if len(resErrors) == 1 {
-		t.Errorf("[ERROR] %v", resErrors[0])
-		if it.HardValidation {
-			t.FailNow()
+		if tErr, ok := err.(cuteErrors.RequireError); ok {
+			if tErr.IsRequire() {
+				failTest = true
+			}
 		}
 
-		return
-	}
-
-	for _, err := range resErrors {
 		t.Errorf("[ERROR] %v", err)
+
+		countNotOptionalErrors++
 	}
 
-	t.Errorf("Test finished with %v errors", len(resErrors))
-
-	if it.HardValidation {
-		t.FailNow()
+	if countNotOptionalErrors != 0 {
+		t.Errorf("Test finished with %v errors", countNotOptionalErrors)
 	}
+
+	// If we have not optional errors and hardValidation (assert errors)
+	// or if we have failed tests (require errors)
+	// we should fail test
+	if (it.HardValidation && countNotOptionalErrors != 0) || failTest {
+		return true
+	}
+
+	return false
 }
 
 func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {
@@ -256,7 +262,7 @@ func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []e
 	// CreateWithStep request
 	req, err := it.createRequest(ctx)
 	if err != nil {
-		return resp, []error{err}
+		return nil, []error{err}
 	}
 
 	// Execute Before
@@ -365,20 +371,35 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 // 3. requestOptions.forms and requestOptions.fileForms <- high priority.
 func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 	var (
-		req *http.Request
-		err error
-		o   = newRequestOptions()
+		req    *http.Request
+		err    error
+		o      = newRequestOptions()
+		reqUrl = o.url
 	)
 
+	// Set builder parameters
 	for _, builder := range it.Request.Builders {
 		builder(o)
 	}
 
-	url := o.uri
-	if o.url != nil {
-		url = o.url.String()
+	if reqUrl == nil {
+		reqUrl, err = url.Parse(o.uri)
+		if err != nil {
+			return nil, err
+		}
 	}
 
+	// Set query parameters
+	query := reqUrl.Query()
+	for key, values := range o.query {
+		for _, value := range values {
+			query.Add(key, value)
+		}
+	}
+
+	reqUrl.RawQuery = query.Encode()
+
+	// Set body
 	body := o.body
 	if o.bodyMarshal != nil {
 		body, err = json.Marshal(o.bodyMarshal) // TODO move marshaler to it struct
@@ -388,6 +409,7 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 		}
 	}
 
+	// Set multipart
 	if len(o.fileForms) != 0 || len(o.forms) != 0 {
 		var (
 			buffer = new(bytes.Buffer)
@@ -414,22 +436,24 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 			return nil, err
 		}
 
-		req, err = http.NewRequestWithContext(ctx, o.method, url, buffer)
+		req, err = http.NewRequestWithContext(ctx, o.method, reqUrl.String(), buffer)
 		if err != nil {
 			return nil, err
 		}
 
 		req.Header.Add("Content-Type", mp.FormDataContentType())
 	} else {
-		req, err = http.NewRequestWithContext(ctx, o.method, url, io.NopCloser(bytes.NewReader(body)))
+		req, err = http.NewRequestWithContext(ctx, o.method, reqUrl.String(), io.NopCloser(bytes.NewReader(body)))
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	// Set headers
 	for nameHeader, valuesHeader := range o.headers {
 		req.Header[nameHeader] = valuesHeader
 	}
+
 	return req, nil
 }
 
