@@ -5,6 +5,7 @@ package examples
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -92,13 +93,19 @@ func Test_TwoSteps_3(t *testing.T) {
 			cute.WithMethod(http.MethodGet),
 		).
 		ExpectStatus(http.StatusOK).
+		RequireBody(func(body []byte) error {
+			return errors.New("example")
+		}).
 		NextTest().
 		AfterTestExecute(func(response *http.Response, errors []error) error { // Execute after first step
 			responseCode = response.StatusCode
 
+			fmt.Println("Hello from after test execute")
+			fmt.Println("Response code", responseCode)
+
 			return nil
 		}).
-		// Second step
+		// Second step. This test isn't run, because previous test has failed require validation
 		Create().
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/2/comments"),
