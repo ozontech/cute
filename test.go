@@ -371,16 +371,18 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 // 3. requestOptions.forms and requestOptions.fileForms <- high priority.
 func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 	var (
-		req    *http.Request
-		err    error
-		o      = newRequestOptions()
-		reqURL = o.url
+		req *http.Request
+		err error
+
+		o = newRequestOptions()
 	)
 
 	// Set builder parameters
 	for _, builder := range it.Request.Builders {
 		builder(o)
 	}
+
+	reqURL := o.url
 
 	if reqURL == nil {
 		reqURL, err = url.Parse(o.uri)

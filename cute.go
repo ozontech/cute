@@ -85,10 +85,10 @@ func createAllureT(t *testing.T) *common.Common {
 		newT        = common.NewT(t)
 		callers     = strings.Split(t.Name(), "/")
 		providerCfg = manager.NewProviderConfig().
-			WithFullName(t.Name()).
-			WithPackageName("package").
-			WithSuiteName(t.Name()).
-			WithRunner(callers[0])
+				WithFullName(t.Name()).
+				WithPackageName("package").
+				WithSuiteName(t.Name()).
+				WithRunner(callers[0])
 		newProvider = manager.NewProvider(providerCfg)
 	)
 	newProvider.NewTest(t.Name(), "package")
@@ -122,6 +122,8 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 				res = append(res, resT)
 
 				if resT.IsFailed() {
+					inT.Fail()
+
 					allureProvider.Logf("Test was failed %v", currentTest.Name)
 
 					return
@@ -141,6 +143,8 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 			res = append(res, resT)
 
 			if resT.IsFailed() {
+				allureProvider.Fail()
+
 				allureProvider.Logf("Test was failed %v", currentTest.Name)
 				break
 			}
