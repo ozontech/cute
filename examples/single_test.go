@@ -36,6 +36,7 @@ func Test_Single_1(t *testing.T) {
 			}{
 				Name: "Vasya Pupkin",
 			}),
+			cute.WithQueryKV("socks", "42"),
 			cute.WithMethod(http.MethodGet),
 		).
 		ExpectExecuteTimeout(10*time.Second).
