@@ -374,7 +374,7 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 		req    *http.Request
 		err    error
 		o      = newRequestOptions()
-		reqUrl = o.url
+		reqURL = o.url
 	)
 
 	// Set builder parameters
@@ -382,22 +382,22 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 		builder(o)
 	}
 
-	if reqUrl == nil {
-		reqUrl, err = url.Parse(o.uri)
+	if reqURL == nil {
+		reqURL, err = url.Parse(o.uri)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// Set query parameters
-	query := reqUrl.Query()
+	query := reqURL.Query()
 	for key, values := range o.query {
 		for _, value := range values {
 			query.Add(key, value)
 		}
 	}
 
-	reqUrl.RawQuery = query.Encode()
+	reqURL.RawQuery = query.Encode()
 
 	// Set body
 	body := o.body
@@ -436,14 +436,14 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 			return nil, err
 		}
 
-		req, err = http.NewRequestWithContext(ctx, o.method, reqUrl.String(), buffer)
+		req, err = http.NewRequestWithContext(ctx, o.method, reqURL.String(), buffer)
 		if err != nil {
 			return nil, err
 		}
 
 		req.Header.Add("Content-Type", mp.FormDataContentType())
 	} else {
-		req, err = http.NewRequestWithContext(ctx, o.method, reqUrl.String(), io.NopCloser(bytes.NewReader(body)))
+		req, err = http.NewRequestWithContext(ctx, o.method, reqURL.String(), io.NopCloser(bytes.NewReader(body)))
 		if err != nil {
 			return nil, err
 		}
