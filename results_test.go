@@ -19,8 +19,9 @@ func TestResult(t *testing.T) {
 		name = "Name"
 
 		testResults ResultsHTTPBuilder = &testResults{
-			name: name,
-			resp: resp,
+			name:     name,
+			resp:     resp,
+			isFailed: true,
 			errors: []error{
 				firstErr,
 				secondErr,
@@ -28,7 +29,8 @@ func TestResult(t *testing.T) {
 		}
 	)
 
+	require.Equal(t, name, testResults.GetName())
+	require.Equal(t, true, testResults.IsFailed())
 	require.Equal(t, resp, testResults.GetHTTPResponse())
 	require.Equal(t, []error{firstErr, secondErr}, testResults.GetErrors())
-	require.Equal(t, name, testResults.GetName())
 }

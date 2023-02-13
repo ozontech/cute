@@ -10,7 +10,7 @@ import (
 const defaultHTTPTimeout = 30
 
 var (
-	errorAssertIsNil = "Assert must be not nil"
+	errorAssertIsNil = "assert must be not nil"
 )
 
 // HTTPTestMaker is a creator tests
@@ -468,6 +468,18 @@ func (it *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	return it
 }
 
+func (it *cute) RequireBody(asserts ...AssertBody) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		it.tests[it.countTests].Expect.AssertBody = append(it.tests[it.countTests].Expect.AssertBody, requireAssertBody(assert))
+	}
+
+	return it
+}
+
 func (it *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
@@ -487,6 +499,18 @@ func (it *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilde
 		}
 
 		it.tests[it.countTests].Expect.AssertHeaders = append(it.tests[it.countTests].Expect.AssertHeaders, optionalAssertHeaders(assert))
+	}
+
+	return it
+}
+
+func (it *cute) RequireHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		it.tests[it.countTests].Expect.AssertHeaders = append(it.tests[it.countTests].Expect.AssertHeaders, requireAssertHeaders(assert))
 	}
 
 	return it
@@ -516,6 +540,18 @@ func (it *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuil
 	return it
 }
 
+func (it *cute) RequireResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		it.tests[it.countTests].Expect.AssertResponse = append(it.tests[it.countTests].Expect.AssertResponse, requireAssertResponse(assert))
+	}
+
+	return it
+}
+
 func (it *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
@@ -535,6 +571,18 @@ func (it *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 		}
 
 		it.tests[it.countTests].Expect.AssertBodyT = append(it.tests[it.countTests].Expect.AssertBodyT, optionalAssertBodyT(assert))
+	}
+
+	return it
+}
+
+func (it *cute) RequireBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		it.tests[it.countTests].Expect.AssertBodyT = append(it.tests[it.countTests].Expect.AssertBodyT, requireAssertBodyT(assert))
 	}
 
 	return it
@@ -564,6 +612,18 @@ func (it *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuil
 	return it
 }
 
+func (it *cute) RequireHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		it.tests[it.countTests].Expect.AssertHeadersT = append(it.tests[it.countTests].Expect.AssertHeadersT, requireAssertHeadersT(assert))
+	}
+
+	return it
+}
+
 func (it *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
@@ -583,6 +643,18 @@ func (it *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBu
 		}
 
 		it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, optionalAssertResponseT(assert))
+	}
+
+	return it
+}
+
+func (it *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
 	}
 
 	return it

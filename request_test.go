@@ -10,10 +10,15 @@ import (
 
 func TestRequest(t *testing.T) {
 	var (
-		req     = &requestOptions{}
+		req     = newRequestOptions()
 		headers = map[string][]string{
 			"key": []string{
 				"value",
+			},
+		}
+		query = map[string][]string{
+			"query_key": []string{
+				"query_value",
 			},
 		}
 		method = http.MethodGet
@@ -34,11 +39,13 @@ func TestRequest(t *testing.T) {
 	WithMethod(method)(req)
 	WithURL(u)(req)
 	WithBody(body)(req)
+	WithQuery(query)(req)
 
 	require.Equal(t, req.headers, headers)
 	require.Equal(t, req.uri, uri)
 	require.Equal(t, req.bodyMarshal, mBody)
 	require.Equal(t, req.method, method)
+	require.Equal(t, req.query, query)
 
 	require.Equal(t, req.body, body)
 	require.Equal(t, req.url, u)

@@ -19,18 +19,13 @@ type WithFields interface {
 	PutFields(map[string]interface{})
 }
 
-// OptionalError is interface for put parameters in allure step.
-// If function returns error, which implement this interface, allure step will have skip status
-type OptionalError interface {
-	IsOptional() bool
-	SetOptional(bool)
-}
-
 type assertError struct {
 	optional bool
-	name     string
-	message  string
-	fields   map[string]interface{}
+	require  bool
+
+	name    string
+	message string
+	fields  map[string]interface{}
 }
 
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
@@ -74,26 +69,10 @@ func (a *assertError) SetOptional(opt bool) {
 	a.optional = opt
 }
 
-type optionalError struct {
-	err      string
-	optional bool
+func (a *assertError) IsRequire() bool {
+	return a.require
 }
 
-func NewOptionalError(err string) error {
-	return &optionalError{
-		optional: true,
-		err:      err,
-	}
-}
-
-func (o *optionalError) Error() string {
-	return o.err
-}
-
-func (o *optionalError) IsOptional() bool {
-	return o.optional
-}
-
-func (o *optionalError) SetOptional(opt bool) {
-	o.optional = opt
+func (a *assertError) SetRequire(b bool) {
+	a.require = b
 }
