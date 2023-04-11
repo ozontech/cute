@@ -1,7 +1,5 @@
-# More info on config here: https://github.com/golangci/golangci-lint#config-file
 run:
-  deadline: 10s
-  timeout: 5m
+  timeout: 10m
   issues-exit-code: 1
   tests: true
   skip-dirs:
@@ -12,7 +10,6 @@ run:
   skip-files:
     - \.pb\.go$
     - \.pb\.goclay\.go$
-    - \_test.go$
 
 output:
   format: colored-line-number
@@ -22,8 +19,6 @@ output:
 linters-settings:
   govet:
     check-shadowing: true
-  golint:
-    min-confidence: 0
   dupl:
     threshold: 100
   goconst:
@@ -33,39 +28,33 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - revive
-    - govet
     - errcheck
-    - deadcode
-    - structcheck
-    - varcheck
-    - ineffassign
-    - typecheck
     - goconst
-    - gosec
     - goimports
+    - gosec
+    - govet
+    - ineffassign
     - megacheck
-
+    - revive
+    - typecheck
+    - unused # will be used insted of varcheck + deadcode + structcheck. More info https://github.com/golangci/golangci-lint/issues/1841
+    - exportloopref
+    - ifshort
+    - prealloc
+    - wsl
 
 issues:
   exclude-use-default: false
   exclude:
     # _ instead of err checks
     - G104
-    - G306
-    # md5 using for hash generation, not for security, so ignore this
-    - G401
-    - G501
     # for "public interface + private struct implementation" cases only!
-    - exported func * returns unexported type *, which can be annoying to use
+    - exported func .* returns unexported type .*, which can be annoying to use
     # can be removed in the development phase
     # - (comment on exported (method|function|type|const)|should have( a package)? comment|comment should be of the form)
     # not for the active development - can be removed in the stable phase
-    - should have a package comment, unless it's in another file for this package
+    - should have a package comment
     - don't use an underscore in package name
-    # errcheck: Almost all programs ignore errors on these functions and in most cases it's ok
-    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv|.*Rollback). is not checked
+    # EXC0001 errcheck: Almost all programs ignore errors on these functions and in most cases it's ok
+    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
     - should check returned error before deferring
-    - should have comment or be unexported
-    - a blank import should be only in a main or test package
-    - Can't process result by diff processor
