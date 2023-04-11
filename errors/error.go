@@ -28,6 +28,7 @@ type assertError struct {
 	fields  map[string]interface{}
 }
 
+// NewAssertError ...
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
 	return &assertError{
 		name:    name,
