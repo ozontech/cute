@@ -126,8 +126,9 @@ You can read about `Allure.Suite` [here](https://github.com/ozontech/allure-go#s
 
 ```go
 import (
-    "github.com/ozontech/allure-go/pkg/framework/provider"
     "github.com/ozontech/cute"
+    "github.com/ozontech/allure-go/pkg/framework/provider"
+    "github.com/ozontech/allure-go/pkg/framework/suite"
 )
 
 type ExampleSuite struct {
