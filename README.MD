@@ -140,7 +140,7 @@ type ExampleSuite struct {
 
 func (i *ExampleSuite) BeforeAll(t provider.T) {
     // Prepare http test builder
-    i.testMaker = cute.NewHTTPTestMakerSuite()
+    i.testMaker = cute.NewHTTPTestMaker()
 
     // Preparing host
     host, err := url.Parse("https://jsonplaceholder.typicode.com/")
