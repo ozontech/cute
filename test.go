@@ -128,23 +128,30 @@ func (it *Test) clearFields() {
 }
 
 func (it *Test) initEmptyFields() {
-	it.httpClient = http.DefaultClient
+	if it.httpClient.Transport == nil || it.httpClient.Timeout == 0 {
+		it.httpClient = http.DefaultClient
+	}
 
 	if it.AllureStep == nil {
 		it.AllureStep = new(AllureStep)
 	}
+
 	if it.Middleware == nil {
 		it.Middleware = new(Middleware)
 	}
+
 	if it.Expect == nil {
 		it.Expect = new(Expect)
 	}
+
 	if it.Request == nil {
 		it.Request = new(Request)
 	}
+
 	if it.Request.Repeat == nil {
 		it.Request.Repeat = new(RequestRepeatPolitic)
 	}
+
 	if it.Expect.JSONSchema == nil {
 		it.Expect.JSONSchema = new(ExpectJSONSchema)
 	}
