@@ -128,10 +128,6 @@ func (it *Test) clearFields() {
 }
 
 func (it *Test) initEmptyFields() {
-	if it.httpClient.Transport == nil || it.httpClient.Timeout == 0 {
-		it.httpClient = http.DefaultClient
-	}
-
 	if it.AllureStep == nil {
 		it.AllureStep = new(AllureStep)
 	}
