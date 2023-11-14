@@ -73,7 +73,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	}
 
 	if httpErr != nil {
-		return nil, err
+		return nil, httpErr
 	}
 
 	if resp != nil {
