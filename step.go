@@ -55,6 +55,16 @@ func processStepErrors(stepCtx provider.StepCtx, errs []error) {
 			}
 		}
 
+		if tErr, ok := err.(errors.WithAttachments); ok {
+			for _, v := range tErr.GetAttachments() {
+				if v == nil {
+					continue
+				}
+
+				currentStep.WithAttachments(allure.NewAttachment(v.Name, allure.MimeType(v.MimeType), v.Content))
+			}
+		}
+
 		statuses = append(statuses, currentStatus)
 
 		currentStep.WithAttachments(allure.NewAttachment("Error", allure.Text, []byte(err.Error())))

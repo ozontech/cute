@@ -41,6 +41,7 @@ func Test_Single_1(t *testing.T) {
 		).
 		ExpectExecuteTimeout(10*time.Second).
 		ExpectStatus(http.StatusOK).
+		AssertBody(json.Diff("{\"aaa\":\"bb\"}")).
 		AssertBody(
 			json.Present("$[1].name"),
 			json.Present("$[0].passport"), // Example fail

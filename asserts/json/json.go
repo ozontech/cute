@@ -3,10 +3,41 @@ package json
 import (
 	"fmt"
 
+	jd "github.com/josephburnett/jd/lib"
 	"github.com/ohler55/ojg/jp"
 	"github.com/ohler55/ojg/oj"
 	"github.com/ozontech/cute"
+	cuteErrors "github.com/ozontech/cute/errors"
 )
+
+// Diff is a function to compare two jsons
+func Diff(original string) cute.AssertBody {
+	return func(body []byte) error {
+		originalJSON, err := jd.ReadJsonString(original)
+		if err != nil {
+			return fmt.Errorf("could not parse original json in Diff error: '%s'", err)
+		}
+
+		bodyJSON, err := jd.ReadJsonString(string(body))
+		if err != nil {
+			return fmt.Errorf("could not parse body json in Diff error: '%s'", err)
+		}
+
+		diff := originalJSON.Diff(bodyJSON).Render()
+		if diff != "" {
+			cErr := cuteErrors.NewEmptyAssertError("JSON Diff", "JSON is not the same")
+			cErr.PutAttachment(&cuteErrors.Attachment{
+				Name:     "JSON diff",
+				MimeType: "text/plain",
+				Content:  []byte(diff),
+			})
+
+			return cErr
+		}
+
+		return nil
+	}
+}
 
 // Contains is a function to assert that a jsonpath expression extracts a value in an array
 // About expression - https://goessner.net/articles/JsonPath/
@@ -99,16 +130,15 @@ func NotPresent(expression string) cute.AssertBody {
 }
 
 // GetValueFromJSON is function for get value from json
-// TODO create tests
 func GetValueFromJSON(js []byte, expression string) (interface{}, error) {
 	obj, err := oj.Parse(js)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse json in ,GetValueFromJSON error: '%s'", err)
+		return nil, fmt.Errorf("could not parse json in GetValueFromJSON error: '%s'", err)
 	}
 
 	jsonPath, err := jp.ParseString(expression)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse path in ,GetValueFromJSON error: '%s'", err)
+		return nil, fmt.Errorf("could not parse path in GetValueFromJSON error: '%s'", err)
 	}
 
 	res := jsonPath.Get(obj)

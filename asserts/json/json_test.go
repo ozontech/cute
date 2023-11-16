@@ -3,6 +3,7 @@ package json
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -12,6 +13,61 @@ type jsonTest struct {
 	expression string
 	expect     interface{}
 	IsNilErr   bool
+}
+
+func TestDiff(t *testing.T) {
+	testCases := []struct {
+		name          string
+		originalJSON  string
+		bodyJSON      string
+		expectedError string
+	}{
+		{
+			name:          "SameJSON",
+			originalJSON:  `{"key1": "value1", "key2": "value2"}`,
+			bodyJSON:      `{"key1": "value1", "key2": "value2"}`,
+			expectedError: "", // No error expected, JSONs are the same
+		},
+		{
+			name:          "DifferentValueJSON",
+			originalJSON:  `{"key1": "value1", "key2": "value2"}`,
+			bodyJSON:      `{"key1": "value1", "key2": "value3"}`,
+			expectedError: "JSON is not same",
+		},
+		{
+			name:          "MissingKeyJSON",
+			originalJSON:  `{"key1": "value1", "key2": "value2"}`,
+			bodyJSON:      `{"key1": "value1"}`,
+			expectedError: "JSON is not same",
+		},
+		{
+			name:          "ExtraKeyJSON",
+			originalJSON:  `{"key1": "value1"}`,
+			bodyJSON:      `{"key1": "value1", "key2": "value2"}`,
+			expectedError: "JSON is not same",
+		},
+		{
+			name:          "EmptyJSON",
+			originalJSON:  `{}`,
+			bodyJSON:      `{}`,
+			expectedError: "", // No error expected, empty JSONs are the same
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Call the Diff function with the test input
+			err := Diff(testCase.originalJSON)([]byte(testCase.bodyJSON))
+
+			// Check if the error message matches the expected result
+			if testCase.expectedError == "" {
+				assert.NoError(t, err) // No error expected
+			} else {
+				assert.Error(t, err) // Error expected
+				assert.Contains(t, err.Error(), testCase.expectedError)
+			}
+		})
+	}
 }
 
 func TestNotPresent(t *testing.T) {
@@ -639,5 +695,69 @@ func TestNotEqual(t *testing.T) {
 		} else {
 			require.Error(t, err, "failed test %v", test.caseName)
 		}
+	}
+}
+
+func TestGetValueFromJSON(t *testing.T) {
+	testCases := []struct {
+		name          string
+		inputJSON     string
+		expression    string
+		expectedValue interface{}
+		expectedError string
+	}{
+		{
+			name:          "ValidExpressionObject",
+			inputJSON:     `{"key1": "value1", "key2": {"key3": "value3"}}`,
+			expression:    "key2.key3",
+			expectedValue: "value3",
+			expectedError: "", // No error expected
+		},
+		{
+			name:          "ValidExpressionArray",
+			inputJSON:     `{"key1": "value1", "key2": [1, 2, 3]}`,
+			expression:    "key2[1]",
+			expectedValue: int64(2),
+			expectedError: "", // No error expected
+		},
+		{
+			name:          "ValidExpressionMap",
+			inputJSON:     `{"key1": "value1", "key2": {"subkey1": "subvalue1"}}`,
+			expression:    "key2",
+			expectedValue: map[string]interface{}{"subkey1": "subvalue1"},
+			expectedError: "", // No error expected
+		},
+		{
+			name:          "InvalidJSON",
+			inputJSON:     `invalid json`,
+			expression:    "key1",
+			expectedValue: nil,
+			expectedError: "could not parse json",
+		},
+		{
+			name:          "InvalidExpression",
+			inputJSON:     `{"key1": "value1"}`,
+			expression:    "key2",
+			expectedValue: nil,
+			expectedError: "could not find element by path key2 in JSON",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			// Call the GetValueFromJSON function with the test input
+			value, err := GetValueFromJSON([]byte(testCase.inputJSON), testCase.expression)
+
+			// Check if the error message matches the expected result
+			if testCase.expectedError == "" {
+				assert.NoError(t, err) // No error expected
+			} else {
+				assert.Error(t, err) // Error expected
+				assert.Contains(t, err.Error(), testCase.expectedError)
+			}
+
+			// Check if the returned value matches the expected result
+			assert.Equal(t, testCase.expectedValue, value)
+		})
 	}
 }
