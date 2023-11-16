@@ -69,7 +69,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// should be after httpClient.Do, because in roundTripper request could be changed
 	err = addInformationRequest(t, req)
 	if err != nil {
-		return nil, err
+		t.Log("[ERROR] Could not log information about request. Error %v", err)
 	}
 
 	if httpErr != nil {
