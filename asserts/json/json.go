@@ -1,10 +1,10 @@
 package json
 
 import (
-	"encoding/json"
 	"fmt"
 
-	"github.com/PaesslerAG/jsonpath"
+	"github.com/ohler55/ojg/jp"
+	"github.com/ohler55/ojg/oj"
 	"github.com/ozontech/cute"
 )
 
@@ -101,17 +101,21 @@ func NotPresent(expression string) cute.AssertBody {
 // GetValueFromJSON is function for get value from json
 // TODO create tests
 func GetValueFromJSON(js []byte, expression string) (interface{}, error) {
-	v := interface{}(nil)
-
-	err := json.Unmarshal(js, &v)
+	obj, err := oj.Parse(js)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not parse json in ,GetValueFromJSON error: '%s'", err)
 	}
 
-	value, err := jsonpath.Get(expression, v)
+	jsonPath, err := jp.ParseString(expression)
 	if err != nil {
-		return nil, fmt.Errorf("evaluating '%s' resulted in error: '%s'", expression, err)
+		return nil, fmt.Errorf("could not parse path in ,GetValueFromJSON error: '%s'", err)
 	}
 
-	return value, nil
+	res := jsonPath.Get(obj)
+
+	if len(res) == 0 {
+		return nil, fmt.Errorf("could not find element by path %v in JSON", expression)
+	}
+
+	return res[0], nil
 }

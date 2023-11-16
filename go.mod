@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
+	github.com/ohler55/ojg v1.12.9
 	github.com/ozontech/allure-go/pkg/allure v0.6.11
 	github.com/ozontech/allure-go/pkg/framework v0.6.28
 	github.com/stretchr/testify v1.7.1
