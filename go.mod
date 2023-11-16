@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
-	github.com/ozontech/allure-go/pkg/allure v0.6.4
-	github.com/ozontech/allure-go/pkg/framework v0.6.18
+	github.com/ozontech/allure-go/pkg/allure v0.6.11
+	github.com/ozontech/allure-go/pkg/framework v0.6.28
 	github.com/stretchr/testify v1.7.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	moul.io/http2curl/v2 v2.3.0

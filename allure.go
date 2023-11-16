@@ -17,6 +17,12 @@ func (it *cute) setLinksAllure(t linksAllureProvider) {
 	if it.allureLinks.link != nil {
 		t.Link(it.allureLinks.link)
 	}
+	if it.allureLinks.tmsLink != "" {
+		t.TmsLink(it.allureLinks.tmsLink)
+	}
+	if len(it.allureLinks.tmsLinks) > 0 {
+		t.TmsLinks(it.allureLinks.tmsLinks...)
+	}
 }
 
 func (it *cute) setLabelsAllure(t labelsAllureProvider) {
@@ -65,6 +71,9 @@ func (it *cute) setLabelsAllure(t labelsAllureProvider) {
 	if len(it.allureLabels.tags) != 0 {
 		t.Tags(it.allureLabels.tags...)
 	}
+	if it.allureLabels.layer != "" {
+		it.Layer(it.allureLabels.layer)
+	}
 }
 
 func (it *cute) setInfoAllure(t infoAllureProvider) {
@@ -73,5 +82,8 @@ func (it *cute) setInfoAllure(t infoAllureProvider) {
 	}
 	if it.allureInfo.description != "" {
 		t.Description(it.allureInfo.description)
+	}
+	if it.allureInfo.stage != "" {
+		t.Stage(it.allureInfo.stage)
 	}
 }

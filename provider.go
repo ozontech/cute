@@ -69,12 +69,16 @@ type infoAllureProvider interface {
 
 	Description(args ...interface{})
 	Descriptionf(format string, args ...interface{})
+
+	Stage(args ...interface{})
+	Stagef(format string, args ...interface{})
 }
 
 type labelsAllureProvider interface {
 	ID(value string)
 	AllureID(value string)
 	Epic(value string)
+	Layer(value string)
 	AddSuiteLabel(value string)
 	AddSubSuite(value string)
 	AddParentSuite(value string)
@@ -93,4 +97,6 @@ type linksAllureProvider interface {
 	SetIssue(issue string)
 	SetTestCase(testCase string)
 	Link(link *allure.Link)
+	TmsLink(tmsCase string)
+	TmsLinks(tmsCases ...string)
 }

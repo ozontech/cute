@@ -29,6 +29,7 @@ type cute struct {
 type allureInformation struct {
 	title       string
 	description string
+	stage       string
 }
 
 type allureLabels struct {
@@ -47,12 +48,15 @@ type allureLabels struct {
 	label       *allure.Label
 	labels      []*allure.Label
 	allureID    string
+	layer       string
 }
 
 type allureLinks struct {
 	issue    string
 	testCase string
 	link     *allure.Link
+	tmsLink  string
+	tmsLinks []string
 }
 
 func (it *cute) ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder {

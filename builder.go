@@ -1,6 +1,7 @@
 package cute
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -181,6 +182,48 @@ func (it *cute) Title(title string) AllureBuilder {
 
 func (it *cute) Epic(epic string) AllureBuilder {
 	it.allureLabels.epic = epic
+
+	return it
+}
+
+func (it *cute) Titlef(format string, args ...interface{}) AllureBuilder {
+	it.allureInfo.title = fmt.Sprintf(format, args...)
+
+	return it
+}
+
+func (it *cute) Descriptionf(format string, args ...interface{}) AllureBuilder {
+	it.allureInfo.description = fmt.Sprintf(format, args...)
+
+	return it
+}
+
+func (it *cute) Stage(stage string) AllureBuilder {
+	it.allureInfo.stage = stage
+
+	return it
+}
+
+func (it *cute) Stagef(format string, args ...interface{}) AllureBuilder {
+	it.allureInfo.stage = fmt.Sprintf(format, args...)
+
+	return it
+}
+
+func (it *cute) Layer(value string) AllureBuilder {
+	it.allureLabels.layer = value
+
+	return it
+}
+
+func (it *cute) TmsLink(tmsLink string) AllureBuilder {
+	it.allureLinks.tmsLink = tmsLink
+
+	return it
+}
+
+func (it *cute) TmsLinks(tmsLinks ...string) AllureBuilder {
+	it.allureLinks.tmsLinks = append(it.allureLinks.tmsLinks, tmsLinks...)
 
 	return it
 }
