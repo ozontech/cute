@@ -3,7 +3,6 @@ package cute
 import (
 	"context"
 	"net/http"
-	"testing"
 	"time"
 
 	"github.com/ozontech/allure-go/pkg/allure"
@@ -266,7 +265,7 @@ type ControlTest interface {
 	NextTest() NextTestBuilder
 
 	// ExecuteTest is a function for execute Test
-	ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder
+	ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuilder
 }
 
 // NextTestBuilder is a scope of methods for processing response, after Test.

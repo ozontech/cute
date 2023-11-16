@@ -3,7 +3,6 @@ module github.com/ozontech/cute
 go 1.18
 
 require (
-	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/ohler55/ojg v1.12.9
 	github.com/ozontech/allure-go/pkg/allure v0.6.11
 	github.com/ozontech/allure-go/pkg/framework v0.6.28
@@ -13,7 +12,6 @@ require (
 )
 
 require (
-	github.com/PaesslerAG/gval v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

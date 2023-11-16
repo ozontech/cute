@@ -36,14 +36,14 @@ type tProvider interface {
 
 	Name() string
 
+	Log(args ...interface{})
+	Logf(format string, args ...interface{})
+
 	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
 }
 
 type logProvider interface {
-	Log(args ...interface{})
-	Logf(format string, args ...interface{})
-
 	LogStep(args ...interface{})
 	LogfStep(format string, args ...interface{})
 }
