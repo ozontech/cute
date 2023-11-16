@@ -130,12 +130,12 @@ func TestNotEmpty(t *testing.T) {
 			expression: "$.o[0]",
 			IsNilErr:   true,
 		},
-		//{
-		//	caseName:   "correct check map",
-		//	data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
-		//	expression: "$.o[0][1]",
-		//	IsNilErr:   true,
-		//},
+		{
+			caseName:   "correct check map",
+			data:       `{"o":[{"1":"a"}, {"2":"b"}, {"3":"c"}]}`,
+			expression: "$.o[0]['1']",
+			IsNilErr:   true,
+		},
 		{
 			caseName:   "check not correct path",
 			data:       `{"o":["a", "b", "c"]}`,
