@@ -11,7 +11,7 @@ import (
 
 func TestBuilderAfterTest(t *testing.T) {
 	var (
-		maker = NewHTTPTestMaker(WithHardValidation())
+		maker = NewHTTPTestMaker()
 	)
 
 	ht := maker.NewTestBuilder().
@@ -43,13 +43,11 @@ func TestBuilderAfterTest(t *testing.T) {
 	res := ht.(*cute)
 	require.Len(t, res.tests[0].Middleware.After, 2)
 	require.Len(t, res.tests[0].Middleware.AfterT, 3)
-	require.True(t, res.tests[0].HardValidation)
 }
 
 func TestBuilderAfterTestTwoStep(t *testing.T) {
 	var (
 		maker = NewHTTPTestMaker(
-			WithHardValidation(),
 			WithMiddlewareBefore(
 				func(request *http.Request) error {
 					return nil
@@ -134,13 +132,11 @@ func TestBuilderAfterTestTwoStep(t *testing.T) {
 	require.Len(t, res.tests[0].Middleware.Before, 2)
 	require.Len(t, res.tests[0].Middleware.BeforeT, 1)
 	require.Len(t, res.tests[0].Middleware.AfterT, 3+3)
-	require.True(t, res.tests[0].HardValidation)
 
 	require.Len(t, res.tests[1].Middleware.After, 2+1)
 	require.Len(t, res.tests[1].Middleware.AfterT, 1+3)
 	require.Len(t, res.tests[1].Middleware.Before, 2)
 	require.Len(t, res.tests[1].Middleware.BeforeT, 1)
-	require.True(t, res.tests[1].HardValidation)
 }
 
 func TestNewTestBuilder(t *testing.T) {

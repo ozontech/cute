@@ -34,8 +34,6 @@ var (
 type Test struct {
 	httpClient *http.Client
 
-	HardValidation bool
-
 	Name string
 
 	AllureStep *AllureStep
@@ -202,6 +200,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) bool {
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
 				t.Logf("[OPTIONAL ERROR] %v", tErr.(error).Error())
+
 				continue
 			}
 		}
@@ -221,14 +220,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) bool {
 		t.Errorf("Test finished with %v errors", countNotOptionalErrors)
 	}
 
-	// If we have not optional errors and hardValidation (assert errors)
-	// or if we have failed tests (require errors)
-	// we should fail test
-	if (it.HardValidation && countNotOptionalErrors != 0) || failTest {
-		return true
-	}
-
-	return false
+	return failTest
 }
 
 func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {

@@ -18,8 +18,6 @@ type HTTPTestMaker struct {
 	httpClient *http.Client
 	middleware *Middleware
 
-	hardValidation bool
-
 	// todo add marshaler
 }
 
@@ -29,8 +27,6 @@ type options struct {
 	httpRoundTripper http.RoundTripper
 
 	middleware *Middleware
-
-	hardValidation bool
 }
 
 type Option func(*options)
@@ -84,13 +80,6 @@ func WithMiddlewareBeforeT(beforeT ...BeforeExecuteT) Option {
 	}
 }
 
-// WithHardValidation ...
-func WithHardValidation() Option {
-	return func(o *options) {
-		o.hardValidation = true
-	}
-}
-
 // NewHTTPTestMaker is function for set options for all cute.
 func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	var (
@@ -124,9 +113,8 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	}
 
 	m := &HTTPTestMaker{
-		hardValidation: o.hardValidation,
-		httpClient:     httpClient,
-		middleware:     o.middleware,
+		httpClient: httpClient,
+		middleware: o.middleware,
 	}
 
 	return m
@@ -175,10 +163,9 @@ func createDefaultTest(m *HTTPTestMaker) *Test {
 	}
 
 	return &Test{
-		HardValidation: m.hardValidation,
-		httpClient:     m.httpClient,
-		Middleware:     middleware,
-		AllureStep:     new(AllureStep),
+		httpClient: m.httpClient,
+		Middleware: middleware,
+		AllureStep: new(AllureStep),
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
@@ -656,12 +643,6 @@ func (it *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 
 		it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
 	}
-
-	return it
-}
-
-func (it *cute) EnableHardValidation() ExpectHTTPBuilder {
-	it.tests[it.countTests].HardValidation = true
 
 	return it
 }

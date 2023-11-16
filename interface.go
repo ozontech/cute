@@ -248,11 +248,6 @@ type ExpectHTTPBuilder interface {
 	// Mark in allure as Skipped
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
-	// EnableHardValidation is enabled hard validation,
-	// If one of assert was failed, test will stopped.
-	// Deprecated. Please use require asserts.
-	EnableHardValidation() ExpectHTTPBuilder
-
 	After
 	ControlTest
 }
