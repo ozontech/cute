@@ -32,19 +32,19 @@ func TestDiff(t *testing.T) {
 			name:          "DifferentValueJSON",
 			originalJSON:  `{"key1": "value1", "key2": "value2"}`,
 			bodyJSON:      `{"key1": "value1", "key2": "value3"}`,
-			expectedError: "JSON is not same",
+			expectedError: "JSON is not the same",
 		},
 		{
 			name:          "MissingKeyJSON",
 			originalJSON:  `{"key1": "value1", "key2": "value2"}`,
 			bodyJSON:      `{"key1": "value1"}`,
-			expectedError: "JSON is not same",
+			expectedError: "JSON is not the same",
 		},
 		{
 			name:          "ExtraKeyJSON",
 			originalJSON:  `{"key1": "value1"}`,
 			bodyJSON:      `{"key1": "value1", "key2": "value2"}`,
-			expectedError: "JSON is not same",
+			expectedError: "JSON is not the same",
 		},
 		{
 			name:          "EmptyJSON",
