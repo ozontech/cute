@@ -72,7 +72,7 @@ func (it *cute) setLabelsAllure(t labelsAllureProvider) {
 		t.Tags(it.allureLabels.tags...)
 	}
 	if it.allureLabels.layer != "" {
-		it.Layer(it.allureLabels.layer)
+		t.Layer(it.allureLabels.layer)
 	}
 }
 
