@@ -5,7 +5,7 @@ LOCAL_BIN:=$(CURDIR)/bin
 ##################### GOLANG-CI RELATED CHECKS #####################
 # Check global GOLANGCI-LINT
 GOLANGCI_BIN:=$(LOCAL_BIN)/golangci-lint
-GOLANGCI_TAG:=1.42.1
+GOLANGCI_TAG:=1.54.2
 
 # Check local bin version
 ifneq ($(wildcard $(GOLANGCI_BIN)),)

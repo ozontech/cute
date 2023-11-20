@@ -1,6 +1,7 @@
 package cute
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -18,8 +19,6 @@ type HTTPTestMaker struct {
 	httpClient *http.Client
 	middleware *Middleware
 
-	hardValidation bool
-
 	// todo add marshaler
 }
 
@@ -29,8 +28,6 @@ type options struct {
 	httpRoundTripper http.RoundTripper
 
 	middleware *Middleware
-
-	hardValidation bool
 }
 
 type Option func(*options)
@@ -84,13 +81,6 @@ func WithMiddlewareBeforeT(beforeT ...BeforeExecuteT) Option {
 	}
 }
 
-// WithHardValidation ...
-func WithHardValidation() Option {
-	return func(o *options) {
-		o.hardValidation = true
-	}
-}
-
 // NewHTTPTestMaker is function for set options for all cute.
 func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	var (
@@ -124,9 +114,8 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	}
 
 	m := &HTTPTestMaker{
-		hardValidation: o.hardValidation,
-		httpClient:     httpClient,
-		middleware:     o.middleware,
+		httpClient: httpClient,
+		middleware: o.middleware,
 	}
 
 	return m
@@ -175,10 +164,9 @@ func createDefaultTest(m *HTTPTestMaker) *Test {
 	}
 
 	return &Test{
-		HardValidation: m.hardValidation,
-		httpClient:     m.httpClient,
-		Middleware:     middleware,
-		AllureStep:     new(AllureStep),
+		httpClient: m.httpClient,
+		Middleware: middleware,
+		AllureStep: new(AllureStep),
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
@@ -194,6 +182,48 @@ func (it *cute) Title(title string) AllureBuilder {
 
 func (it *cute) Epic(epic string) AllureBuilder {
 	it.allureLabels.epic = epic
+
+	return it
+}
+
+func (it *cute) Titlef(format string, args ...interface{}) AllureBuilder {
+	it.allureInfo.title = fmt.Sprintf(format, args...)
+
+	return it
+}
+
+func (it *cute) Descriptionf(format string, args ...interface{}) AllureBuilder {
+	it.allureInfo.description = fmt.Sprintf(format, args...)
+
+	return it
+}
+
+func (it *cute) Stage(stage string) AllureBuilder {
+	it.allureInfo.stage = stage
+
+	return it
+}
+
+func (it *cute) Stagef(format string, args ...interface{}) AllureBuilder {
+	it.allureInfo.stage = fmt.Sprintf(format, args...)
+
+	return it
+}
+
+func (it *cute) Layer(value string) AllureBuilder {
+	it.allureLabels.layer = value
+
+	return it
+}
+
+func (it *cute) TmsLink(tmsLink string) AllureBuilder {
+	it.allureLinks.tmsLink = tmsLink
+
+	return it
+}
+
+func (it *cute) TmsLinks(tmsLinks ...string) AllureBuilder {
+	it.allureLinks.tmsLinks = append(it.allureLinks.tmsLinks, tmsLinks...)
 
 	return it
 }
@@ -656,12 +686,6 @@ func (it *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 
 		it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
 	}
-
-	return it
-}
-
-func (it *cute) EnableHardValidation() ExpectHTTPBuilder {
-	it.tests[it.countTests].HardValidation = true
 
 	return it
 }

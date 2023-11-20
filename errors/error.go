@@ -5,6 +5,13 @@ const (
 	expectedField = "Expected"
 )
 
+type CuteError interface {
+	error
+	WithNameError
+	WithFields
+	WithAttachments
+}
+
 // WithNameError is interface for creates allure step.
 // If function returns error, which implement this interface, allure step will create automatically
 type WithNameError interface {
@@ -19,13 +26,27 @@ type WithFields interface {
 	PutFields(map[string]interface{})
 }
 
+// Attachment represents an attachment to Allure with properties like name, MIME type, and content.
+type Attachment struct {
+	Name     string // Name of the attachment.
+	MimeType string // MIME type of the attachment.
+	Content  []byte // Content of the attachment.
+}
+
+// WithAttachments is an interface that defines methods for managing attachments.
+type WithAttachments interface {
+	GetAttachments() []*Attachment
+	PutAttachment(a *Attachment)
+}
+
 type assertError struct {
 	optional bool
 	require  bool
 
-	name    string
-	message string
-	fields  map[string]interface{}
+	name        string
+	message     string
+	fields      map[string]interface{}
+	attachments []*Attachment
 }
 
 // NewAssertError ...
@@ -37,6 +58,15 @@ func NewAssertError(name string, message string, actual interface{}, expected in
 			actualField:   actual,
 			expectedField: expected,
 		},
+	}
+}
+
+// NewEmptyAssertError ...
+func NewEmptyAssertError(name string, message string) CuteError {
+	return &assertError{
+		name:    name,
+		message: message,
+		fields:  map[string]interface{}{},
 	}
 }
 
@@ -60,6 +90,14 @@ func (a *assertError) PutFields(fields map[string]interface{}) {
 	for k, v := range fields {
 		a.fields[k] = v
 	}
+}
+
+func (a *assertError) GetAttachments() []*Attachment {
+	return a.attachments
+}
+
+func (a *assertError) PutAttachment(attachment *Attachment) {
+	a.attachments = append(a.attachments, attachment)
 }
 
 func (a *assertError) IsOptional() bool {

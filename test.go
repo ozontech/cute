@@ -34,8 +34,6 @@ var (
 type Test struct {
 	httpClient *http.Client
 
-	HardValidation bool
-
 	Name string
 
 	AllureStep *AllureStep
@@ -95,11 +93,20 @@ type ExpectJSONSchema struct {
 	File   string
 }
 
-func (it *Test) Execute(ctx context.Context, t testing.TB) ResultsHTTPBuilder {
+func (it *Test) Execute(ctx context.Context, t tProvider) ResultsHTTPBuilder {
 	var (
 		internalT allureProvider
 		res       ResultsHTTPBuilder
 	)
+
+	if t == nil {
+		panic("could not start test without testing.T")
+	}
+
+	stepCtx, isStepCtx := t.(provider.StepCtx)
+	if isStepCtx {
+		return it.executeInsideStep(ctx, stepCtx)
+	}
 
 	tOriginal, ok := t.(*testing.T)
 	if ok {
@@ -128,6 +135,10 @@ func (it *Test) clearFields() {
 }
 
 func (it *Test) initEmptyFields() {
+	if it.httpClient == nil {
+		it.httpClient = http.DefaultClient
+	}
+
 	if it.AllureStep == nil {
 		it.AllureStep = new(AllureStep)
 	}
@@ -151,6 +162,20 @@ func (it *Test) initEmptyFields() {
 	if it.Expect.JSONSchema == nil {
 		it.Expect.JSONSchema = new(ExpectJSONSchema)
 	}
+}
+
+func (it *Test) executeInsideStep(ctx context.Context, t internalT) ResultsHTTPBuilder {
+	resp, errs := it.startTest(ctx, t)
+
+	if len(errs) != 0 {
+		t.Fail()
+	}
+	isFailedTest := it.processTestErrors(t, errs)
+
+	// Remove from base struct all asserts
+	it.clearFields()
+
+	return newTestResult(t.Name(), resp, isFailedTest, errs)
 }
 
 func (it *Test) execute(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
@@ -202,6 +227,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) bool {
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
 				t.Logf("[OPTIONAL ERROR] %v", tErr.(error).Error())
+
 				continue
 			}
 		}
@@ -221,14 +247,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) bool {
 		t.Errorf("Test finished with %v errors", countNotOptionalErrors)
 	}
 
-	// If we have not optional errors and hardValidation (assert errors)
-	// or if we have failed tests (require errors)
-	// we should fail test
-	if (it.HardValidation && countNotOptionalErrors != 0) || failTest {
-		return true
-	}
-
-	return false
+	return failTest
 }
 
 func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {

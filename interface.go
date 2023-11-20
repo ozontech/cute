@@ -3,7 +3,6 @@ package cute
 import (
 	"context"
 	"net/http"
-	"testing"
 	"time"
 
 	"github.com/ozontech/allure-go/pkg/allure"
@@ -25,14 +24,20 @@ type AllureBuilder interface {
 type AllureInfoBuilder interface {
 	// Title is a function for set title in allure information
 	Title(title string) AllureBuilder
+	Titlef(format string, args ...interface{}) AllureBuilder
 	// Description is a function for set description in allure information
 	Description(description string) AllureBuilder
+	Descriptionf(format string, args ...interface{}) AllureBuilder
+	Stage(stage string) AllureBuilder
+	Stagef(format string, args ...interface{}) AllureBuilder
 }
 
 type AllureLinksBuilder interface {
 	SetIssue(issue string) AllureBuilder
 	SetTestCase(testCase string) AllureBuilder
 	Link(link *allure.Link) AllureBuilder
+	TmsLink(tmsLink string) AllureBuilder
+	TmsLinks(tmsLinks ...string) AllureBuilder
 }
 
 type AllureLabelsBuilder interface {
@@ -51,6 +56,9 @@ type AllureLabelsBuilder interface {
 	Lead(value string) AllureBuilder
 	Label(label *allure.Label) AllureBuilder
 	Labels(labels ...*allure.Label) AllureBuilder
+	Layer(value string) AllureBuilder
+	Stagef(format string, args ...interface{}) AllureBuilder
+	Stage(stage string) AllureBuilder
 }
 
 // CreateBuilder is functions for create Test or table tests
@@ -248,11 +256,6 @@ type ExpectHTTPBuilder interface {
 	// Mark in allure as Skipped
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
-	// EnableHardValidation is enabled hard validation,
-	// If one of assert was failed, test will stopped.
-	// Deprecated. Please use require asserts.
-	EnableHardValidation() ExpectHTTPBuilder
-
 	After
 	ControlTest
 }
@@ -262,7 +265,7 @@ type ControlTest interface {
 	NextTest() NextTestBuilder
 
 	// ExecuteTest is a function for execute Test
-	ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder
+	ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuilder
 }
 
 // NextTestBuilder is a scope of methods for processing response, after Test.

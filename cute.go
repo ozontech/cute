@@ -29,6 +29,7 @@ type cute struct {
 type allureInformation struct {
 	title       string
 	description string
+	stage       string
 }
 
 type allureLabels struct {
@@ -47,16 +48,28 @@ type allureLabels struct {
 	label       *allure.Label
 	labels      []*allure.Label
 	allureID    string
+	layer       string
 }
 
 type allureLinks struct {
 	issue    string
 	testCase string
 	link     *allure.Link
+	tmsLink  string
+	tmsLinks []string
 }
 
-func (it *cute) ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuilder {
+func (it *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuilder {
 	var internalT allureProvider
+
+	if t == nil {
+		panic("could not start test without testing.T")
+	}
+
+	stepCtx, isStepCtx := t.(provider.StepCtx)
+	if isStepCtx {
+		return it.executeTestInsideStep(ctx, stepCtx)
+	}
 
 	tOriginal, ok := t.(*testing.T)
 	if ok {
@@ -78,6 +91,22 @@ func (it *cute) ExecuteTest(ctx context.Context, t testing.TB) []ResultsHTTPBuil
 	}
 
 	return it.executeTest(ctx, internalT)
+}
+
+func (it *cute) executeTestInsideStep(ctx context.Context, stepCtx provider.StepCtx) []ResultsHTTPBuilder {
+	var (
+		res = make([]ResultsHTTPBuilder, 0)
+	)
+
+	// Cycle for change number of Test
+	for i := 0; i <= it.countTests; i++ {
+		currentTest := it.tests[i]
+
+		result := currentTest.executeInsideStep(ctx, stepCtx)
+		res = append(res, result)
+	}
+
+	return res
 }
 
 func createAllureT(t *testing.T) *common.Common {
@@ -113,45 +142,39 @@ func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) 
 			tableTestName := currentTest.Name
 
 			allureProvider.Run(tableTestName, func(inT provider.T) {
-				// Copy allure labels from common allure test
-				it.setAllureInformation(inT)
 				inT.Title(tableTestName) // set current test name
 
-				inT.Logf("Test start %v", tableTestName)
-				resT := currentTest.execute(ctx, inT)
-				res = append(res, resT)
-
-				if resT.IsFailed() {
-					inT.Fail()
-
-					allureProvider.Logf("Test was failed %v", currentTest.Name)
-
-					return
-				}
-
-				inT.Logf("Test finished %v", tableTestName)
+				resultTest := it.executeSingleTest(ctx, inT, currentTest)
+				res = append(res, resultTest)
 			})
 		} else {
+			currentTest.Name = allureProvider.Name()
+
 			// set labels
 			it.setAllureInformation(allureProvider)
 
-			currentTest.Name = allureProvider.Name()
-
-			allureProvider.Logf("Test start %v", currentTest.Name)
-
-			resT := currentTest.execute(ctx, allureProvider)
-			res = append(res, resT)
-
-			if resT.IsFailed() {
-				allureProvider.Fail()
-
-				allureProvider.Logf("Test was failed %v", currentTest.Name)
-				break
+			resultTest := it.executeSingleTest(ctx, allureProvider, currentTest)
+			if resultTest != nil {
+				res = append(res, resultTest)
 			}
-
-			allureProvider.Logf("Test finished %v", currentTest.Name)
 		}
 	}
 
 	return res
+}
+
+func (it *cute) executeSingleTest(ctx context.Context, allureProvider allureProvider, currentTest *Test) ResultsHTTPBuilder {
+	allureProvider.Logf("Test start %v", currentTest.Name)
+
+	resT := currentTest.execute(ctx, allureProvider)
+	if resT.IsFailed() {
+		allureProvider.Fail()
+		allureProvider.Logf("Test was failed %v", currentTest.Name)
+
+		return resT
+	}
+
+	allureProvider.Logf("Test finished %v", currentTest.Name)
+
+	return resT
 }
