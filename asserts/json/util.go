@@ -23,6 +23,7 @@ func contains(data []byte, expression string, expect interface{}) error {
 		if !ok {
 			return errors.NewAssertError("Contains", fmt.Sprintf("on path %v. %v could not be applied builtin len()", expression, expect), nil, nil)
 		}
+
 		if !found {
 			return errors.NewAssertError("Contains", fmt.Sprintf("on path %v. expect %v, but actual %v", expression, expect, value), value, expect)
 		}
