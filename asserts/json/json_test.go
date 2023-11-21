@@ -703,28 +703,28 @@ func TestGetValueFromJSON(t *testing.T) {
 		name          string
 		inputJSON     string
 		expression    string
-		expectedValue interface{}
+		expectedValue []interface{}
 		expectedError string
 	}{
 		{
 			name:          "ValidExpressionObject",
 			inputJSON:     `{"key1": "value1", "key2": {"key3": "value3"}}`,
 			expression:    "key2.key3",
-			expectedValue: "value3",
+			expectedValue: []interface{}{"value3"},
 			expectedError: "", // No error expected
 		},
 		{
 			name:          "ValidExpressionArray",
 			inputJSON:     `{"key1": "value1", "key2": [1, 2, 3]}`,
 			expression:    "key2[1]",
-			expectedValue: int64(2),
+			expectedValue: []interface{}{int64(2)},
 			expectedError: "", // No error expected
 		},
 		{
 			name:          "ValidExpressionMap",
 			inputJSON:     `{"key1": "value1", "key2": {"subkey1": "subvalue1"}}`,
 			expression:    "key2",
-			expectedValue: map[string]interface{}{"subkey1": "subvalue1"},
+			expectedValue: []interface{}{map[string]interface{}{"subkey1": "subvalue1"}},
 			expectedError: "", // No error expected
 		},
 		{
@@ -756,7 +756,8 @@ func TestGetValueFromJSON(t *testing.T) {
 				assert.Contains(t, err.Error(), testCase.expectedError)
 			}
 
-			// Check if the returned value matches the expected result
+			// Check if the returned value is an array and matches the expected result
+			assert.IsType(t, []interface{}{}, value)
 			assert.Equal(t, testCase.expectedValue, value)
 		})
 	}

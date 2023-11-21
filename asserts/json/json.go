@@ -130,7 +130,7 @@ func NotPresent(expression string) cute.AssertBody {
 }
 
 // GetValueFromJSON is function for get value from json
-func GetValueFromJSON(js []byte, expression string) (interface{}, error) {
+func GetValueFromJSON(js []byte, expression string) ([]interface{}, error) {
 	obj, err := oj.Parse(js)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse json in GetValueFromJSON error: '%s'", err)
@@ -147,5 +147,5 @@ func GetValueFromJSON(js []byte, expression string) (interface{}, error) {
 		return nil, fmt.Errorf("could not find element by path %v in JSON", expression)
 	}
 
-	return res[0], nil
+	return res, nil
 }
