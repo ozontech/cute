@@ -67,7 +67,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 
 	// Add information (method, host, curl) about request to Allure step
 	// should be after httpClient.Do, because in roundTripper request could be changed
-	err = addInformationRequest(t, req)
+	err = addInformationRequest(t, resp.Request)
 	if err != nil {
 		t.Log("[ERROR] Could not log information about request. Error %v", err)
 	}
