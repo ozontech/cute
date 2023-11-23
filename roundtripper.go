@@ -59,17 +59,21 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// copy request, because body can be read once
 	req, err := copyRequest(baseReq.Context(), baseReq)
 	if err != nil {
-
 		return nil, err
 	}
 
 	resp, httpErr := it.httpClient.Do(req)
 
-	// Add information (method, host, curl) about request to Allure step
-	// should be after httpClient.Do, because in roundTripper request could be changed
-	err = addInformationRequest(t, resp.Request)
+	// BAD CODE. Need to copy body, because we can't read body again from resp.Request.Body. Problem is io.Reader
+	resp.Request.Body, baseReq.Body, err = utils.DrainBody(baseReq.Body)
 	if err != nil {
-		t.Log("[ERROR] Could not log information about request. Error %v", err)
+		t.Log("[ERROR] Could not drain body from baseReq.Body. Error %v", err)
+	}
+
+	// Add information (method, host, curl) about request to Allure step
+	// should be after httpClient.Do and from resp.Request, because in roundTripper request may be changed
+	if addErr := addInformationRequest(t, resp.Request); addErr != nil {
+		t.Log("[ERROR] Could not log information about request. Error %v", addErr)
 	}
 
 	if httpErr != nil {
@@ -80,9 +84,8 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 		// Add information (code, body, headers) about response to Allure step
 		addInformationResponse(t, resp)
 
-		err = it.validateResponseCode(t, resp)
-		if err != nil {
-			return nil, err
+		if validErr := it.validateResponseCode(t, resp); validErr != nil {
+			return nil, validErr
 		}
 	}
 

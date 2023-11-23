@@ -7,8 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -49,7 +47,9 @@ func Test_TwoSteps_1(t *testing.T) {
 
 func Test_TwoSteps_2_AllureRunner(t *testing.T) {
 	runner.Run(t, "Test with two steps", func(t provider.T) {
-		test := cute.NewTestBuilder().
+		testBuilder := cute.NewHTTPTestMaker().NewTestBuilder()
+
+		testBuilder.
 			Title("Test with two requests executed by allure-go").
 			Tag("two_steps").
 			Description("some_description").
@@ -61,17 +61,10 @@ func Test_TwoSteps_2_AllureRunner(t *testing.T) {
 			ExpectStatus(http.StatusOK).
 			ExecuteTest(context.Background(), t)
 
-		bodyBytes, err := io.ReadAll(test[0].GetHTTPResponse().Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// process body
-		_ = string(bodyBytes)
-
-		cute.NewTestBuilder().
+		testBuilder.
 			CreateStep("Request 2").
 			RequestBuilder(
-				cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+				cute.WithURI("https://jsonplaceholder.typicode.com/posts/2/comments"),
 				cute.WithMethod(http.MethodGet),
 			).
 			ExpectExecuteTimeout(10*time.Second).
