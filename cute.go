@@ -59,7 +59,7 @@ type allureLinks struct {
 	tmsLinks []string
 }
 
-func (it *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuilder {
+func (qt *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuilder {
 	var internalT allureProvider
 
 	if t == nil {
@@ -68,13 +68,13 @@ func (it *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuild
 
 	stepCtx, isStepCtx := t.(provider.StepCtx)
 	if isStepCtx {
-		return it.executeTestInsideStep(ctx, stepCtx)
+		return qt.executeTestsInsideStep(ctx, stepCtx)
 	}
 
 	tOriginal, ok := t.(*testing.T)
 	if ok {
 		newT := createAllureT(tOriginal)
-		if !it.isTableTest {
+		if !qt.isTableTest {
 			defer newT.FinishTest() //nolint
 		}
 
@@ -86,27 +86,11 @@ func (it *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuild
 		internalT = allureT
 	}
 
-	if it.parallel {
+	if qt.parallel {
 		internalT.Parallel()
 	}
 
-	return it.executeTest(ctx, internalT)
-}
-
-func (it *cute) executeTestInsideStep(ctx context.Context, stepCtx provider.StepCtx) []ResultsHTTPBuilder {
-	var (
-		res = make([]ResultsHTTPBuilder, 0)
-	)
-
-	// Cycle for change number of Test
-	for i := 0; i <= it.countTests; i++ {
-		currentTest := it.tests[i]
-
-		result := currentTest.executeInsideStep(ctx, stepCtx)
-		res = append(res, result)
-	}
-
-	return res
+	return qt.executeTests(ctx, internalT)
 }
 
 func createAllureT(t *testing.T) *common.Common {
@@ -128,45 +112,65 @@ func createAllureT(t *testing.T) *common.Common {
 	return newT
 }
 
-func (it *cute) executeTest(ctx context.Context, allureProvider allureProvider) []ResultsHTTPBuilder {
+// executeTestsInsideStep is method for run group of tests inside provider.StepCtx
+func (qt *cute) executeTestsInsideStep(ctx context.Context, stepCtx provider.StepCtx) []ResultsHTTPBuilder {
 	var (
 		res = make([]ResultsHTTPBuilder, 0)
 	)
 
 	// Cycle for change number of Test
-	for i := 0; i <= it.countTests; i++ {
-		currentTest := it.tests[i]
+	for i := 0; i <= qt.countTests; i++ {
+		currentTest := qt.tests[i]
+
+		result := currentTest.executeInsideStep(ctx, stepCtx)
+
+		// Remove from base struct all asserts
+		currentTest.clearFields()
+
+		res = append(res, result)
+	}
+
+	return res
+}
+
+// executeTests is method for run tests
+// It's could be table tests or usual tests
+func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider) []ResultsHTTPBuilder {
+	var (
+		res = make([]ResultsHTTPBuilder, 0)
+	)
+
+	// Cycle for change number of Test
+	for i := 0; i <= qt.countTests; i++ {
+		currentTest := qt.tests[i]
 
 		// Execute by new T for table tests
-		if it.isTableTest {
+		if qt.isTableTest {
 			tableTestName := currentTest.Name
 
 			allureProvider.Run(tableTestName, func(inT provider.T) {
-				inT.Title(tableTestName) // set current test name
+				// Set current test name
+				inT.Title(tableTestName)
 
-				resultTest := it.executeSingleTest(ctx, inT, currentTest)
-				res = append(res, resultTest)
+				res = append(res, qt.executeSingleTest(ctx, inT, currentTest))
 			})
 		} else {
 			currentTest.Name = allureProvider.Name()
 
 			// set labels
-			it.setAllureInformation(allureProvider)
+			qt.setAllureInformation(allureProvider)
 
-			resultTest := it.executeSingleTest(ctx, allureProvider, currentTest)
-			if resultTest != nil {
-				res = append(res, resultTest)
-			}
+			res = append(res, qt.executeSingleTest(ctx, allureProvider, currentTest))
 		}
 	}
 
 	return res
 }
 
-func (it *cute) executeSingleTest(ctx context.Context, allureProvider allureProvider, currentTest *Test) ResultsHTTPBuilder {
+func (qt *cute) executeSingleTest(ctx context.Context, allureProvider allureProvider, currentTest *Test) ResultsHTTPBuilder {
 	allureProvider.Logf("Test start %v", currentTest.Name)
 
-	resT := currentTest.execute(ctx, allureProvider)
+	resT := currentTest.executeInsideAllure(ctx, allureProvider)
 	if resT.IsFailed() {
 		allureProvider.Fail()
 		allureProvider.Logf("Test was failed %v", currentTest.Name)
@@ -175,6 +179,9 @@ func (it *cute) executeSingleTest(ctx context.Context, allureProvider allureProv
 	}
 
 	allureProvider.Logf("Test finished %v", currentTest.Name)
+
+	// Remove from base struct all asserts
+	currentTest.clearFields()
 
 	return resT
 }

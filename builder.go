@@ -174,574 +174,574 @@ func createDefaultTest(m *HTTPTestMaker) *Test {
 	}
 }
 
-func (it *cute) Title(title string) AllureBuilder {
-	it.allureInfo.title = title
+func (qt *cute) Title(title string) AllureBuilder {
+	qt.allureInfo.title = title
 
-	return it
+	return qt
 }
 
-func (it *cute) Epic(epic string) AllureBuilder {
-	it.allureLabels.epic = epic
+func (qt *cute) Epic(epic string) AllureBuilder {
+	qt.allureLabels.epic = epic
 
-	return it
+	return qt
 }
 
-func (it *cute) Titlef(format string, args ...interface{}) AllureBuilder {
-	it.allureInfo.title = fmt.Sprintf(format, args...)
+func (qt *cute) Titlef(format string, args ...interface{}) AllureBuilder {
+	qt.allureInfo.title = fmt.Sprintf(format, args...)
 
-	return it
+	return qt
 }
 
-func (it *cute) Descriptionf(format string, args ...interface{}) AllureBuilder {
-	it.allureInfo.description = fmt.Sprintf(format, args...)
+func (qt *cute) Descriptionf(format string, args ...interface{}) AllureBuilder {
+	qt.allureInfo.description = fmt.Sprintf(format, args...)
 
-	return it
+	return qt
 }
 
-func (it *cute) Stage(stage string) AllureBuilder {
-	it.allureInfo.stage = stage
+func (qt *cute) Stage(stage string) AllureBuilder {
+	qt.allureInfo.stage = stage
 
-	return it
+	return qt
 }
 
-func (it *cute) Stagef(format string, args ...interface{}) AllureBuilder {
-	it.allureInfo.stage = fmt.Sprintf(format, args...)
+func (qt *cute) Stagef(format string, args ...interface{}) AllureBuilder {
+	qt.allureInfo.stage = fmt.Sprintf(format, args...)
 
-	return it
+	return qt
 }
 
-func (it *cute) Layer(value string) AllureBuilder {
-	it.allureLabels.layer = value
+func (qt *cute) Layer(value string) AllureBuilder {
+	qt.allureLabels.layer = value
 
-	return it
+	return qt
 }
 
-func (it *cute) TmsLink(tmsLink string) AllureBuilder {
-	it.allureLinks.tmsLink = tmsLink
+func (qt *cute) TmsLink(tmsLink string) AllureBuilder {
+	qt.allureLinks.tmsLink = tmsLink
 
-	return it
+	return qt
 }
 
-func (it *cute) TmsLinks(tmsLinks ...string) AllureBuilder {
-	it.allureLinks.tmsLinks = append(it.allureLinks.tmsLinks, tmsLinks...)
+func (qt *cute) TmsLinks(tmsLinks ...string) AllureBuilder {
+	qt.allureLinks.tmsLinks = append(qt.allureLinks.tmsLinks, tmsLinks...)
 
-	return it
+	return qt
 }
 
-func (it *cute) SetIssue(issue string) AllureBuilder {
-	it.allureLinks.issue = issue
+func (qt *cute) SetIssue(issue string) AllureBuilder {
+	qt.allureLinks.issue = issue
 
-	return it
+	return qt
 }
 
-func (it *cute) SetTestCase(testCase string) AllureBuilder {
-	it.allureLinks.testCase = testCase
+func (qt *cute) SetTestCase(testCase string) AllureBuilder {
+	qt.allureLinks.testCase = testCase
 
-	return it
+	return qt
 }
 
-func (it *cute) Link(link *allure.Link) AllureBuilder {
-	it.allureLinks.link = link
+func (qt *cute) Link(link *allure.Link) AllureBuilder {
+	qt.allureLinks.link = link
 
-	return it
+	return qt
 }
 
-func (it *cute) ID(value string) AllureBuilder {
-	it.allureLabels.id = value
+func (qt *cute) ID(value string) AllureBuilder {
+	qt.allureLabels.id = value
 
-	return it
+	return qt
 }
 
-func (it *cute) AllureID(value string) AllureBuilder {
-	it.allureLabels.allureID = value
+func (qt *cute) AllureID(value string) AllureBuilder {
+	qt.allureLabels.allureID = value
 
-	return it
+	return qt
 }
 
-func (it *cute) AddSuiteLabel(value string) AllureBuilder {
-	it.allureLabels.suiteLabel = value
+func (qt *cute) AddSuiteLabel(value string) AllureBuilder {
+	qt.allureLabels.suiteLabel = value
 
-	return it
+	return qt
 }
 
-func (it *cute) AddSubSuite(value string) AllureBuilder {
-	it.allureLabels.subSuite = value
+func (qt *cute) AddSubSuite(value string) AllureBuilder {
+	qt.allureLabels.subSuite = value
 
-	return it
+	return qt
 }
 
-func (it *cute) AddParentSuite(value string) AllureBuilder {
-	it.allureLabels.parentSuite = value
+func (qt *cute) AddParentSuite(value string) AllureBuilder {
+	qt.allureLabels.parentSuite = value
 
-	return it
+	return qt
 }
 
-func (it *cute) Story(value string) AllureBuilder {
-	it.allureLabels.story = value
+func (qt *cute) Story(value string) AllureBuilder {
+	qt.allureLabels.story = value
 
-	return it
+	return qt
 }
 
-func (it *cute) Tag(value string) AllureBuilder {
-	it.allureLabels.tag = value
+func (qt *cute) Tag(value string) AllureBuilder {
+	qt.allureLabels.tag = value
 
-	return it
+	return qt
 }
 
-func (it *cute) Severity(value allure.SeverityType) AllureBuilder {
-	it.allureLabels.severity = value
+func (qt *cute) Severity(value allure.SeverityType) AllureBuilder {
+	qt.allureLabels.severity = value
 
-	return it
+	return qt
 }
 
-func (it *cute) Owner(value string) AllureBuilder {
-	it.allureLabels.owner = value
+func (qt *cute) Owner(value string) AllureBuilder {
+	qt.allureLabels.owner = value
 
-	return it
+	return qt
 }
 
-func (it *cute) Lead(value string) AllureBuilder {
-	it.allureLabels.lead = value
+func (qt *cute) Lead(value string) AllureBuilder {
+	qt.allureLabels.lead = value
 
-	return it
+	return qt
 }
 
-func (it *cute) Label(label *allure.Label) AllureBuilder {
-	it.allureLabels.label = label
+func (qt *cute) Label(label *allure.Label) AllureBuilder {
+	qt.allureLabels.label = label
 
-	return it
+	return qt
 }
 
-func (it *cute) Labels(labels ...*allure.Label) AllureBuilder {
-	it.allureLabels.labels = labels
+func (qt *cute) Labels(labels ...*allure.Label) AllureBuilder {
+	qt.allureLabels.labels = labels
 
-	return it
+	return qt
 }
 
-func (it *cute) Description(description string) AllureBuilder {
-	it.allureInfo.description = description
+func (qt *cute) Description(description string) AllureBuilder {
+	qt.allureInfo.description = description
 
-	return it
+	return qt
 }
 
-func (it *cute) Tags(tags ...string) AllureBuilder {
-	it.allureLabels.tags = tags
+func (qt *cute) Tags(tags ...string) AllureBuilder {
+	qt.allureLabels.tags = tags
 
-	return it
+	return qt
 }
 
-func (it *cute) Feature(feature string) AllureBuilder {
-	it.allureLabels.feature = feature
+func (qt *cute) Feature(feature string) AllureBuilder {
+	qt.allureLabels.feature = feature
 
-	return it
+	return qt
 }
 
-func (it *cute) Create() MiddlewareRequest {
-	return it
+func (qt *cute) Create() MiddlewareRequest {
+	return qt
 }
 
-func (it *cute) CreateStep(name string) MiddlewareRequest {
-	it.tests[it.countTests].AllureStep.Name = name
+func (qt *cute) CreateStep(name string) MiddlewareRequest {
+	qt.tests[qt.countTests].AllureStep.Name = name
 
-	return it
+	return qt
 }
 
-func (it *cute) Parallel() AllureBuilder {
-	it.parallel = true
+func (qt *cute) Parallel() AllureBuilder {
+	qt.parallel = true
 
-	return it
+	return qt
 }
 
-func (it *cute) CreateRequest() RequestHTTPBuilder {
-	return it
+func (qt *cute) CreateRequest() RequestHTTPBuilder {
+	return qt
 }
 
-func (it *cute) StepName(name string) MiddlewareRequest {
-	it.tests[it.countTests].AllureStep.Name = name
+func (qt *cute) StepName(name string) MiddlewareRequest {
+	qt.tests[qt.countTests].AllureStep.Name = name
 
-	return it
+	return qt
 }
 
-func (it *cute) BeforeExecute(fs ...BeforeExecute) MiddlewareRequest {
-	it.tests[it.countTests].Middleware.Before = append(it.tests[it.countTests].Middleware.Before, fs...)
+func (qt *cute) BeforeExecute(fs ...BeforeExecute) MiddlewareRequest {
+	qt.tests[qt.countTests].Middleware.Before = append(qt.tests[qt.countTests].Middleware.Before, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) BeforeExecuteT(fs ...BeforeExecuteT) MiddlewareRequest {
-	it.tests[it.countTests].Middleware.BeforeT = append(it.tests[it.countTests].Middleware.BeforeT, fs...)
+func (qt *cute) BeforeExecuteT(fs ...BeforeExecuteT) MiddlewareRequest {
+	qt.tests[qt.countTests].Middleware.BeforeT = append(qt.tests[qt.countTests].Middleware.BeforeT, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) After(fs ...AfterExecute) ExpectHTTPBuilder {
-	it.tests[it.countTests].Middleware.After = append(it.tests[it.countTests].Middleware.After, fs...)
+func (qt *cute) After(fs ...AfterExecute) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Middleware.After = append(qt.tests[qt.countTests].Middleware.After, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) AfterT(fs ...AfterExecuteT) ExpectHTTPBuilder {
-	it.tests[it.countTests].Middleware.AfterT = append(it.tests[it.countTests].Middleware.AfterT, fs...)
+func (qt *cute) AfterT(fs ...AfterExecuteT) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Middleware.AfterT = append(qt.tests[qt.countTests].Middleware.AfterT, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) AfterExecute(fs ...AfterExecute) MiddlewareRequest {
-	it.tests[it.countTests].Middleware.After = append(it.tests[it.countTests].Middleware.After, fs...)
+func (qt *cute) AfterExecute(fs ...AfterExecute) MiddlewareRequest {
+	qt.tests[qt.countTests].Middleware.After = append(qt.tests[qt.countTests].Middleware.After, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) AfterExecuteT(fs ...AfterExecuteT) MiddlewareRequest {
-	it.tests[it.countTests].Middleware.AfterT = append(it.tests[it.countTests].Middleware.AfterT, fs...)
+func (qt *cute) AfterExecuteT(fs ...AfterExecuteT) MiddlewareRequest {
+	qt.tests[qt.countTests].Middleware.AfterT = append(qt.tests[qt.countTests].Middleware.AfterT, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) AfterTestExecute(fs ...AfterExecute) NextTestBuilder {
+func (qt *cute) AfterTestExecute(fs ...AfterExecute) NextTestBuilder {
 	previousTest := 0
-	if it.countTests != 0 {
-		previousTest = it.countTests - 1
+	if qt.countTests != 0 {
+		previousTest = qt.countTests - 1
 	}
 
-	it.tests[previousTest].Middleware.After = append(it.tests[previousTest].Middleware.After, fs...)
+	qt.tests[previousTest].Middleware.After = append(qt.tests[previousTest].Middleware.After, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) AfterTestExecuteT(fs ...AfterExecuteT) NextTestBuilder {
+func (qt *cute) AfterTestExecuteT(fs ...AfterExecuteT) NextTestBuilder {
 	previousTest := 0
-	if it.countTests != 0 {
-		previousTest = it.countTests - 1
+	if qt.countTests != 0 {
+		previousTest = qt.countTests - 1
 	}
 
-	it.tests[previousTest].Middleware.AfterT = append(it.tests[previousTest].Middleware.AfterT, fs...)
+	qt.tests[previousTest].Middleware.AfterT = append(qt.tests[previousTest].Middleware.AfterT, fs...)
 
-	return it
+	return qt
 }
 
-func (it *cute) RequestRepeat(count int) RequestHTTPBuilder {
-	it.tests[it.countTests].Request.Repeat.Count = count
+func (qt *cute) RequestRepeat(count int) RequestHTTPBuilder {
+	qt.tests[qt.countTests].Request.Repeat.Count = count
 
-	return it
+	return qt
 }
 
-func (it *cute) RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder {
-	it.tests[it.countTests].Request.Repeat.Delay = delay
+func (qt *cute) RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder {
+	qt.tests[qt.countTests].Request.Repeat.Delay = delay
 
-	return it
+	return qt
 }
 
-func (it *cute) Request(r *http.Request) ExpectHTTPBuilder {
-	it.tests[it.countTests].Request.Base = r
+func (qt *cute) Request(r *http.Request) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Request.Base = r
 
-	return it
+	return qt
 }
 
-func (it *cute) RequestBuilder(r ...RequestBuilder) ExpectHTTPBuilder {
-	it.tests[it.countTests].Request.Builders = append(it.tests[it.countTests].Request.Builders, r...)
+func (qt *cute) RequestBuilder(r ...RequestBuilder) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Request.Builders = append(qt.tests[qt.countTests].Request.Builders, r...)
 
-	return it
+	return qt
 }
 
-func (it *cute) ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.ExecuteTime = t
+func (qt *cute) ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.ExecuteTime = t
 
-	return it
+	return qt
 }
 
-func (it *cute) ExpectStatus(code int) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.Code = code
+func (qt *cute) ExpectStatus(code int) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.Code = code
 
-	return it
+	return qt
 }
 
-func (it *cute) ExpectJSONSchemaString(schema string) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.JSONSchema.String = schema
+func (qt *cute) ExpectJSONSchemaString(schema string) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.JSONSchema.String = schema
 
-	return it
+	return qt
 }
 
-func (it *cute) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.JSONSchema.Byte = schema
+func (qt *cute) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.JSONSchema.Byte = schema
 
-	return it
+	return qt
 }
 
-func (it *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
-	it.tests[it.countTests].Expect.JSONSchema.File = filePath
+func (qt *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.JSONSchema.File = filePath
 
-	return it
+	return qt
 }
 
-func (it *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+func (qt *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 	}
 
-	it.tests[it.countTests].Expect.AssertBody = append(it.tests[it.countTests].Expect.AssertBody, asserts...)
+	qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, asserts...)
 
-	return it
+	return qt
 }
 
-func (it *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+func (qt *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertBody = append(it.tests[it.countTests].Expect.AssertBody, optionalAssertBody(assert))
+		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, optionalAssertBody(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) RequireBody(asserts ...AssertBody) ExpectHTTPBuilder {
+func (qt *cute) RequireBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertBody = append(it.tests[it.countTests].Expect.AssertBody, requireAssertBody(assert))
+		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, requireAssertBody(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	it.tests[it.countTests].Expect.AssertHeaders = append(it.tests[it.countTests].Expect.AssertHeaders, asserts...)
-
-	return it
-}
-
-func (it *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		it.tests[it.countTests].Expect.AssertHeaders = append(it.tests[it.countTests].Expect.AssertHeaders, optionalAssertHeaders(assert))
-	}
-
-	return it
-}
-
-func (it *cute) RequireHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		it.tests[it.countTests].Expect.AssertHeaders = append(it.tests[it.countTests].Expect.AssertHeaders, requireAssertHeaders(assert))
-	}
-
-	return it
-}
-
-func (it *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+func (qt *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 	}
 
-	it.tests[it.countTests].Expect.AssertResponse = append(it.tests[it.countTests].Expect.AssertResponse, asserts...)
+	qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, asserts...)
 
-	return it
+	return qt
 }
 
-func (it *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+func (qt *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertResponse = append(it.tests[it.countTests].Expect.AssertResponse, optionalAssertResponse(assert))
+		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, optionalAssertHeaders(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) RequireResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+func (qt *cute) RequireHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertResponse = append(it.tests[it.countTests].Expect.AssertResponse, requireAssertResponse(assert))
+		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, requireAssertHeaders(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	it.tests[it.countTests].Expect.AssertBodyT = append(it.tests[it.countTests].Expect.AssertBodyT, asserts...)
-
-	return it
-}
-
-func (it *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		it.tests[it.countTests].Expect.AssertBodyT = append(it.tests[it.countTests].Expect.AssertBodyT, optionalAssertBodyT(assert))
-	}
-
-	return it
-}
-
-func (it *cute) RequireBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		it.tests[it.countTests].Expect.AssertBodyT = append(it.tests[it.countTests].Expect.AssertBodyT, requireAssertBodyT(assert))
-	}
-
-	return it
-}
-
-func (it *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+func (qt *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 	}
 
-	it.tests[it.countTests].Expect.AssertHeadersT = append(it.tests[it.countTests].Expect.AssertHeadersT, asserts...)
+	qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, asserts...)
 
-	return it
+	return qt
 }
 
-func (it *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+func (qt *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertHeadersT = append(it.tests[it.countTests].Expect.AssertHeadersT, optionalAssertHeadersT(assert))
+		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, optionalAssertResponse(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) RequireHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+func (qt *cute) RequireResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertHeadersT = append(it.tests[it.countTests].Expect.AssertHeadersT, requireAssertHeadersT(assert))
+		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, requireAssertResponse(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+func (qt *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 	}
 
-	it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, asserts...)
+	qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, asserts...)
 
-	return it
+	return qt
 }
 
-func (it *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+func (qt *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, optionalAssertResponseT(assert))
+		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, optionalAssertBodyT(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+func (qt *cute) RequireBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		it.tests[it.countTests].Expect.AssertResponseT = append(it.tests[it.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
+		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, requireAssertBodyT(assert))
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) CreateTableTest() MiddlewareTable {
-	it.isTableTest = true
+func (qt *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
 
-	return it
+	qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, asserts...)
+
+	return qt
 }
 
-func (it *cute) PutNewTest(name string, r *http.Request, expect *Expect) TableTest {
+func (qt *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, optionalAssertHeadersT(assert))
+	}
+
+	return qt
+}
+
+func (qt *cute) RequireHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, requireAssertHeadersT(assert))
+	}
+
+	return qt
+}
+
+func (qt *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+	}
+
+	qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, asserts...)
+
+	return qt
+}
+
+func (qt *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, optionalAssertResponseT(assert))
+	}
+
+	return qt
+}
+
+func (qt *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	for _, assert := range asserts {
+		if assert == nil {
+			panic(errorAssertIsNil)
+		}
+
+		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
+	}
+
+	return qt
+}
+
+func (qt *cute) CreateTableTest() MiddlewareTable {
+	qt.isTableTest = true
+
+	return qt
+}
+
+func (qt *cute) PutNewTest(name string, r *http.Request, expect *Expect) TableTest {
 	// Validate, that first step is empty
-	if it.countTests == 0 {
-		if it.tests[0].Request.Base == nil &&
-			len(it.tests[0].Request.Builders) == 0 {
-			it.tests[0].Expect = expect
-			it.tests[0].Name = name
-			it.tests[0].Request.Base = r
+	if qt.countTests == 0 {
+		if qt.tests[0].Request.Base == nil &&
+			len(qt.tests[0].Request.Builders) == 0 {
+			qt.tests[0].Expect = expect
+			qt.tests[0].Name = name
+			qt.tests[0].Request.Base = r
 
-			return it
+			return qt
 		}
 	}
 
-	newTest := createDefaultTest(it.baseProps)
+	newTest := createDefaultTest(qt.baseProps)
 	newTest.Expect = expect
 	newTest.Name = name
 	newTest.Request.Base = r
-	it.tests = append(it.tests, newTest)
-	it.countTests++ // async?
+	qt.tests = append(qt.tests, newTest)
+	qt.countTests++ // async?
 
-	return it
+	return qt
 }
 
-func (it *cute) PutTests(params ...*Test) TableTest {
+func (qt *cute) PutTests(params ...*Test) TableTest {
 	for _, param := range params {
 		// Validate, that first step is empty
-		if it.countTests == 0 {
-			if it.tests[0].Request.Base == nil &&
-				len(it.tests[0].Request.Builders) == 0 {
-				it.tests[0] = param
+		if qt.countTests == 0 {
+			if qt.tests[0].Request.Base == nil &&
+				len(qt.tests[0].Request.Builders) == 0 {
+				qt.tests[0] = param
 
 				continue
 			}
 		}
 
-		it.tests = append(it.tests, param)
-		it.countTests++
+		qt.tests = append(qt.tests, param)
+		qt.countTests++
 	}
 
-	return it
+	return qt
 }
 
-func (it *cute) NextTest() NextTestBuilder {
-	it.countTests++ // async?
+func (qt *cute) NextTest() NextTestBuilder {
+	qt.countTests++ // async?
 
-	it.tests = append(it.tests, createDefaultTest(it.baseProps))
+	qt.tests = append(qt.tests, createDefaultTest(qt.baseProps))
 
-	return it
+	return qt
 }

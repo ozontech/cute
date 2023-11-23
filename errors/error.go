@@ -5,6 +5,7 @@ const (
 	expectedField = "Expected"
 )
 
+// CuteError ...
 type CuteError interface {
 	error
 	WithNameError

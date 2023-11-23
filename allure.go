@@ -1,89 +1,89 @@
 package cute
 
-func (it *cute) setAllureInformation(t allureProvider) {
+func (qt *cute) setAllureInformation(t allureProvider) {
 	// Log main vars to allureProvider
-	it.setLabelsAllure(t)
-	it.setInfoAllure(t)
-	it.setLinksAllure(t)
+	qt.setLabelsAllure(t)
+	qt.setInfoAllure(t)
+	qt.setLinksAllure(t)
 }
 
-func (it *cute) setLinksAllure(t linksAllureProvider) {
-	if it.allureLinks.issue != "" {
-		t.SetIssue(it.allureLinks.issue)
+func (qt *cute) setLinksAllure(t linksAllureProvider) {
+	if qt.allureLinks.issue != "" {
+		t.SetIssue(qt.allureLinks.issue)
 	}
-	if it.allureLinks.testCase != "" {
-		t.SetTestCase(it.allureLinks.testCase)
+	if qt.allureLinks.testCase != "" {
+		t.SetTestCase(qt.allureLinks.testCase)
 	}
-	if it.allureLinks.link != nil {
-		t.Link(it.allureLinks.link)
+	if qt.allureLinks.link != nil {
+		t.Link(qt.allureLinks.link)
 	}
-	if it.allureLinks.tmsLink != "" {
-		t.TmsLink(it.allureLinks.tmsLink)
+	if qt.allureLinks.tmsLink != "" {
+		t.TmsLink(qt.allureLinks.tmsLink)
 	}
-	if len(it.allureLinks.tmsLinks) > 0 {
-		t.TmsLinks(it.allureLinks.tmsLinks...)
-	}
-}
-
-func (it *cute) setLabelsAllure(t labelsAllureProvider) {
-	if it.allureLabels.id != "" {
-		t.ID(it.allureLabels.id)
-	}
-	if it.allureLabels.suiteLabel != "" {
-		t.AddSuiteLabel(it.allureLabels.suiteLabel)
-	}
-	if it.allureLabels.subSuite != "" {
-		t.AddSubSuite(it.allureLabels.subSuite)
-	}
-	if it.allureLabels.parentSuite != "" {
-		t.AddParentSuite(it.allureLabels.parentSuite)
-	}
-	if it.allureLabels.story != "" {
-		t.Story(it.allureLabels.story)
-	}
-	if it.allureLabels.tag != "" {
-		t.Tag(it.allureLabels.tag)
-	}
-	if it.allureLabels.allureID != "" {
-		t.AllureID(it.allureLabels.allureID)
-	}
-	if it.allureLabels.severity != "" {
-		t.Severity(it.allureLabels.severity)
-	}
-	if it.allureLabels.owner != "" {
-		t.Owner(it.allureLabels.owner)
-	}
-	if it.allureLabels.lead != "" {
-		t.Lead(it.allureLabels.lead)
-	}
-	if it.allureLabels.label != nil {
-		t.Label(it.allureLabels.label)
-	}
-	if len(it.allureLabels.labels) != 0 {
-		t.Labels(it.allureLabels.labels...)
-	}
-	if it.allureLabels.feature != "" {
-		t.Feature(it.allureLabels.feature)
-	}
-	if it.allureLabels.epic != "" {
-		t.Epic(it.allureLabels.epic)
-	}
-	if len(it.allureLabels.tags) != 0 {
-		t.Tags(it.allureLabels.tags...)
-	}
-	if it.allureLabels.layer != "" {
-		t.Layer(it.allureLabels.layer)
+	if len(qt.allureLinks.tmsLinks) > 0 {
+		t.TmsLinks(qt.allureLinks.tmsLinks...)
 	}
 }
 
-func (it *cute) setInfoAllure(t infoAllureProvider) {
-	if it.allureInfo.title != "" {
-		t.Title(it.allureInfo.title)
+func (qt *cute) setLabelsAllure(t labelsAllureProvider) {
+	if qt.allureLabels.id != "" {
+		t.ID(qt.allureLabels.id)
 	}
-	if it.allureInfo.description != "" {
-		t.Description(it.allureInfo.description)
+	if qt.allureLabels.suiteLabel != "" {
+		t.AddSuiteLabel(qt.allureLabels.suiteLabel)
 	}
-	if it.allureInfo.stage != "" {
-		t.Stage(it.allureInfo.stage)
+	if qt.allureLabels.subSuite != "" {
+		t.AddSubSuite(qt.allureLabels.subSuite)
+	}
+	if qt.allureLabels.parentSuite != "" {
+		t.AddParentSuite(qt.allureLabels.parentSuite)
+	}
+	if qt.allureLabels.story != "" {
+		t.Story(qt.allureLabels.story)
+	}
+	if qt.allureLabels.tag != "" {
+		t.Tag(qt.allureLabels.tag)
+	}
+	if qt.allureLabels.allureID != "" {
+		t.AllureID(qt.allureLabels.allureID)
+	}
+	if qt.allureLabels.severity != "" {
+		t.Severity(qt.allureLabels.severity)
+	}
+	if qt.allureLabels.owner != "" {
+		t.Owner(qt.allureLabels.owner)
+	}
+	if qt.allureLabels.lead != "" {
+		t.Lead(qt.allureLabels.lead)
+	}
+	if qt.allureLabels.label != nil {
+		t.Label(qt.allureLabels.label)
+	}
+	if len(qt.allureLabels.labels) != 0 {
+		t.Labels(qt.allureLabels.labels...)
+	}
+	if qt.allureLabels.feature != "" {
+		t.Feature(qt.allureLabels.feature)
+	}
+	if qt.allureLabels.epic != "" {
+		t.Epic(qt.allureLabels.epic)
+	}
+	if len(qt.allureLabels.tags) != 0 {
+		t.Tags(qt.allureLabels.tags...)
+	}
+	if qt.allureLabels.layer != "" {
+		t.Layer(qt.allureLabels.layer)
+	}
+}
+
+func (qt *cute) setInfoAllure(t infoAllureProvider) {
+	if qt.allureInfo.title != "" {
+		t.Title(qt.allureInfo.title)
+	}
+	if qt.allureInfo.description != "" {
+		t.Description(qt.allureInfo.description)
+	}
+	if qt.allureInfo.stage != "" {
+		t.Stage(qt.allureInfo.stage)
 	}
 }

@@ -57,7 +57,7 @@ type RequestRepeatPolitic struct {
 	Delay time.Duration
 }
 
-// Middleware is struct for execute something before or after test
+// Middleware is struct for executeInsideAllure something before or after test
 type Middleware struct {
 	After   []AfterExecute
 	AfterT  []AfterExecuteT
@@ -93,6 +93,7 @@ type ExpectJSONSchema struct {
 	File   string
 }
 
+// Execute is common method for run test from builder
 func (it *Test) Execute(ctx context.Context, t tProvider) ResultsHTTPBuilder {
 	var (
 		internalT allureProvider
@@ -119,7 +120,7 @@ func (it *Test) Execute(ctx context.Context, t tProvider) ResultsHTTPBuilder {
 	}
 
 	internalT.Run(it.Name, func(inT provider.T) {
-		res = it.execute(ctx, inT)
+		res = it.executeInsideAllure(ctx, inT)
 	})
 
 	return res
@@ -164,21 +165,17 @@ func (it *Test) initEmptyFields() {
 	}
 }
 
+// executeInsideStep is method for start test with provider.StepCtx
+// It's test inside the step
 func (it *Test) executeInsideStep(ctx context.Context, t internalT) ResultsHTTPBuilder {
 	resp, errs := it.startTest(ctx, t)
 
-	if len(errs) != 0 {
-		t.Fail()
-	}
 	isFailedTest := it.processTestErrors(t, errs)
-
-	// Remove from base struct all asserts
-	it.clearFields()
 
 	return newTestResult(t.Name(), resp, isFailedTest, errs)
 }
 
-func (it *Test) execute(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
+func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
 	var (
 		resp *http.Response
 		errs []error
@@ -189,23 +186,18 @@ func (it *Test) execute(ctx context.Context, allureProvider allureProvider) Resu
 	it.initEmptyFields()
 
 	if it.AllureStep.Name != "" {
-		// Test with step
+		// Set name of test for results
 		name = it.AllureStep.Name
 
-		// Execute Test
-		allureProvider.Logf("Start step %v", name)
+		// Execute test inside step
 		resp, errs = it.startTestWithStep(ctx, allureProvider)
-		allureProvider.Logf("Finish step %v", name)
 	} else {
+
 		// Execute Test
-		// Test without step
 		resp, errs = it.startTest(ctx, allureProvider)
 	}
 
 	isFailedTest := it.processTestErrors(allureProvider, errs)
-
-	// Remove from base struct all asserts
-	it.clearFields()
 
 	return newTestResult(name, resp, isFailedTest, errs)
 }
@@ -245,6 +237,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) bool {
 
 	if countNotOptionalErrors != 0 {
 		t.Errorf("Test finished with %v errors", countNotOptionalErrors)
+		t.Fail()
 	}
 
 	return failTest
@@ -257,6 +250,9 @@ func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Respo
 	)
 
 	t.WithNewStep(it.AllureStep.Name, func(stepCtx provider.StepCtx) {
+		t.Logf("Start step %v", it.AllureStep.Name)
+		defer t.Logf("Finish step %v", it.AllureStep.Name)
+
 		resp, errs = it.startTest(ctx, stepCtx)
 
 		if len(errs) != 0 {
@@ -273,7 +269,7 @@ func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []e
 		err  error
 	)
 
-	// CreateWithStep execute timer
+	// CreateWithStep executeInsideAllure timer
 	if it.Expect.ExecuteTime == 0 {
 		it.Expect.ExecuteTime = defaultExecuteTestTime
 	}
