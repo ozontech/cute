@@ -3,6 +3,7 @@ package json
 import (
 	"bytes"
 	"fmt"
+	"github.com/ohler55/ojg/oj"
 	"reflect"
 	"strings"
 
@@ -60,6 +61,58 @@ func notEqual(data []byte, expression string, expect interface{}) error {
 	for _, value := range values {
 		if objectsAreEqual(value, expect) {
 			return errors.NewAssertError("NotEqual", fmt.Sprintf("on path %v. expect %v, but actual %v", expression, expect, value), value, expect)
+		}
+	}
+
+	return nil
+}
+
+// EqualJSON is a function to check json path expression value is equal to given json
+// About expression - https://goessner.net/articles/JsonPath/
+func equalJSON(data []byte, expression string, expect []byte) error {
+	values, err := GetValueFromJSON(data, expression)
+	if err != nil {
+		return err
+	}
+
+	obj, err := oj.Parse(expect)
+	if err != nil {
+		return fmt.Errorf("could not parse json in EqualJSON error: '%s'", err)
+	}
+
+	for _, value := range values {
+		if !objectsAreEqual(value, obj) {
+			return errors.NewAssertError(
+				"EqualJSON",
+				fmt.Sprintf("on path %v. expect %v (from json %v), but actual %v", expression, obj, expect, value),
+				value,
+				obj)
+		}
+	}
+
+	return nil
+}
+
+// NotEqualJSON is a function to check json path expression value is not equal to given json
+// About expression - https://goessner.net/articles/JsonPath/
+func notEqualJSON(data []byte, expression string, expect []byte) error {
+	values, err := GetValueFromJSON(data, expression)
+	if err != nil {
+		return err
+	}
+
+	obj, err := oj.Parse(expect)
+	if err != nil {
+		return fmt.Errorf("could not parse json in NotEqualJSON error: '%s'", err)
+	}
+
+	for _, value := range values {
+		if objectsAreEqual(value, obj) {
+			return errors.NewAssertError(
+				"NotEqualJSON",
+				fmt.Sprintf("on path %v. expect %v (from json %v), but actual %v", expression, obj, expect, value),
+				value,
+				obj)
 		}
 	}
 

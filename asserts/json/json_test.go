@@ -698,6 +698,199 @@ func TestNotEqual(t *testing.T) {
 	}
 }
 
+func TestEqualJSON(t *testing.T) {
+	tests := []jsonTest{
+		{
+			caseName:   "valid json",
+			data:       `{"first": 777, "second": [{"key_1": "some_key", "value": "some_value"}]}`,
+			expression: "$.second[0].value",
+			expect:     `"some_value"`,
+			IsNilErr:   true,
+		},
+		{
+			caseName: "not valid json",
+			data:     "{not_valid_json}",
+		},
+		{
+			caseName:   "3rd party key",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.l",
+		},
+		{
+			caseName:   "not array",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.b[bs]",
+		},
+		{
+			caseName:   "valid array",
+			data:       `{"arr": ["one","two"]}`,
+			expression: "$.arr",
+			expect:     `["one", "two"]`,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check equal map",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.b",
+			expect:     `{"bs": "sb"}`,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check equal string",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     `"as"`,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check equal not correct string",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     `"not_correct"`,
+		},
+		{
+			caseName:   "check deep equal",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$",
+			expect:     `{ "b": {"bs": "sb"}, "a":"as" }`,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check deep equal not correct",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$",
+			expect:     `{ "b": {"sb": "bs"}, "a":"as" }`,
+		},
+		{
+			caseName:   "check 186135434",
+			data:       `{"a":186135434, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     "186135434",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check float",
+			data:       `{"a":1.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     "1.0000001",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check float 2",
+			data:       `{"a":999.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     "999.0000001",
+			IsNilErr:   true,
+		},
+	}
+
+	for _, test := range tests {
+		exp, _ := test.expect.(string)
+		err := EqualJSON(test.expression, []byte(exp))([]byte(test.data))
+
+		if test.IsNilErr {
+			require.NoError(t, err, "failed test %v", test.caseName)
+		} else {
+			require.Error(t, err, "failed test %v", test.caseName)
+		}
+	}
+}
+
+func TestNotEqualJSON(t *testing.T) {
+	tests := []jsonTest{
+		{
+			caseName:   "valid json",
+			data:       `{"first": 777, "second": [{"key_1": "some_key", "value": "some_value"}]}`,
+			expression: "$.second[0].value",
+			expect:     `"some_value"`,
+		},
+		{
+			caseName: "not valid json",
+			data:     "{not_valid_json}",
+			IsNilErr: true,
+		},
+		{
+			caseName:   "3rd party key",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.l",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "not array",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.b[bs]",
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "valid array",
+			data:       `{"arr": ["one","two"]}`,
+			expression: "$.arr",
+			expect:     `["one", "two"]`,
+		},
+		{
+			caseName:   "check equal map",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.b",
+			expect:     `{"bs": "sb"}`,
+		},
+		{
+			caseName:   "check equal string",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     `"as"`,
+		},
+		{
+			caseName:   "check equal not correct string",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     `"not_correct"`,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check deep equal",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$",
+			expect:     `{ "b": {"bs": "sb"}, "a":"as" }`,
+		},
+		{
+			caseName:   "check deep equal not correct",
+			data:       `{"a":"as", "b":{"bs":"sb"}}`,
+			expression: "$",
+			expect:     `{ "b": {"sb": "bs"}, "a":"as" }`,
+			IsNilErr:   true,
+		},
+		{
+			caseName:   "check 186135434",
+			data:       `{"a":186135434, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     "186135434",
+		},
+		{
+			caseName:   "check float",
+			data:       `{"a":1.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     "1.0000001",
+		},
+		{
+			caseName:   "check float 2",
+			data:       `{"a":999.0000001, "b":{"bs":"sb"}}`,
+			expression: "$.a",
+			expect:     "999.0000001",
+		},
+	}
+
+	for _, test := range tests {
+		exp, _ := test.expect.(string)
+		err := NotEqualJSON(test.expression, []byte(exp))([]byte(test.data))
+
+		if test.IsNilErr {
+			require.NoError(t, err, "failed test %v", test.caseName)
+		} else {
+			require.Error(t, err, "failed test %v", test.caseName)
+		}
+	}
+}
+
 func TestGetValueFromJSON(t *testing.T) {
 	testCases := []struct {
 		name          string
