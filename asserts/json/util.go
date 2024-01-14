@@ -33,9 +33,7 @@ func contains(data []byte, expression string, expect interface{}) error {
 	return nil
 }
 
-// Equal is a function to assert that a jsonpath expression matches the given value
-// About expression - https://goessner.net/articles/JsonPath/
-func equal(data []byte, expression string, expect interface{}) error {
+func equalAbstract(data []byte, expression string, expect interface{}, name string) error {
 	values, err := GetValueFromJSON(data, expression)
 	if err != nil {
 		return err
@@ -43,16 +41,14 @@ func equal(data []byte, expression string, expect interface{}) error {
 
 	for _, value := range values {
 		if !objectsAreEqual(value, expect) {
-			return errors.NewAssertError("Equal", fmt.Sprintf("on path %v. expect %v, but actual %v", expression, expect, value), value, expect)
+			return errors.NewAssertError(name, fmt.Sprintf("on path %v. expect %v, but actual %v", expression, expect, value), value, expect)
 		}
 	}
 
 	return nil
 }
 
-// NotEqual is a function to check json path expression value is not equal to given value
-// About expression - https://goessner.net/articles/JsonPath/
-func notEqual(data []byte, expression string, expect interface{}) error {
+func notEqualAbstract(data []byte, expression string, expect interface{}, name string) error {
 	values, err := GetValueFromJSON(data, expression)
 	if err != nil {
 		return err
@@ -60,63 +56,45 @@ func notEqual(data []byte, expression string, expect interface{}) error {
 
 	for _, value := range values {
 		if objectsAreEqual(value, expect) {
-			return errors.NewAssertError("NotEqual", fmt.Sprintf("on path %v. expect %v, but actual %v", expression, expect, value), value, expect)
+			return errors.NewAssertError(name, fmt.Sprintf("on path %v. expect %v, but actual %v", expression, expect, value), value, expect)
 		}
 	}
 
 	return nil
+}
+
+// Equal is a function to assert that a jsonpath expression matches the given value
+// About expression - https://goessner.net/articles/JsonPath/
+func equal(data []byte, expression string, expect interface{}) error {
+	return equalAbstract(data, expression, expect, "Equal")
+}
+
+// NotEqual is a function to check json path expression value is not equal to given value
+// About expression - https://goessner.net/articles/JsonPath/
+func notEqual(data []byte, expression string, expect interface{}) error {
+	return notEqualAbstract(data, expression, expect, "NotEqual")
 }
 
 // EqualJSON is a function to check json path expression value is equal to given json
 // About expression - https://goessner.net/articles/JsonPath/
 func equalJSON(data []byte, expression string, expect []byte) error {
-	values, err := GetValueFromJSON(data, expression)
-	if err != nil {
-		return err
-	}
-
 	obj, err := oj.Parse(expect)
 	if err != nil {
 		return fmt.Errorf("could not parse json in EqualJSON error: '%s'", err)
 	}
 
-	for _, value := range values {
-		if !objectsAreEqual(value, obj) {
-			return errors.NewAssertError(
-				"EqualJSON",
-				fmt.Sprintf("on path %v. expect %v (from json %v), but actual %v", expression, obj, expect, value),
-				value,
-				obj)
-		}
-	}
-
-	return nil
+	return equalAbstract(data, expression, obj, "EqualJSON")
 }
 
 // NotEqualJSON is a function to check json path expression value is not equal to given json
 // About expression - https://goessner.net/articles/JsonPath/
 func notEqualJSON(data []byte, expression string, expect []byte) error {
-	values, err := GetValueFromJSON(data, expression)
-	if err != nil {
-		return err
-	}
-
 	obj, err := oj.Parse(expect)
 	if err != nil {
 		return fmt.Errorf("could not parse json in NotEqualJSON error: '%s'", err)
 	}
 
-	for _, value := range values {
-		if objectsAreEqual(value, obj) {
-			return errors.NewAssertError(
-				"NotEqualJSON",
-				fmt.Sprintf("on path %v. expect %v (from json %v), but actual %v", expression, obj, expect, value),
-				value,
-				obj)
-		}
-	}
-
-	return nil
+	return notEqualAbstract(data, expression, obj, "NotEqualJSON")
 }
 
 // Length is a function to asserts that value is the expected length
