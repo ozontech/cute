@@ -807,19 +807,16 @@ func TestNotEqualJSON(t *testing.T) {
 		{
 			caseName: "not valid json",
 			data:     "{not_valid_json}",
-			IsNilErr: true,
 		},
 		{
 			caseName:   "3rd party key",
 			data:       `{"a":"as", "b":{"bs":"sb"}}`,
 			expression: "$.l",
-			IsNilErr:   true,
 		},
 		{
 			caseName:   "not array",
 			data:       `{"a":"as", "b":{"bs":"sb"}}`,
 			expression: "$.b[bs]",
-			IsNilErr:   true,
 		},
 		{
 			caseName:   "valid array",
