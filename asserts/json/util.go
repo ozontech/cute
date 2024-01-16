@@ -3,10 +3,10 @@ package json
 import (
 	"bytes"
 	"fmt"
-	"github.com/ohler55/ojg/oj"
 	"reflect"
 	"strings"
 
+	"github.com/ohler55/ojg/oj"
 	"github.com/ozontech/cute/errors"
 )
 
