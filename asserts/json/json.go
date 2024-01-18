@@ -63,6 +63,22 @@ func NotEqual(expression string, expect interface{}) cute.AssertBody {
 	}
 }
 
+// EqualJSON is a function to check json path expression value is equal to given json
+// About expression - https://goessner.net/articles/JsonPath/
+func EqualJSON(expression string, expect []byte) cute.AssertBody {
+	return func(body []byte) error {
+		return equalJSON(body, expression, expect)
+	}
+}
+
+// NotEqualJSON is a function to check json path expression value is not equal to given json
+// About expression - https://goessner.net/articles/JsonPath/
+func NotEqualJSON(expression string, expect []byte) cute.AssertBody {
+	return func(body []byte) error {
+		return notEqualJSON(body, expression, expect)
+	}
+}
+
 // Length is a function to asserts that value is the expected length
 // About expression - https://goessner.net/articles/JsonPath/
 func Length(expression string, expectLength int) cute.AssertBody {
