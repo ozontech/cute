@@ -104,6 +104,7 @@ func createAllureT(t *testing.T) *common.Common {
 				WithRunner(callers[0])
 		newProvider = manager.NewProvider(providerCfg)
 	)
+
 	newProvider.NewTest(t.Name(), "package")
 
 	newT.SetProvider(newProvider)

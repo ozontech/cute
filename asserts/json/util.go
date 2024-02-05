@@ -273,7 +273,9 @@ func isEmpty(object interface{}) bool {
 		if objValue.IsNil() {
 			return true
 		}
+
 		deref := objValue.Elem().Interface()
+
 		return isEmpty(deref)
 	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice:
 		return objValue.Len() == 0

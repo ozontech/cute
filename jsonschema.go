@@ -32,6 +32,7 @@ func (it *Test) validateJSONSchema(t internalT, body []byte) []error {
 
 func checkJSONSchema(expect gojsonschema.JSONLoader, data []byte) []error {
 	scope := make([]error, 0)
+
 	validateResult, err := gojsonschema.Validate(expect, gojsonschema.NewBytesLoader(data))
 	if err != nil {
 		return []error{err}

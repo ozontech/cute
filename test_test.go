@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"testing"
@@ -39,7 +39,7 @@ func TestCreateRequestBuilder(t *testing.T) {
 		url = "http://go.com"
 	)
 
-	req, err := http.NewRequest(http.MethodGet, url, ioutil.NopCloser(bytes.NewReader(body)))
+	req, err := http.NewRequest(http.MethodGet, url, io.NopCloser(bytes.NewReader(body)))
 	require.NoError(t, err)
 
 	req.Header = headers
@@ -135,7 +135,7 @@ func TestValidateResponseWithErrors(t *testing.T) {
 				},
 				AssertResponse: []AssertResponse{
 					func(response *http.Response) error {
-						if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 {
+						if response.StatusCode != http.StatusOK || len(response.Header["auth"]) == 0 { //nolint
 							return errors.New("bad response")
 						}
 						return nil
@@ -152,7 +152,7 @@ func TestValidateResponseWithErrors(t *testing.T) {
 				"key":  []string{"value"},
 				"auth": []string{"sometoken"},
 			},
-			Body: ioutil.NopCloser(reader),
+			Body: io.NopCloser(reader),
 		}
 	)
 

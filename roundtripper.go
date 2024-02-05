@@ -47,6 +47,7 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 		}
 
 		scope = append(scope, err)
+
 		if i != countRepeat {
 			time.Sleep(delay)
 		}
@@ -84,7 +85,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 		// Add information (code, body, headers) about response to Allure step
 		addInformationResponse(t, resp)
 
-		if validErr := it.validateResponseCode(t, resp); validErr != nil {
+		if validErr := it.validateResponseCode(resp); validErr != nil {
 			return nil, validErr
 		}
 	}
@@ -92,7 +93,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (it *Test) validateResponseCode(t T, resp *http.Response) error {
+func (it *Test) validateResponseCode(resp *http.Response) error {
 	if it.Expect.Code != 0 && it.Expect.Code != resp.StatusCode {
 		return cuteErrors.NewAssertError(
 			"Assert response code",
@@ -194,6 +195,7 @@ func addInformationResponse(t T, response *http.Response) {
 	if err != nil {
 		return
 	}
+
 	body, err := utils.GetBody(saveBody)
 	// if could not get body from response, no add to allure
 	if err != nil {
@@ -206,6 +208,7 @@ func addInformationResponse(t T, response *http.Response) {
 	}
 
 	responseType := allure.Text
+
 	if _, ok := response.Header["Content-Type"]; ok {
 		if len(response.Header["Content-Type"]) > 0 {
 			if strings.Contains(response.Header["Content-Type"][0], "application/json") {
@@ -215,6 +218,7 @@ func addInformationResponse(t T, response *http.Response) {
 			}
 		}
 	}
+
 	if responseType == allure.JSON {
 		body, _ = utils.PrettyJSON(body)
 	}
