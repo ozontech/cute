@@ -1,10 +1,10 @@
 module github.com/ozontech/cute
 
-go 1.18
+go 1.19
 
 require (
 	github.com/josephburnett/jd v1.5.1
-	github.com/ohler55/ojg v1.12.9
+	github.com/ohler55/ojg v1.19.4
 	github.com/ozontech/allure-go/pkg/allure v0.6.11
 	github.com/ozontech/allure-go/pkg/framework v0.6.28
 	github.com/stretchr/testify v1.7.1
