@@ -21,6 +21,7 @@ type AllureBuilder interface {
 	Parallel() AllureBuilder
 }
 
+// AllureInfoBuilder ...
 type AllureInfoBuilder interface {
 	// Title is a function for set title in allure information
 	Title(title string) AllureBuilder
@@ -32,6 +33,7 @@ type AllureInfoBuilder interface {
 	Stagef(format string, args ...interface{}) AllureBuilder
 }
 
+// AllureLinksBuilder ...
 type AllureLinksBuilder interface {
 	SetIssue(issue string) AllureBuilder
 	SetTestCase(testCase string) AllureBuilder
@@ -40,6 +42,7 @@ type AllureLinksBuilder interface {
 	TmsLinks(tmsLinks ...string) AllureBuilder
 }
 
+// AllureLabelsBuilder ...
 type AllureLabelsBuilder interface {
 	Feature(feature string) AllureBuilder
 	Epic(epic string) AllureBuilder
@@ -166,6 +169,7 @@ type RequestHTTPBuilder interface {
 	RequestParams
 }
 
+// RequestParams is a scope of methods for configurate http request
 type RequestParams interface {
 	// RequestRepeat is a count of repeat request, if request was failed.
 	RequestRepeat(count int) RequestHTTPBuilder

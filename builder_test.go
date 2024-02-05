@@ -179,7 +179,7 @@ func TestHTTPTestMaker(t *testing.T) {
 		allureID       = "AllureID"
 		owner          = "Owner"
 		lead           = "Lead"
-		label          = &allure.Label{"kek", "lol"}
+		label          = &allure.Label{Name: "kek", Value: "lol"}
 		setIssue       = "SetIssue"
 		setTestCase    = "SetTestCase"
 		repeatCount    = 10
@@ -354,10 +354,10 @@ func TestCreateDefaultTest(t *testing.T) {
 		Name:       "",
 		AllureStep: new(AllureStep),
 		Middleware: &Middleware{
-			After:   make([]AfterExecute, 0, 0),
-			AfterT:  make([]AfterExecuteT, 0, 0),
-			Before:  make([]BeforeExecute, 0, 0),
-			BeforeT: make([]BeforeExecuteT, 0, 0),
+			After:   make([]AfterExecute, 0),
+			AfterT:  make([]AfterExecuteT, 0),
+			Before:  make([]BeforeExecute, 0),
+			BeforeT: make([]BeforeExecuteT, 0),
 		},
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),

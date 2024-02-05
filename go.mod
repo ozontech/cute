@@ -1,6 +1,6 @@
 module github.com/ozontech/cute
 
-go 1.19
+go 1.21
 
 require (
 	github.com/josephburnett/jd v1.7.1

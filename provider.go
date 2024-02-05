@@ -5,6 +5,7 @@ import (
 	"github.com/ozontech/allure-go/pkg/framework/provider"
 )
 
+// T is internal testing.T provider
 type T interface {
 	tProvider
 	logProvider

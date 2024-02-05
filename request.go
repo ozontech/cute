@@ -4,6 +4,7 @@ import (
 	"net/url"
 )
 
+// RequestBuilder ...
 type RequestBuilder func(o *requestOptions)
 
 // File is struct for upload file in form field

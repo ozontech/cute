@@ -30,6 +30,7 @@ type options struct {
 	middleware *Middleware
 }
 
+// Option ...
 type Option func(*options)
 
 // WithHTTPClient is a function for set custom http client
