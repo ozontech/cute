@@ -39,7 +39,6 @@ linters:
     - typecheck
     - unused # will be used insted of varcheck + deadcode + structcheck. More info https://github.com/golangci/golangci-lint/issues/1841
     - exportloopref
-    - ifshort
     - prealloc
     - wsl
 
