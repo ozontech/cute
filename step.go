@@ -39,6 +39,12 @@ func processStepErrors(stepCtx provider.StepCtx, errs []error) {
 			}
 		}
 
+		if tErr, ok := err.(errors.BrokenError); ok {
+			if tErr.IsBroken() {
+				currentStatus = allure.Broken
+			}
+		}
+
 		if tErr, ok := err.(errors.WithNameError); ok {
 			currentStep = allure.NewSimpleStep(tErr.GetName())
 			currentStep.Status = currentStatus

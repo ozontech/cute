@@ -14,18 +14,25 @@ var (
 	errorAssertIsNil = "assert must be not nil"
 )
 
+// JSONMarshaler is marshaler which use for marshal/unmarshal JSON to/from struct
+type JSONMarshaler interface {
+	Marshal(v any) ([]byte, error)
+	Unmarshal(data []byte, v any) error
+}
+
 // HTTPTestMaker is a creator tests
 type HTTPTestMaker struct {
-	httpClient *http.Client
-	middleware *Middleware
-
-	// todo add marshaler
+	httpClient    *http.Client
+	middleware    *Middleware
+	jsonMarshaler JSONMarshaler
 }
 
 type options struct {
 	httpClient       *http.Client
 	httpTimeout      time.Duration
 	httpRoundTripper http.RoundTripper
+
+	jsonMarshaler JSONMarshaler
 
 	middleware *Middleware
 }
@@ -37,6 +44,13 @@ type Option func(*options)
 func WithHTTPClient(client *http.Client) Option {
 	return func(o *options) {
 		o.httpClient = client
+	}
+}
+
+// WithJSONMarshaler is a function for set custom json marshaler
+func WithJSONMarshaler(m JSONMarshaler) Option {
+	return func(o *options) {
+		o.jsonMarshaler = m
 	}
 }
 
@@ -89,8 +103,9 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 			middleware: new(Middleware),
 		}
 
-		timeout      = defaultHTTPTimeout * time.Second
-		roundTripper = http.DefaultTransport
+		timeout                    = defaultHTTPTimeout * time.Second
+		roundTripper               = http.DefaultTransport
+		jsMarshaler  JSONMarshaler = &jsonMarshaler{}
 	)
 
 	for _, opt := range opts {
@@ -114,9 +129,14 @@ func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 		httpClient = o.httpClient
 	}
 
+	if o.jsonMarshaler != nil {
+		jsMarshaler = o.jsonMarshaler
+	}
+
 	m := &HTTPTestMaker{
-		httpClient: httpClient,
-		middleware: o.middleware,
+		httpClient:    httpClient,
+		jsonMarshaler: jsMarshaler,
+		middleware:    o.middleware,
 	}
 
 	return m
@@ -165,9 +185,10 @@ func createDefaultTest(m *HTTPTestMaker) *Test {
 	}
 
 	return &Test{
-		httpClient: m.httpClient,
-		Middleware: middleware,
-		AllureStep: new(AllureStep),
+		httpClient:    m.httpClient,
+		jsonMarshaler: m.jsonMarshaler,
+		Middleware:    middleware,
+		AllureStep:    new(AllureStep),
 		Request: &Request{
 			Repeat: new(RequestRepeatPolitic),
 		},
@@ -421,30 +442,6 @@ func (qt *cute) AfterTestExecuteT(fs ...AfterExecuteT) NextTestBuilder {
 	return qt
 }
 
-func (qt *cute) RequestRepeat(count int) RequestHTTPBuilder {
-	qt.tests[qt.countTests].Request.Repeat.Count = count
-
-	return qt
-}
-
-func (qt *cute) RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder {
-	qt.tests[qt.countTests].Request.Repeat.Delay = delay
-
-	return qt
-}
-
-func (qt *cute) Request(r *http.Request) ExpectHTTPBuilder {
-	qt.tests[qt.countTests].Request.Base = r
-
-	return qt
-}
-
-func (qt *cute) RequestBuilder(r ...RequestBuilder) ExpectHTTPBuilder {
-	qt.tests[qt.countTests].Request.Builders = append(qt.tests[qt.countTests].Request.Builders, r...)
-
-	return qt
-}
-
 func (qt *cute) ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder {
 	qt.tests[qt.countTests].Expect.ExecuteTime = t
 
@@ -471,222 +468,6 @@ func (qt *cute) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
 
 func (qt *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
 	qt.tests[qt.countTests].Expect.JSONSchema.File = filePath
-
-	return qt
-}
-
-func (qt *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, asserts...)
-
-	return qt
-}
-
-func (qt *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, optionalAssertBody(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) RequireBody(asserts ...AssertBody) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, requireAssertBody(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, asserts...)
-
-	return qt
-}
-
-func (qt *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, optionalAssertHeaders(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) RequireHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, requireAssertHeaders(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, asserts...)
-
-	return qt
-}
-
-func (qt *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, optionalAssertResponse(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) RequireResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, requireAssertResponse(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, asserts...)
-
-	return qt
-}
-
-func (qt *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, optionalAssertBodyT(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) RequireBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, requireAssertBodyT(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, asserts...)
-
-	return qt
-}
-
-func (qt *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, optionalAssertHeadersT(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) RequireHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, requireAssertHeadersT(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-	}
-
-	qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, asserts...)
-
-	return qt
-}
-
-func (qt *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, optionalAssertResponseT(assert))
-	}
-
-	return qt
-}
-
-func (qt *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
-	for _, assert := range asserts {
-		if assert == nil {
-			panic(errorAssertIsNil)
-		}
-
-		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
-	}
 
 	return qt
 }

@@ -5,6 +5,7 @@ package examples
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -69,6 +70,29 @@ func Test_Single_1(t *testing.T) {
 
 				return nil
 			},
+		).
+		ExecuteTest(context.Background(), t)
+}
+
+func Test_Single_Broken111(t *testing.T) {
+	cute.NewTestBuilder().
+		Title("Test_Single_Broken").
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		BrokenAssertBodyT(func(t cute.T, body []byte) error {
+			return errors.New("example broken error")
+		}).
+		ExpectStatus(http.StatusOK).
+		NextTest().
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		AssertBody(func(body []byte) error {
+			return errors.New("ssss")
+		},
 		).
 		ExecuteTest(context.Background(), t)
 }

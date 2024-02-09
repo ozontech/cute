@@ -3,7 +3,6 @@ package cute
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -32,7 +31,8 @@ var (
 // Test is a main struct of test.
 // You may field Request and Expect for create simple test
 type Test struct {
-	httpClient *http.Client
+	httpClient    *http.Client
+	jsonMarshaler JSONMarshaler
 
 	Name string
 
@@ -170,9 +170,9 @@ func (it *Test) initEmptyFields() {
 func (it *Test) executeInsideStep(ctx context.Context, t internalT) ResultsHTTPBuilder {
 	resp, errs := it.startTest(ctx, t)
 
-	isFailedTest := it.processTestErrors(t, errs)
+	resultState := it.processTestErrors(t, errs)
 
-	return newTestResult(t.Name(), resp, isFailedTest, errs)
+	return newTestResult(t.Name(), resp, resultState, errs)
 }
 
 func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
@@ -197,23 +197,23 @@ func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allurePr
 		resp, errs = it.startTest(ctx, allureProvider)
 	}
 
-	isFailedTest := it.processTestErrors(allureProvider, errs)
+	resultState := it.processTestErrors(allureProvider, errs)
 
-	return newTestResult(name, resp, isFailedTest, errs)
+	return newTestResult(name, resp, resultState, errs)
 }
 
 // processTestErrors returns flag, which mean finish test or not.
 // true - need finish test
 // false - continue
-func (it *Test) processTestErrors(t internalT, errs []error) bool {
+func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
+	if len(errs) == 0 {
+		return ResultStateSuccess
+	}
+
 	var (
 		countNotOptionalErrors = 0
-		failTest               = false
+		state                  = ResultStateFail
 	)
-
-	if len(errs) == 0 {
-		return false
-	}
 
 	for _, err := range errs {
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
@@ -224,9 +224,19 @@ func (it *Test) processTestErrors(t internalT, errs []error) bool {
 			}
 		}
 
+		if tErr, ok := err.(cuteErrors.BrokenError); ok {
+			if tErr.IsBroken() {
+				t.Logf("[BROKEN ERROR] %v", tErr.(error).Error())
+
+				state = ResultStateBroken
+
+				continue
+			}
+		}
+
 		if tErr, ok := err.(cuteErrors.RequireError); ok {
 			if tErr.IsRequire() {
-				failTest = true
+				state = ResultStateFailNow
 			}
 		}
 
@@ -237,10 +247,9 @@ func (it *Test) processTestErrors(t internalT, errs []error) bool {
 
 	if countNotOptionalErrors != 0 {
 		t.Errorf("Test finished with %v errors", countNotOptionalErrors)
-		t.Fail()
 	}
 
-	return failTest
+	return state
 }
 
 func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {
@@ -422,7 +431,7 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 	// Set body
 	body := o.body
 	if o.bodyMarshal != nil {
-		body, err = json.Marshal(o.bodyMarshal) // TODO move marshaler to it struct
+		body, err = it.jsonMarshaler.Marshal(o.bodyMarshal)
 
 		if err != nil {
 			return nil, err

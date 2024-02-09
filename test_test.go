@@ -70,6 +70,7 @@ func TestCreateRequestBuilder_MarshalBody(t *testing.T) {
 	)
 
 	ht := &Test{
+		jsonMarshaler: jsonMarshaler{},
 		Request: &Request{
 			Builders: []RequestBuilder{
 				WithMarshalBody(str),

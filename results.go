@@ -4,19 +4,30 @@ import (
 	"net/http"
 )
 
+// ResultState is state of test
+type ResultState int
+
+// ResultState ...
+const (
+	ResultStateSuccess ResultState = iota
+	ResultStateBroken
+	ResultStateFail
+	ResultStateFailNow
+)
+
 type testResults struct {
-	isFailed bool
-	name     string
-	resp     *http.Response
-	errors   []error
+	name   string
+	state  ResultState
+	resp   *http.Response
+	errors []error
 }
 
-func newTestResult(name string, resp *http.Response, isFailed bool, errs []error) ResultsHTTPBuilder {
+func newTestResult(name string, resp *http.Response, state ResultState, errs []error) ResultsHTTPBuilder {
 	return &testResults{
-		name:     name,
-		resp:     resp,
-		isFailed: isFailed,
-		errors:   errs,
+		name:   name,
+		resp:   resp,
+		state:  state,
+		errors: errs,
 	}
 }
 
@@ -32,6 +43,12 @@ func (r *testResults) GetName() string {
 	return r.name
 }
 
+// IsFailed ...
+// Deprecated please use GetResultState
 func (r *testResults) IsFailed() bool {
-	return r.isFailed
+	return r.state == ResultStateFail
+}
+
+func (r *testResults) GetResultState() ResultState {
+	return r.state
 }

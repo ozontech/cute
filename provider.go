@@ -17,6 +17,8 @@ type T interface {
 type allureProvider interface {
 	internalT
 	Parallel()
+	Broken()
+	BrokenNow()
 	Run(testName string, testBody func(provider.T), tags ...string) (res *allure.Result)
 
 	infoAllureProvider

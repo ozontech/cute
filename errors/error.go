@@ -43,6 +43,7 @@ type WithAttachments interface {
 type assertError struct {
 	optional bool
 	require  bool
+	broken   bool
 
 	name        string
 	message     string
@@ -59,6 +60,14 @@ func NewAssertError(name string, message string, actual interface{}, expected in
 			actualField:   actual,
 			expectedField: expected,
 		},
+	}
+}
+
+// NewAssertErrorWithMessage ...
+func NewAssertErrorWithMessage(name string, message string) error {
+	return &assertError{
+		name:    name,
+		message: message,
 	}
 }
 
@@ -115,4 +124,12 @@ func (a *assertError) IsRequire() bool {
 
 func (a *assertError) SetRequire(b bool) {
 	a.require = b
+}
+
+func (a *assertError) IsBroken() bool {
+	return a.broken
+}
+
+func (a *assertError) SetBroken(b bool) {
+	a.broken = b
 }
