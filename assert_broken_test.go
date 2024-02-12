@@ -12,7 +12,7 @@ import (
 
 func TestBrokenAssertResponse(t *testing.T) {
 	v := &http.Response{}
-	f := func(resp *http.Response) error {
+	f := func(_ *http.Response) error {
 		return errors.New("test error")
 	}
 
@@ -25,7 +25,7 @@ func TestBrokenAssertResponse(t *testing.T) {
 
 func TestBrokenAssertResponseT(t *testing.T) {
 	v := &http.Response{}
-	f := func(t T, resp *http.Response) error {
+	f := func(T, *http.Response) error {
 		return errors.New("test error")
 	}
 
@@ -38,7 +38,7 @@ func TestBrokenAssertResponseT(t *testing.T) {
 
 func TestBrokenAssertHeaders(t *testing.T) {
 	h := http.Header{}
-	f := func(headers http.Header) error {
+	f := func(_ http.Header) error {
 		return errors.New("test error")
 	}
 
@@ -51,7 +51,7 @@ func TestBrokenAssertHeaders(t *testing.T) {
 
 func TestBrokenAssertHeadersT(t *testing.T) {
 	h := http.Header{}
-	f := func(t T, headers http.Header) error {
+	f := func(T, http.Header) error {
 		return errors.New("test error")
 	}
 
@@ -64,7 +64,7 @@ func TestBrokenAssertHeadersT(t *testing.T) {
 
 func TestBrokenAssertBody(t *testing.T) {
 	v := []byte{}
-	f := func(body []byte) error {
+	f := func(_ []byte) error {
 		return errors.New("test error")
 	}
 
@@ -77,7 +77,7 @@ func TestBrokenAssertBody(t *testing.T) {
 
 func TestBrokenAssertBodyT(t *testing.T) {
 	v := []byte{}
-	f := func(t T, body []byte) error {
+	f := func(T, []byte) error {
 		return errors.New("test error")
 	}
 

@@ -14,12 +14,6 @@ var (
 	errorAssertIsNil = "assert must be not nil"
 )
 
-// JSONMarshaler is marshaler which use for marshal/unmarshal JSON to/from struct
-type JSONMarshaler interface {
-	Marshal(v any) ([]byte, error)
-	Unmarshal(data []byte, v any) error
-}
-
 // HTTPTestMaker is a creator tests
 type HTTPTestMaker struct {
 	httpClient    *http.Client

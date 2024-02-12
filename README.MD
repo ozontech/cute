@@ -39,7 +39,7 @@ Three steps for testing your HTTP service:
 ## Installation
 
 ```bash
-go get -u github.com/ozontech/cute
+  go get -u github.com/ozontech/cute
 ```
 
 ## Requirements
@@ -58,16 +58,16 @@ go get -u github.com/ozontech/cute
 
 1) Install allure
 ```bash
-    $ brew install allure
+  brew install allure
   ```
 2) Run example
  ```bash
-    $ make example
+  make example
 ```
 
 3) Run allure
 ```bash
-    $ allure serve ./examples/allure-results
+  allure serve ./examples/allure-results
 ```
 
 ## Examples
@@ -447,9 +447,9 @@ You can implement [3 type of asserts](assert.go):
 Types for creating custom assertions.
 
 ```go
-type AssertBody func(body []byte) error
-type AssertHeaders func(headers http.Header) error
-type AssertResponse func(response *http.Response) error
+    type AssertBody func(body []byte) error
+    type AssertHeaders func(headers http.Header) error
+    type AssertResponse func(response *http.Response) error
 ```
 
 **Example:**
@@ -473,9 +473,9 @@ You can log some information to Allure. \
 Also you can log error on Allure yourself or just return error.
 
 ```go
-type AssertBodyT func(t cute.T, body []byte) error
-type AssertHeadersT func(t cute.T, headers http.Header) error
-type AssertResponseT func(t cute.T, response *http.Response) error
+    type AssertBodyT func(t cute.T, body []byte) error
+    type AssertHeadersT func(t cute.T, headers http.Header) error
+    type AssertResponseT func(t cute.T, response *http.Response) error
 ```
 
 **Example with T:**

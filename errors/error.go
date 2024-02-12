@@ -51,7 +51,7 @@ type assertError struct {
 	attachments []*Attachment
 }
 
-// NewAssertError ...
+// NewAssertError is the function, which creates error with "Actual" and "Expected" for allure
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
 	return &assertError{
 		name:    name,

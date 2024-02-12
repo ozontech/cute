@@ -7,11 +7,12 @@ import (
 // ResultState is state of test
 type ResultState int
 
-// ResultState ...
+// ResultState is state of test
 const (
 	ResultStateSuccess ResultState = iota
 	ResultStateBroken
 	ResultStateFail
+	// ResultStateFailNow is state for require validations
 	ResultStateFailNow
 )
 

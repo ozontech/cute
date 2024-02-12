@@ -65,5 +65,5 @@ func wrapRequireError(err error) error {
 		return tErr.(error)
 	}
 
-	return errors.NewRequireError(err.Error())
+	return errors.WrapRequireError(err)
 }

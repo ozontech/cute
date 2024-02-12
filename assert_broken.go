@@ -65,5 +65,5 @@ func wrapBrokenError(err error) error {
 		return tErr.(error)
 	}
 
-	return errors.NewBrokenError(err.Error())
+	return errors.WrapBrokenError(err)
 }
