@@ -2,8 +2,8 @@ package errors
 
 import "errors"
 
-// BrokenError is interface for set error like Broken error.
-// If function returns error, which implement this interface, allure step will has broken status
+// BrokenError is an interface for set errors like Broken errors.
+// If the function returns an error, which implements this interface, the allure step will has a broken status
 type BrokenError interface {
 	IsBroken() bool
 	SetBroken(bool)
@@ -23,7 +23,7 @@ func NewBrokenError(err string) error {
 	}
 }
 
-// WrapBrokenError ...
+// WrapBrokenError returns error with a Broken tag for Allure
 func WrapBrokenError(err error) error {
 	return &brokenError{
 		broken: true,

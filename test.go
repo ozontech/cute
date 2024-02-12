@@ -236,7 +236,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 
 		if tErr, ok := err.(cuteErrors.RequireError); ok {
 			if tErr.IsRequire() {
-				state = ResultStateFailNow
+				state = resultStateFailNow
 			}
 		}
 

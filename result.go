@@ -12,8 +12,9 @@ const (
 	ResultStateSuccess ResultState = iota
 	ResultStateBroken
 	ResultStateFail
-	// ResultStateFailNow is state for require validations
-	ResultStateFailNow
+
+	// resultStateFailNow is state for require validations (execute failNow)
+	resultStateFailNow
 )
 
 type testResults struct {
@@ -47,7 +48,7 @@ func (r *testResults) GetName() string {
 // IsFailed ...
 // Deprecated please use GetResultState
 func (r *testResults) IsFailed() bool {
-	return r.state == ResultStateFail
+	return r.state == ResultStateFail || r.state == resultStateFailNow
 }
 
 func (r *testResults) GetResultState() ResultState {

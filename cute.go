@@ -180,7 +180,7 @@ func (qt *cute) executeSingleTest(ctx context.Context, allureProvider allureProv
 	case ResultStateFail:
 		allureProvider.Fail()
 		allureProvider.Logf("Test failed %v", currentTest.Name)
-	case ResultStateFailNow:
+	case resultStateFailNow:
 		allureProvider.FailNow()
 		allureProvider.Logf("Test failed %v", currentTest.Name)
 	case ResultStateSuccess:

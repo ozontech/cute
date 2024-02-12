@@ -12,7 +12,7 @@ import (
 
 func TestRequireAssertResponse(t *testing.T) {
 	v := &http.Response{}
-	f := func(resp *http.Response) error {
+	f := func(_ *http.Response) error {
 		return errors.New("test error")
 	}
 
@@ -25,7 +25,7 @@ func TestRequireAssertResponse(t *testing.T) {
 
 func TestRequireAssertResponseT(t *testing.T) {
 	v := &http.Response{}
-	f := func(t T, resp *http.Response) error {
+	f := func(T, *http.Response) error {
 		return errors.New("test error")
 	}
 
@@ -38,7 +38,7 @@ func TestRequireAssertResponseT(t *testing.T) {
 
 func TestRequireAssertHeaders(t *testing.T) {
 	h := http.Header{}
-	f := func(headers http.Header) error {
+	f := func(http.Header) error {
 		return errors.New("test error")
 	}
 
@@ -51,7 +51,7 @@ func TestRequireAssertHeaders(t *testing.T) {
 
 func TestRequireAssertHeadersT(t *testing.T) {
 	h := http.Header{}
-	f := func(t T, headers http.Header) error {
+	f := func(T, http.Header) error {
 		return errors.New("test error")
 	}
 
@@ -64,7 +64,7 @@ func TestRequireAssertHeadersT(t *testing.T) {
 
 func TestRequireAssertBody(t *testing.T) {
 	v := []byte{}
-	f := func(body []byte) error {
+	f := func([]byte) error {
 		return errors.New("test error")
 	}
 
@@ -77,7 +77,7 @@ func TestRequireAssertBody(t *testing.T) {
 
 func TestRequireAssertBodyT(t *testing.T) {
 	v := []byte{}
-	f := func(t T, body []byte) error {
+	f := func(T, []byte) error {
 		return errors.New("test error")
 	}
 
