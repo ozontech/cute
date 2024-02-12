@@ -41,7 +41,7 @@ install:
 # run full lint like in pipeline
 .PHONY: lint
 lint: install-lint
-	$(GOLANGCI_BIN) run --config=.golangci.yaml ./... --build-tags=examples,allure_go,provider
+	$(GOLANGCI_BIN) run --config=.golangci.yaml ./... --new-from-rev=origin/master --build-tags=examples,allure_go,provider
 
 
 .PHONY: install-lint

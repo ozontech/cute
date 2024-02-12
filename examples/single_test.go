@@ -5,6 +5,7 @@ package examples
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 	"github.com/ozontech/allure-go/pkg/allure"
 	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/allure-go/pkg/framework/runner"
+	cuteErrors "github.com/ozontech/cute/errors"
 
 	"github.com/ozontech/cute"
 	"github.com/ozontech/cute/asserts/json"
@@ -69,6 +71,53 @@ func Test_Single_1(t *testing.T) {
 
 				return nil
 			},
+		).
+		ExecuteTest(context.Background(), t)
+}
+
+func Test_Single_Broken(t *testing.T) {
+	cute.NewTestBuilder().
+		Title("Test_Single_Broken").
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		BrokenAssertBodyT(func(t cute.T, body []byte) error {
+			return errors.New("example broken error")
+		}).
+		ExpectStatus(http.StatusOK).
+		NextTest().
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		AssertBody(func(body []byte) error {
+			return errors.New("it's NOT must be run")
+		},
+		).
+		ExecuteTest(context.Background(), t)
+}
+
+func Test_Single_Broken_2(t *testing.T) {
+	cute.NewTestBuilder().
+		Title("Test_Single_Broken_2").
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		AssertBodyT(func(t cute.T, body []byte) error {
+			err := errors.New("example broken error")
+			return cuteErrors.WrapBrokenError(err)
+		}).
+		ExpectStatus(http.StatusOK).
+		NextTest().
+		Create().
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		AssertBody(func(body []byte) error {
+			return errors.New("it's NOT must be run")
+		},
 		).
 		ExecuteTest(context.Background(), t)
 }

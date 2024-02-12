@@ -12,7 +12,7 @@ import (
 
 func TestOptionalAssertResponse(t *testing.T) {
 	v := &http.Response{}
-	f := func(resp *http.Response) error {
+	f := func(*http.Response) error {
 		return errors.New("test error")
 	}
 
@@ -25,7 +25,7 @@ func TestOptionalAssertResponse(t *testing.T) {
 
 func TestOptionalAssertResponseT(t *testing.T) {
 	v := &http.Response{}
-	f := func(t T, resp *http.Response) error {
+	f := func(T, *http.Response) error {
 		return errors.New("test error")
 	}
 
@@ -38,7 +38,7 @@ func TestOptionalAssertResponseT(t *testing.T) {
 
 func TestOptionalAssertHeaders(t *testing.T) {
 	h := http.Header{}
-	f := func(headers http.Header) error {
+	f := func(http.Header) error {
 		return errors.New("test error")
 	}
 
@@ -51,7 +51,7 @@ func TestOptionalAssertHeaders(t *testing.T) {
 
 func TestOptionalAssertHeadersT(t *testing.T) {
 	h := http.Header{}
-	f := func(t T, headers http.Header) error {
+	f := func(T, http.Header) error {
 		return errors.New("test error")
 	}
 
@@ -64,7 +64,7 @@ func TestOptionalAssertHeadersT(t *testing.T) {
 
 func TestOptionalAssertBody(t *testing.T) {
 	v := []byte{}
-	f := func(body []byte) error {
+	f := func([]byte) error {
 		return errors.New("test error")
 	}
 
@@ -77,7 +77,7 @@ func TestOptionalAssertBody(t *testing.T) {
 
 func TestOptionalAssertBodyT(t *testing.T) {
 	v := []byte{}
-	f := func(t T, body []byte) error {
+	f := func(T, []byte) error {
 		return errors.New("test error")
 	}
 

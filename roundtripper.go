@@ -105,7 +105,6 @@ func (it *Test) validateResponseCode(resp *http.Response) error {
 	return nil
 }
 
-// PrepareStep returns step based on http request.
 func addInformationRequest(t T, req *http.Request) error {
 	var (
 		saveBody io.ReadCloser
@@ -123,6 +122,8 @@ func addInformationRequest(t T, req *http.Request) error {
 		t.Log("[Request] Do request")
 	}
 
+	// Do not change to JSONMarshaler
+	// In this case we can keep default for keep JSON, independence from JSONMarshaler
 	headers, err := utils.ToJSON(req.Header)
 	if err != nil {
 		return err

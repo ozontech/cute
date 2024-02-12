@@ -65,5 +65,5 @@ func wrapOptionalError(err error) error {
 		return tErr.(error)
 	}
 
-	return errors.NewOptionalError(err.Error())
+	return errors.WrapOptionalError(err)
 }

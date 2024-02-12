@@ -1,14 +1,16 @@
 package errors
 
-// OptionalError is interface for set error like optional error.
-// If function returns error, which implement this interface, allure step will have skip status
+import "errors"
+
+// OptionalError is an interface for set errors like optional errors.
+// If the function returns an error, which implements this interface, the allure step will has to skip status
 type OptionalError interface {
 	IsOptional() bool
 	SetOptional(bool)
 }
 
 type optionalError struct {
-	err      string
+	err      error
 	optional bool
 }
 
@@ -16,12 +18,20 @@ type optionalError struct {
 func NewOptionalError(err string) error {
 	return &optionalError{
 		optional: true,
+		err:      errors.New(err),
+	}
+}
+
+// WrapOptionalError returns error with an Optional tag for Allure
+func WrapOptionalError(err error) error {
+	return &optionalError{
+		optional: true,
 		err:      err,
 	}
 }
 
 func (o *optionalError) Error() string {
-	return o.err
+	return o.err.Error()
 }
 
 func (o *optionalError) IsOptional() bool {

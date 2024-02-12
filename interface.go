@@ -215,6 +215,9 @@ type ExpectHTTPBuilder interface {
 	// OptionalAssertBody is not a mandatory assert.
 	// Mark in allure as Skipped
 	OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder
+	// BrokenAssertBody  is function for validate response, if it's failed, then test will be Broken.
+	// Mark in allure as Broken
+	BrokenAssertBody(asserts ...AssertBody) ExpectHTTPBuilder
 	// AssertBodyT is function for validate response body with help testing.TB and allure allureProvider.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder
@@ -223,6 +226,9 @@ type ExpectHTTPBuilder interface {
 	// OptionalAssertBodyT is not a mandatory assert.
 	// Mark in allure as Skipped
 	OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder
+	// BrokenAssertBodyT  is function for validate response, if it's failed, then test will be Broken.
+	// Mark in allure as Broken
+	BrokenAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder
 
 	// AssertHeaders is function for validate response headers
 	// Available asserts from asserts/headers/headers.go:
@@ -235,6 +241,9 @@ type ExpectHTTPBuilder interface {
 	// OptionalAssertHeaders is not a mandatory assert.
 	// Mark in allure as Skipped
 	OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder
+	// BrokenAssertHeaders  is function for validate response, if it's failed, then test will be Broken.
+	// Mark in allure as Broken
+	BrokenAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder
 	// AssertHeadersT is function for validate headers body with help testing.TB and allure allureProvider.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder
@@ -243,14 +252,20 @@ type ExpectHTTPBuilder interface {
 	// OptionalAssertHeadersT is not a mandatory assert.
 	// Mark in allure as Skipped
 	OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder
+	// BrokenAssertHeadersT is function for validate response, if it's failed, then test will be Broken.
+	// Mark in allure as Broken
+	BrokenAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder
 
-	// AssertResponse is function for validate response
+	// AssertResponse is function for validate response.
 	AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder
 	// RequireResponse implements the same assertions as the `AssertResponse`, but stops test execution when a test fails.
 	RequireResponse(asserts ...AssertResponse) ExpectHTTPBuilder
 	// OptionalAssertResponse is not a mandatory assert.
 	// Mark in allure as Skipped
 	OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder
+	// BrokenAssertResponse  is function for validate response, if it's failed, then test will be Broken.
+	// Mark in allure as Broken
+	BrokenAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder
 	// AssertResponseT is function for validate response with help testing.TB.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
@@ -259,6 +274,9 @@ type ExpectHTTPBuilder interface {
 	// OptionalAssertResponseT is not a mandatory assert.
 	// Mark in allure as Skipped
 	OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
+	// BrokenAssertResponseT is function for validate response, if it's failed, then test will be Broken.
+	// Mark in allure as Broken
+	BrokenAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
 	After
 	ControlTest
@@ -288,7 +306,11 @@ type ResultsHTTPBuilder interface {
 	// GetName is a function, which returns name of Test
 	GetName() string
 	// IsFailed is a function, which returns flag about status of test
+	// Deprecated, use GetResultState()
 	IsFailed() bool
+	// GetResultState is a function, which returns state of test
+	// State could be ResultStateSuccess, ResultStateBroken, ResultStateFail
+	GetResultState() ResultState
 }
 
 // BeforeExecute ...
