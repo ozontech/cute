@@ -497,6 +497,14 @@ func (qt *cute) PutNewTest(name string, r *http.Request, expect *Expect) TableTe
 
 func (qt *cute) PutTests(params ...*Test) TableTest {
 	for _, param := range params {
+		if qt.baseProps != nil && qt.baseProps.httpClient != nil {
+			param.httpClient = qt.baseProps.httpClient
+		}
+
+		if qt.baseProps != nil && qt.baseProps.jsonMarshaler != nil {
+			param.jsonMarshaler = qt.baseProps.jsonMarshaler
+		}
+
 		// Validate, that first step is empty
 		if qt.countTests == 0 {
 			if qt.tests[0].Request.Base == nil &&
