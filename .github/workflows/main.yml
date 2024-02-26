@@ -35,7 +35,7 @@ jobs:
         with:
           only-new-issues: true
           # golangci-lint command line arguments
-          args: --timeout=5m0s --new-from-rev=origin/master
+          args: --timeout=5m0s
 
   examples:
     name: examples
