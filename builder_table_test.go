@@ -45,7 +45,7 @@ func TestFillBaseProps_WhenBasePropsIsNotNil(t *testing.T) {
 			},
 			BeforeT: []BeforeExecuteT{
 				func(T, *http.Request) error { return nil },
-				func(t T, request *http.Request) error {
+				func(T, *http.Request) error {
 					return nil
 				},
 			},
@@ -67,7 +67,7 @@ func TestFillBaseProps_WhenBasePropsIsNotNil_After(t *testing.T) {
 	testObj := &Test{
 		Middleware: &Middleware{
 			After: []AfterExecute{
-				func(response *http.Response, errors []error) error {
+				func(*http.Response, []error) error {
 					return nil
 				},
 			},
@@ -89,7 +89,7 @@ func TestFillBaseProps_WhenBasePropsIsNotNil_After(t *testing.T) {
 			},
 			BeforeT: []BeforeExecuteT{
 				func(T, *http.Request) error { return nil },
-				func(t T, request *http.Request) error {
+				func(T, *http.Request) error {
 					return nil
 				},
 			},
@@ -111,40 +111,40 @@ func TestFillBaseProps_WhenBasePropsIsNotNil_Middleware(t *testing.T) {
 	testObj := &Test{
 		Middleware: &Middleware{
 			After: []AfterExecute{
-				func(response *http.Response, errors []error) error {
+				func(*http.Response, []error) error {
 					return nil
 				},
-				func(response *http.Response, errors []error) error {
+				func(*http.Response, []error) error {
 					return nil
 				},
 			},
 			AfterT: []AfterExecuteT{
-				func(t T, response *http.Response, errors []error) error {
+				func(T, *http.Response, []error) error {
 					return nil
 				},
-				func(t T, response *http.Response, errors []error) error {
+				func(T, *http.Response, []error) error {
 					return nil
 				},
-				func(t T, response *http.Response, errors []error) error {
+				func(T, *http.Response, []error) error {
 					return nil
 				},
 			},
 			Before: []BeforeExecute{
-				func(request *http.Request) error {
+				func(*http.Request) error {
 					return nil
 				},
-				func(request *http.Request) error {
+				func(*http.Request) error {
 					return nil
 				},
-				func(request *http.Request) error {
+				func(*http.Request) error {
 					return nil
 				},
-				func(request *http.Request) error {
+				func(*http.Request) error {
 					return nil
 				},
 			},
 			BeforeT: []BeforeExecuteT{
-				func(t T, request *http.Request) error {
+				func(T, *http.Request) error {
 					return nil
 				},
 			},
@@ -175,7 +175,7 @@ func TestFillBaseProps_WhenBasePropsIsNotNil_Middleware(t *testing.T) {
 			},
 			BeforeT: []BeforeExecuteT{
 				func(T, *http.Request) error { return nil },
-				func(t T, request *http.Request) error {
+				func(T, *http.Request) error {
 					return nil
 				},
 			},
