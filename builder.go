@@ -507,6 +507,14 @@ func (qt *cute) PutTests(params ...*Test) TableTest {
 			}
 		}
 
+		if qt.baseProps != nil && qt.baseProps.httpClient != nil {
+			param.httpClient = qt.baseProps.httpClient
+		}
+
+		if qt.baseProps != nil && qt.baseProps.jsonMarshaler != nil {
+			param.jsonMarshaler = qt.baseProps.jsonMarshaler
+		}
+
 		qt.tests = append(qt.tests, param)
 		qt.countTests++
 	}
