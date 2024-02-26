@@ -1,5 +1,7 @@
 package cute
 
+import "time"
+
 func (qt *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 	for _, assert := range asserts {
 		if assert == nil {
@@ -284,6 +286,36 @@ func (qt *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
 
 		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
 	}
+
+	return qt
+}
+
+func (qt *cute) ExpectExecuteTimeout(t time.Duration) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.ExecuteTime = t
+
+	return qt
+}
+
+func (qt *cute) ExpectStatus(code int) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.Code = code
+
+	return qt
+}
+
+func (qt *cute) ExpectJSONSchemaString(schema string) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.JSONSchema.String = schema
+
+	return qt
+}
+
+func (qt *cute) ExpectJSONSchemaByte(schema []byte) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.JSONSchema.Byte = schema
+
+	return qt
+}
+
+func (qt *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
+	qt.tests[qt.countTests].Expect.JSONSchema.File = filePath
 
 	return qt
 }
