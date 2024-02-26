@@ -53,24 +53,26 @@ func (qt *cute) PutTests(tests ...*Test) TableTest {
 	return qt
 }
 
-func (qt *cute) fillBaseProps(param *Test) {
+func (qt *cute) fillBaseProps(t *Test) {
 	if qt.baseProps == nil {
 		return
 	}
 
 	if qt.baseProps.httpClient != nil {
-		param.httpClient = qt.baseProps.httpClient
+		t.httpClient = qt.baseProps.httpClient
 	}
 
 	if qt.baseProps.jsonMarshaler != nil {
-		param.jsonMarshaler = qt.baseProps.jsonMarshaler
+		t.jsonMarshaler = qt.baseProps.jsonMarshaler
 	}
 
-	if qt.baseProps.middleware != nil {
-		param.Middleware.After = append(param.Middleware.After, qt.baseProps.middleware.After...)
-		param.Middleware.AfterT = append(param.Middleware.AfterT, qt.baseProps.middleware.AfterT...)
-		param.Middleware.Before = append(param.Middleware.Before, qt.baseProps.middleware.Before...)
-		param.Middleware.BeforeT = append(param.Middleware.BeforeT, qt.baseProps.middleware.BeforeT...)
+	if t.Middleware == nil {
+		t.Middleware = createMiddlewareFromTemplate(qt.baseProps.middleware)
+	} else {
+		t.Middleware.After = append(t.Middleware.After, qt.baseProps.middleware.After...)
+		t.Middleware.AfterT = append(t.Middleware.AfterT, qt.baseProps.middleware.AfterT...)
+		t.Middleware.Before = append(t.Middleware.Before, qt.baseProps.middleware.Before...)
+		t.Middleware.BeforeT = append(t.Middleware.BeforeT, qt.baseProps.middleware.BeforeT...)
 	}
 }
 

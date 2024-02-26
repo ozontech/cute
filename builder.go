@@ -87,17 +87,30 @@ func createDefaultTests(m *HTTPTestMaker) []*Test {
 }
 
 func createDefaultTest(m *HTTPTestMaker) *Test {
-	after := make([]AfterExecute, 0, len(m.middleware.After))
-	after = append(after, m.middleware.After...)
+	return &Test{
+		httpClient:    m.httpClient,
+		jsonMarshaler: m.jsonMarshaler,
+		Middleware:    createMiddlewareFromTemplate(m.middleware),
+		AllureStep:    new(AllureStep),
+		Request: &Request{
+			Repeat: new(RequestRepeatPolitic),
+		},
+		Expect: &Expect{JSONSchema: new(ExpectJSONSchema)},
+	}
+}
 
-	afterT := make([]AfterExecuteT, 0, len(m.middleware.AfterT))
-	afterT = append(afterT, m.middleware.AfterT...)
+func createMiddlewareFromTemplate(m *Middleware) *Middleware {
+	after := make([]AfterExecute, 0, len(m.After))
+	after = append(after, m.After...)
 
-	before := make([]BeforeExecute, 0, len(m.middleware.Before))
-	before = append(before, m.middleware.Before...)
+	afterT := make([]AfterExecuteT, 0, len(m.AfterT))
+	afterT = append(afterT, m.AfterT...)
 
-	beforeT := make([]BeforeExecuteT, 0, len(m.middleware.BeforeT))
-	beforeT = append(beforeT, m.middleware.BeforeT...)
+	before := make([]BeforeExecute, 0, len(m.Before))
+	before = append(before, m.Before...)
+
+	beforeT := make([]BeforeExecuteT, 0, len(m.BeforeT))
+	beforeT = append(beforeT, m.BeforeT...)
 
 	middleware := &Middleware{
 		After:   after,
@@ -106,16 +119,7 @@ func createDefaultTest(m *HTTPTestMaker) *Test {
 		BeforeT: beforeT,
 	}
 
-	return &Test{
-		httpClient:    m.httpClient,
-		jsonMarshaler: m.jsonMarshaler,
-		Middleware:    middleware,
-		AllureStep:    new(AllureStep),
-		Request: &Request{
-			Repeat: new(RequestRepeatPolitic),
-		},
-		Expect: &Expect{JSONSchema: new(ExpectJSONSchema)},
-	}
+	return middleware
 }
 
 func (qt *cute) Create() MiddlewareRequest {
