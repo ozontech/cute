@@ -455,7 +455,7 @@ Types for creating custom assertions.
 **Example:**
 
 ```go
-func customAssertBody() asserts.AssertBody {
+func customAssertBody() cute.AssertBody {
     return func(bytes []byte) error {
         if len(bytes) == 0 {
             return errors.New("response body is empty")
