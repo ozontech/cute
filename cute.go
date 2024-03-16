@@ -169,23 +169,7 @@ func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider)
 }
 
 func (qt *cute) executeSingleTest(ctx context.Context, allureProvider allureProvider, currentTest *Test) ResultsHTTPBuilder {
-	allureProvider.Logf("Test start %v", currentTest.Name)
-
 	resT := currentTest.executeInsideAllure(ctx, allureProvider)
-
-	switch resT.GetResultState() {
-	case ResultStateBroken:
-		allureProvider.BrokenNow()
-		allureProvider.Logf("Test broken %v", currentTest.Name)
-	case ResultStateFail:
-		allureProvider.Fail()
-		allureProvider.Logf("Test failed %v", currentTest.Name)
-	case resultStateFailNow:
-		allureProvider.FailNow()
-		allureProvider.Logf("Test failed %v", currentTest.Name)
-	case ResultStateSuccess:
-		allureProvider.Logf("Test finished %v", currentTest.Name)
-	}
 
 	// Remove from base struct all asserts
 	currentTest.clearFields()

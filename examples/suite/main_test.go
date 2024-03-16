@@ -14,3 +14,8 @@ func TestExampleSuite(t *testing.T) {
 	os.Setenv("ALLURE_OUTPUT_PATH", "../") // custom, read Readme.md for more info
 	suite.RunSuite(t, new(ExampleSuite))
 }
+
+func TestExampleSuite1(t *testing.T) {
+	os.Setenv("ALLURE_OUTPUT_PATH", "../") // custom, read Readme.md for more info
+	suite.RunSuite(t, new(ExampleSuite1))
+}

@@ -34,6 +34,8 @@ type internalT interface {
 }
 
 type tProvider interface {
+	Helper()
+
 	Fail()
 	FailNow()
 

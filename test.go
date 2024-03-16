@@ -111,6 +111,7 @@ func (it *Test) Execute(ctx context.Context, t tProvider) ResultsHTTPBuilder {
 
 	tOriginal, ok := t.(*testing.T)
 	if ok {
+		tOriginal.Helper()
 		internalT = createAllureT(tOriginal)
 	}
 
@@ -182,6 +183,8 @@ func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allurePr
 		name = allureProvider.Name() + "_" + it.Name
 	)
 
+	it.Info(allureProvider, "Start test")
+
 	// Set empty fields in test
 	it.initEmptyFields()
 
@@ -218,7 +221,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	for _, err := range errs {
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
-				t.Logf("[OPTIONAL ERROR] %v", tErr.(error).Error())
+				it.Info(t, "[OPTIONAL ERROR] %v", tErr.(error).Error())
 
 				continue
 			}
@@ -226,7 +229,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 
 		if tErr, ok := err.(cuteErrors.BrokenError); ok {
 			if tErr.IsBroken() {
-				t.Logf("[BROKEN ERROR] %v", tErr.(error).Error())
+				it.Error(t, "[BROKEN ERROR], error %v", tErr.Error())
 
 				state = ResultStateBroken
 
@@ -240,13 +243,27 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 			}
 		}
 
-		t.Errorf("[ERROR] %v", err)
+		it.Error(t, "Error %v", err.Error())
 
 		countNotOptionalErrors++
 	}
 
 	if countNotOptionalErrors != 0 {
-		t.Errorf("Test finished with %v errors", countNotOptionalErrors)
+		it.Error(t, "Test finished with %v errors", countNotOptionalErrors)
+	}
+
+	switch state {
+	case ResultStateBroken:
+		t.FailNow()
+		it.Info(t, "Test broken")
+	case ResultStateFail:
+		t.Fail()
+		it.Error(t, "Test failed")
+	case resultStateFailNow:
+		t.FailNow()
+		it.Error(t, "Test failed")
+	case ResultStateSuccess:
+		it.Info(t, "Test success")
 	}
 
 	return state
@@ -259,8 +276,8 @@ func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Respo
 	)
 
 	t.WithNewStep(it.AllureStep.Name, func(stepCtx provider.StepCtx) {
-		t.Logf("Start step %v", it.AllureStep.Name)
-		defer t.Logf("Finish step %v", it.AllureStep.Name)
+		it.Info(t, "Start step %v", it.AllureStep.Name)
+		defer it.Info(t, "Finish step %v", it.AllureStep.Name)
 
 		resp, errs = it.startTest(ctx, stepCtx)
 
@@ -297,7 +314,7 @@ func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []e
 		return nil, errs
 	}
 
-	t.Logf("Start make request")
+	it.Info(t, "Start make request")
 
 	// Make request
 	resp, errs := it.makeRequest(t, req)
@@ -305,7 +322,7 @@ func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []e
 		return resp, errs
 	}
 
-	t.Logf("Finish make request")
+	it.Info(t, "Finish make request")
 
 	// Validate response body
 	errs = it.validateResponse(t, resp)
