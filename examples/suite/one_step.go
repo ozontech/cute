@@ -2,19 +2,16 @@ package suite
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/url"
 	"path"
 	"time"
 
 	"github.com/ozontech/allure-go/pkg/framework/provider"
-	"github.com/ozontech/allure-go/pkg/framework/suite"
 	"github.com/ozontech/cute"
 	"github.com/ozontech/cute/asserts/headers"
 	"github.com/ozontech/cute/asserts/json"
 	"github.com/ozontech/cute/examples"
-	"github.com/stretchr/testify/require"
 )
 
 /*
@@ -65,46 +62,6 @@ Response:
 ]
 
 */
-
-type ExampleSuite1 struct {
-	suite.Suite
-	host *url.URL
-
-	testMaker *cute.HTTPTestMaker
-}
-
-func (i *ExampleSuite1) BeforeAll(t provider.T) {
-	// Prepare http test builder
-	i.testMaker = cute.NewHTTPTestMaker()
-
-	// Preparing host
-	host, err := url.Parse("https://jsonplaceholder.typicode.com/")
-	require.NoError(t, err)
-
-	i.host = host
-}
-
-func (i *ExampleSuite1) BeforeEach(t provider.T) {
-	t.Feature("ExampleSuite")
-	t.Tags("some_global_tag")
-}
-
-func (i *ExampleSuite1) Test_Denis(t provider.T) {
-	t.WithNewStep("Step 3333", func(stepCtx provider.StepCtx) {
-		cute.NewTestBuilder().Create().RequestBuilder(
-			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
-			cute.WithMethod(http.MethodGet),
-		).RequireHeaders(func(headers http.Header) error {
-			return errors.New("some error")
-		}).ExpectStatus(http.StatusOK).ExecuteTest(context.Background(), stepCtx)
-	})
-
-	cute.NewTestBuilder().Create().RequestBuilder(
-		cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
-		cute.WithMethod(http.MethodGet),
-	).ExpectStatus(http.StatusOK).ExecuteTest(context.Background(), t)
-}
-
 func (i *ExampleSuite) Test_OneStep(t provider.T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()
