@@ -54,6 +54,20 @@ func brokenAssertResponseT(assert AssertResponseT) AssertResponseT {
 	}
 }
 
+func wrapWithTrace(err error, trace string) error {
+	if err == nil {
+		return nil
+	}
+
+	if tErr, ok := err.(errors.WithTrace); ok {
+		tErr.SetTrace(trace)
+
+		return tErr.(error)
+	}
+
+	return errors.WrapErrorWithTrace(err, trace)
+}
+
 func wrapBrokenError(err error) error {
 	if err == nil {
 		return nil

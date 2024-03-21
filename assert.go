@@ -1,7 +1,9 @@
 package cute
 
 import (
+	"fmt"
 	"net/http"
+	"runtime"
 )
 
 // This is type of asserts, for create some assert with using custom logic.
@@ -25,6 +27,31 @@ type AssertHeadersT func(t T, headers http.Header) error
 
 // AssertResponseT ...
 type AssertResponseT func(t T, response *http.Response) error
+
+func callAssertWrapper(assert AssertBody, withCall string) func(body []byte) error {
+	return func(body []byte) error {
+		err := assert(body)
+
+		if err != nil {
+			return fmt.Errorf("%w\n%s", err, withCall)
+		}
+
+		return nil
+	}
+}
+
+func getCaller() string {
+	pcs := make([]uintptr, 10)
+	depth := runtime.Callers(3, pcs)
+	if depth == 0 {
+		fmt.Println("Couldn't get the stack information")
+		return ""
+	}
+	callers := runtime.CallersFrames(pcs[:depth])
+	caller, _ := callers.Next()
+
+	return fmt.Sprintf("Called from: %s:%d\n", caller.File, caller.Line)
+}
 
 func (it *Test) assertHeaders(t internalT, headers http.Header) []error {
 	var (

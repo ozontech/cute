@@ -5,7 +5,6 @@ import (
 )
 
 type tlogger interface {
-	Helper()
 	Name() string
 	Logf(format string, args ...any)
 	Errorf(format string, args ...interface{})
@@ -24,8 +23,6 @@ func (it *Test) Debug(t tlogger, format string, args ...interface{}) {
 }
 
 func (it *Test) logf(t tlogger, level, format string, args ...interface{}) {
-	t.Helper()
-
 	name := it.Name
 
 	if it.Name == "" {
@@ -36,8 +33,6 @@ func (it *Test) logf(t tlogger, level, format string, args ...interface{}) {
 }
 
 func (it *Test) errorf(t tlogger, level, format string, args ...interface{}) {
-	t.Helper()
-
 	name := it.Name
 
 	if it.Name == "" {

@@ -221,7 +221,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	for _, err := range errs {
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
-				it.Info(t, "[OPTIONAL ERROR] %v", tErr.(error).Error())
+				it.Info(t, "[OPTIONAL ERROR] %v", err.Error())
 
 				continue
 			}
@@ -229,7 +229,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 
 		if tErr, ok := err.(cuteErrors.BrokenError); ok {
 			if tErr.IsBroken() {
-				it.Error(t, "[BROKEN ERROR], error %v", tErr.Error())
+				it.Error(t, "[BROKEN ERROR], error %v", err.Error())
 
 				state = ResultStateBroken
 

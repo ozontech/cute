@@ -7,9 +7,9 @@ func (qt *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
-	}
 
-	qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, asserts...)
+		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, assert)
+	}
 
 	return qt
 }
@@ -55,9 +55,9 @@ func (qt *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
-	}
 
-	qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, asserts...)
+		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, assert)
+	}
 
 	return qt
 }
@@ -103,9 +103,9 @@ func (qt *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
-	}
 
-	qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, asserts...)
+		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, assert)
+	}
 
 	return qt
 }
@@ -151,9 +151,9 @@ func (qt *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
-	}
 
-	qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, asserts...)
+		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, assert)
+	}
 
 	return qt
 }

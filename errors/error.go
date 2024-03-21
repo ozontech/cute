@@ -1,16 +1,19 @@
 package errors
 
+import "fmt"
+
 const (
 	actualField   = "Actual"
 	expectedField = "Expected"
 )
 
-// CuteError ...
-type CuteError interface {
+// AssertError ...
+type AssertError interface {
 	error
 	WithNameError
 	WithFields
 	WithAttachments
+	WithTrace
 }
 
 // WithNameError is interface for creates allure step.
@@ -27,6 +30,11 @@ type WithFields interface {
 	PutFields(map[string]interface{})
 }
 
+type WithTrace interface {
+	GetTrace() string
+	SetTrace(string)
+}
+
 // Attachment represents an attachment to Allure with properties like name, MIME type, and content.
 type Attachment struct {
 	Name     string // Name of the attachment.
@@ -40,23 +48,25 @@ type WithAttachments interface {
 	PutAttachment(a *Attachment)
 }
 
-type assertError struct {
-	optional bool
-	require  bool
-	broken   bool
+type CuteError struct {
+	Optional bool
+	Require  bool
+	Broken   bool
 
-	name        string
-	message     string
-	fields      map[string]interface{}
-	attachments []*Attachment
+	Name        string
+	Message     string
+	Err         error
+	Trace       string
+	Fields      map[string]interface{}
+	Attachments []*Attachment
 }
 
 // NewAssertError is the function, which creates error with "Actual" and "Expected" for allure
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
-	return &assertError{
-		name:    name,
-		message: message,
-		fields: map[string]interface{}{
+	return CuteError{
+		Name:    name,
+		Message: message,
+		Fields: map[string]interface{}{
 			actualField:   actual,
 			expectedField: expected,
 		},
@@ -65,71 +75,93 @@ func NewAssertError(name string, message string, actual interface{}, expected in
 
 // NewAssertErrorWithMessage ...
 func NewAssertErrorWithMessage(name string, message string) error {
-	return &assertError{
-		name:    name,
-		message: message,
+	return CuteError{
+		Name:    name,
+		Message: message,
 	}
 }
 
 // NewEmptyAssertError ...
-func NewEmptyAssertError(name string, message string) CuteError {
-	return &assertError{
-		name:    name,
-		message: message,
-		fields:  map[string]interface{}{},
+func NewEmptyAssertError(name string, message string) AssertError {
+	return CuteError{
+		Name:    name,
+		Message: message,
+		Fields:  map[string]interface{}{},
 	}
 }
 
-func (a *assertError) Error() string {
-	return a.message
+func (a CuteError) Unwrap() error {
+	return a.Err
 }
 
-func (a *assertError) GetName() string {
-	return a.name
+func (a CuteError) Error() string {
+	if a.Trace == "" {
+		return a.Message
+	}
+
+	errText := a.Message
+
+	if a.Err != nil {
+		errText = a.Err.Error()
+	}
+
+	return fmt.Sprintf("%s\nCalled from:%S", errText, a.Trace)
 }
 
-func (a *assertError) SetName(name string) {
-	a.name = name
+func (a CuteError) GetName() string {
+	return a.Name
 }
 
-func (a *assertError) GetFields() map[string]interface{} {
-	return a.fields
+func (a CuteError) SetName(name string) {
+	a.Name = name
 }
 
-func (a *assertError) PutFields(fields map[string]interface{}) {
+func (a CuteError) GetFields() map[string]interface{} {
+	return a.Fields
+}
+
+func (a CuteError) PutFields(fields map[string]interface{}) {
 	for k, v := range fields {
-		a.fields[k] = v
+		a.Fields[k] = v
 	}
 }
 
-func (a *assertError) GetAttachments() []*Attachment {
-	return a.attachments
+func (a CuteError) GetAttachments() []*Attachment {
+	return a.Attachments
 }
 
-func (a *assertError) PutAttachment(attachment *Attachment) {
-	a.attachments = append(a.attachments, attachment)
+func (a CuteError) PutAttachment(attachment *Attachment) {
+	a.Attachments = append(a.Attachments, attachment)
 }
 
-func (a *assertError) IsOptional() bool {
-	return a.optional
+func (a CuteError) IsOptional() bool {
+	return a.Optional
 }
 
-func (a *assertError) SetOptional(opt bool) {
-	a.optional = opt
+func (a CuteError) SetOptional(opt bool) {
+	a.Optional = opt
 }
 
-func (a *assertError) IsRequire() bool {
-	return a.require
+func (a CuteError) IsRequire() bool {
+	return a.Require
 }
 
-func (a *assertError) SetRequire(b bool) {
-	a.require = b
+func (a CuteError) SetRequire(b bool) {
+	a.Require = b
 }
 
-func (a *assertError) IsBroken() bool {
-	return a.broken
+func (a CuteError) IsBroken() bool {
+	return a.Broken
 }
 
-func (a *assertError) SetBroken(b bool) {
-	a.broken = b
+func (a CuteError) SetBroken(b bool) {
+	a.Broken = b
+}
+
+func (a CuteError) GetTrace() string {
+	return a.Trace
+}
+
+func (a CuteError) SetTrace(trace string) {
+	a.Trace = trace
 }

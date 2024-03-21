@@ -1,7 +1,5 @@
 package errors
 
-import "errors"
-
 // RequireError is an interface for set errors like require error.
 // If the function returns an error, which implements this interface, the allure step will has failed status
 type RequireError interface {
@@ -16,31 +14,16 @@ type requireError struct {
 
 // NewRequireError ...
 func NewRequireError(err string) error {
-	return &requireError{
-		require: true,
-		err:     errors.New(err),
+	return &CuteError{
+		Require: true,
+		Message: err,
 	}
 }
 
 // WrapRequireError returns error with flag for execute t.FailNow() and finish test after this error
 func WrapRequireError(err error) error {
-	return &requireError{
-		require: true,
-		err:     err,
+	return &CuteError{
+		Require: true,
+		Err:     err,
 	}
-}
-
-// Error ..
-func (o *requireError) Error() string {
-	return o.err.Error()
-}
-
-// IsRequire ...
-func (o *requireError) IsRequire() bool {
-	return o.require
-}
-
-// SetRequire ...
-func (o *requireError) SetRequire(require bool) {
-	o.require = require
 }
