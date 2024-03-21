@@ -1,57 +1,47 @@
 package cute
 
 import (
-	"fmt"
 	"net/http"
-	"runtime"
 )
 
 // This is type of asserts, for create some assert with using custom logic.
 
-// AssertBody ...
+// AssertBody is type for create custom assertions for body
+// Example asserts:
+// - json.LengthGreaterThan
+// - json.LengthGreaterOrEqualThan
+// - json.LengthLessThan
+// - json.LengthLessOrEqualThan
+// - json.Present
+// - json.NotEmpty
+// - json.NotPresent
 type AssertBody func(body []byte) error
 
-// AssertHeaders ...
+// AssertHeaders is type for create custom assertions for headers
+// Example asserts:
+// - headers.Present
+// - headers.NotPresent
 type AssertHeaders func(headers http.Header) error
 
-// AssertResponse ...
+// AssertResponse is type for create custom assertions for response
 type AssertResponse func(response *http.Response) error
 
 // This is type for create custom assertions with using allure and testing.allureProvider
 
-// AssertBodyT ...
+// AssertBodyT is type for create custom assertions for body with TB
+// Check example in AssertBody
+// TB is testing.T and it can be used for require ore assert from testify or another packages
 type AssertBodyT func(t T, body []byte) error
 
-// AssertHeadersT ...
+// AssertHeadersT is type for create custom assertions for headers with TB
+// Check example in AssertHeaders
+// TB is testing.T and it can be used for require ore assert from testify or another packages
 type AssertHeadersT func(t T, headers http.Header) error
 
-// AssertResponseT ...
+// AssertResponseT is type for create custom assertions for response with TB
+// Check example in AssertResponse
+// TB is testing.T and it can be used for require ore assert from testify or another packages
 type AssertResponseT func(t T, response *http.Response) error
-
-func callAssertWrapper(assert AssertBody, withCall string) func(body []byte) error {
-	return func(body []byte) error {
-		err := assert(body)
-
-		if err != nil {
-			return fmt.Errorf("%w\n%s", err, withCall)
-		}
-
-		return nil
-	}
-}
-
-func getCaller() string {
-	pcs := make([]uintptr, 10)
-	depth := runtime.Callers(3, pcs)
-	if depth == 0 {
-		fmt.Println("Couldn't get the stack information")
-		return ""
-	}
-	callers := runtime.CallersFrames(pcs[:depth])
-	caller, _ := callers.Next()
-
-	return fmt.Sprintf("Called from: %s:%d\n", caller.File, caller.Line)
-}
 
 func (it *Test) assertHeaders(t internalT, headers http.Header) []error {
 	var (

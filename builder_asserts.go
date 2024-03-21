@@ -3,288 +3,336 @@ package cute
 import "time"
 
 func (qt *cute) AssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, assert)
+		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, assertBodyWithTrace(assert, trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) OptionalAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, optionalAssertBody(assert))
+		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, assertBodyWithTrace(optionalAssertBody(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) BrokenAssertBody(asserts ...AssertBody) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, brokenAssertBody(assert))
+		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, assertBodyWithTrace(brokenAssertBody(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) RequireBody(asserts ...AssertBody) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, requireAssertBody(assert))
+		qt.tests[qt.countTests].Expect.AssertBody = append(qt.tests[qt.countTests].Expect.AssertBody, assertBodyWithTrace(requireAssertBody(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) AssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, assert)
+		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, assertHeadersWithTrace(assert, trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) OptionalAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, optionalAssertHeaders(assert))
+		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, assertHeadersWithTrace(optionalAssertHeaders(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) RequireHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, requireAssertHeaders(assert))
+		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, assertHeadersWithTrace(requireAssertHeaders(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) BrokenAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, brokenAssertHeaders(assert))
+		qt.tests[qt.countTests].Expect.AssertHeaders = append(qt.tests[qt.countTests].Expect.AssertHeaders, assertHeadersWithTrace(brokenAssertHeaders(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) AssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, assert)
+		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, assertResponseWithTrace(assert, trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) OptionalAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, optionalAssertResponse(assert))
+		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, assertResponseWithTrace(optionalAssertResponse(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) RequireResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, requireAssertResponse(assert))
+		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, assertResponseWithTrace(requireAssertResponse(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) BrokenAssertResponse(asserts ...AssertResponse) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, brokenAssertResponse(assert))
+		qt.tests[qt.countTests].Expect.AssertResponse = append(qt.tests[qt.countTests].Expect.AssertResponse, assertResponseWithTrace(brokenAssertResponse(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, assert)
+		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, assertBodyTWithTrace(assert, trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) OptionalAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, optionalAssertBodyT(assert))
+		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, assertBodyTWithTrace(optionalAssertBodyT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) BrokenAssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, brokenAssertBodyT(assert))
+		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, assertBodyTWithTrace(brokenAssertBodyT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) RequireBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, requireAssertBodyT(assert))
+		qt.tests[qt.countTests].Expect.AssertBodyT = append(qt.tests[qt.countTests].Expect.AssertBodyT, assertBodyTWithTrace(requireAssertBodyT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
-	}
 
-	qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, asserts...)
+		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, assertHeadersTWithTrace(assert, trace))
+	}
 
 	return qt
 }
 
 func (qt *cute) OptionalAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, optionalAssertHeadersT(assert))
+		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, assertHeadersTWithTrace(optionalAssertHeadersT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) RequireHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, requireAssertHeadersT(assert))
+		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, assertHeadersTWithTrace(requireAssertHeadersT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) BrokenAssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, brokenAssertHeadersT(assert))
+		qt.tests[qt.countTests].Expect.AssertHeadersT = append(qt.tests[qt.countTests].Expect.AssertHeadersT, assertHeadersTWithTrace(brokenAssertHeadersT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) AssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
-	}
 
-	qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, asserts...)
+		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, assertResponseTWithTrace(assert, trace))
+	}
 
 	return qt
 }
 
 func (qt *cute) OptionalAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, optionalAssertResponseT(assert))
+		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, assertResponseTWithTrace(optionalAssertResponseT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) BrokenAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, brokenAssertResponseT(assert))
+		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, assertResponseTWithTrace(brokenAssertResponseT(assert), trace))
 	}
 
 	return qt
 }
 
 func (qt *cute) RequireResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder {
+	trace := getTrace()
+
 	for _, assert := range asserts {
 		if assert == nil {
 			panic(errorAssertIsNil)
 		}
 
-		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, requireAssertResponseT(assert))
+		qt.tests[qt.countTests].Expect.AssertResponseT = append(qt.tests[qt.countTests].Expect.AssertResponseT, assertResponseTWithTrace(requireAssertResponseT(assert), trace))
 	}
 
 	return qt

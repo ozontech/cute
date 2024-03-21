@@ -63,7 +63,7 @@ type CuteError struct {
 
 // NewAssertError is the function, which creates error with "Actual" and "Expected" for allure
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
-	return CuteError{
+	return &CuteError{
 		Name:    name,
 		Message: message,
 		Fields: map[string]interface{}{
@@ -75,7 +75,7 @@ func NewAssertError(name string, message string, actual interface{}, expected in
 
 // NewAssertErrorWithMessage ...
 func NewAssertErrorWithMessage(name string, message string) error {
-	return CuteError{
+	return &CuteError{
 		Name:    name,
 		Message: message,
 	}
@@ -83,18 +83,18 @@ func NewAssertErrorWithMessage(name string, message string) error {
 
 // NewEmptyAssertError ...
 func NewEmptyAssertError(name string, message string) AssertError {
-	return CuteError{
+	return &CuteError{
 		Name:    name,
 		Message: message,
 		Fields:  map[string]interface{}{},
 	}
 }
 
-func (a CuteError) Unwrap() error {
+func (a *CuteError) Unwrap() error {
 	return a.Err
 }
 
-func (a CuteError) Error() string {
+func (a *CuteError) Error() string {
 	if a.Trace == "" {
 		return a.Message
 	}
@@ -105,63 +105,63 @@ func (a CuteError) Error() string {
 		errText = a.Err.Error()
 	}
 
-	return fmt.Sprintf("%s\nCalled from:%S", errText, a.Trace)
+	return fmt.Sprintf("%s\nCalled from: %s", errText, a.Trace)
 }
 
-func (a CuteError) GetName() string {
+func (a *CuteError) GetName() string {
 	return a.Name
 }
 
-func (a CuteError) SetName(name string) {
+func (a *CuteError) SetName(name string) {
 	a.Name = name
 }
 
-func (a CuteError) GetFields() map[string]interface{} {
+func (a *CuteError) GetFields() map[string]interface{} {
 	return a.Fields
 }
 
-func (a CuteError) PutFields(fields map[string]interface{}) {
+func (a *CuteError) PutFields(fields map[string]interface{}) {
 	for k, v := range fields {
 		a.Fields[k] = v
 	}
 }
 
-func (a CuteError) GetAttachments() []*Attachment {
+func (a *CuteError) GetAttachments() []*Attachment {
 	return a.Attachments
 }
 
-func (a CuteError) PutAttachment(attachment *Attachment) {
+func (a *CuteError) PutAttachment(attachment *Attachment) {
 	a.Attachments = append(a.Attachments, attachment)
 }
 
-func (a CuteError) IsOptional() bool {
+func (a *CuteError) IsOptional() bool {
 	return a.Optional
 }
 
-func (a CuteError) SetOptional(opt bool) {
+func (a *CuteError) SetOptional(opt bool) {
 	a.Optional = opt
 }
 
-func (a CuteError) IsRequire() bool {
+func (a *CuteError) IsRequire() bool {
 	return a.Require
 }
 
-func (a CuteError) SetRequire(b bool) {
+func (a *CuteError) SetRequire(b bool) {
 	a.Require = b
 }
 
-func (a CuteError) IsBroken() bool {
+func (a *CuteError) IsBroken() bool {
 	return a.Broken
 }
 
-func (a CuteError) SetBroken(b bool) {
+func (a *CuteError) SetBroken(b bool) {
 	a.Broken = b
 }
 
-func (a CuteError) GetTrace() string {
+func (a *CuteError) GetTrace() string {
 	return a.Trace
 }
 
-func (a CuteError) SetTrace(trace string) {
+func (a *CuteError) SetTrace(trace string) {
 	a.Trace = trace
 }
