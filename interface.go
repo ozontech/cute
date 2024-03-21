@@ -305,9 +305,6 @@ type ResultsHTTPBuilder interface {
 	GetErrors() []error
 	// GetName is a function, which returns name of Test
 	GetName() string
-	// IsFailed is a function, which returns flag about status of test
-	// Deprecated, use GetResultState()
-	IsFailed() bool
 	// GetResultState is a function, which returns state of test
 	// State could be ResultStateSuccess, ResultStateBroken, ResultStateFail
 	GetResultState() ResultState

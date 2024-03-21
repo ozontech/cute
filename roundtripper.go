@@ -68,13 +68,15 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// BAD CODE. Need to copy body, because we can't read body again from resp.Request.Body. Problem is io.Reader
 	resp.Request.Body, baseReq.Body, err = utils.DrainBody(baseReq.Body)
 	if err != nil {
-		t.Log("[ERROR] Could not drain body from baseReq.Body. Error %v", err)
+		it.Error(t, "Could not drain body from baseReq.Body. Error %v", err)
+		// Ignore err return, because it's connected with test logic
 	}
 
 	// Add information (method, host, curl) about request to Allure step
 	// should be after httpClient.Do and from resp.Request, because in roundTripper request may be changed
-	if addErr := addInformationRequest(t, resp.Request); addErr != nil {
-		t.Log("[ERROR] Could not log information about request. Error %v", addErr)
+	if addErr := it.addInformationRequest(t, resp.Request); addErr != nil {
+		it.Error(t, "[ERROR] Could not log information about request. Error %v", addErr)
+		// Ignore err return, because it's connected with test logic
 	}
 
 	if httpErr != nil {
@@ -83,7 +85,10 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 
 	if resp != nil {
 		// Add information (code, body, headers) about response to Allure step
-		addInformationResponse(t, resp)
+		if addErr := it.addInformationResponse(t, resp); addErr != nil {
+			it.Error(t, "[ERROR] Could not log information about response. Error %v", addErr)
+			// Ignore err return, because it's connected with test logic
+		}
 
 		if validErr := it.validateResponseCode(resp); validErr != nil {
 			return nil, validErr
@@ -105,7 +110,7 @@ func (it *Test) validateResponseCode(resp *http.Response) error {
 	return nil
 }
 
-func addInformationRequest(t T, req *http.Request) error {
+func (it *Test) addInformationRequest(t T, req *http.Request) error {
 	var (
 		saveBody io.ReadCloser
 		err      error
@@ -117,9 +122,9 @@ func addInformationRequest(t T, req *http.Request) error {
 	}
 
 	if c := curl.String(); len(c) <= 2048 {
-		t.Log("[Request] " + c)
+		it.Info(t, "[Request] "+c)
 	} else {
-		t.Log("[Request] Do request")
+		it.Info(t, "[Request] Do request")
 	}
 
 	// Do not change to JSONMarshaler
@@ -172,8 +177,7 @@ func copyRequest(ctx context.Context, req *http.Request) (*http.Request, error) 
 	return clone, nil
 }
 
-// UpdateStepWithResponse returns step based on already created step and grpc response.
-func addInformationResponse(t T, response *http.Response) {
+func (it *Test) addInformationResponse(t T, response *http.Response) error {
 	var (
 		saveBody io.ReadCloser
 		err      error
@@ -185,27 +189,27 @@ func addInformationResponse(t T, response *http.Response) {
 	}
 
 	t.WithNewParameters("response_code", fmt.Sprint(response.StatusCode))
-	t.Log("[Response] Status: " + response.Status)
+	it.Info(t, "[Response] Status: "+response.Status)
 
 	if response.Body == nil {
-		return
+		return nil
 	}
 
 	saveBody, response.Body, err = utils.DrainBody(response.Body)
 	// if could not get body from response, no add to allure
 	if err != nil {
-		return
+		return err
 	}
 
 	body, err := utils.GetBody(saveBody)
 	// if could not get body from response, no add to allure
 	if err != nil {
-		return
+		return err
 	}
 
 	// if body is empty - skip
 	if len(body) == 0 {
-		return
+		return nil
 	}
 
 	responseType := allure.Text
@@ -225,6 +229,8 @@ func addInformationResponse(t T, response *http.Response) {
 	}
 
 	t.WithAttachments(allure.NewAttachment("response", responseType, body))
+
+	return nil
 }
 
 func createTitle(try, countRepeat int, req *http.Request) string {

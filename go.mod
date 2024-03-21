@@ -5,8 +5,8 @@ go 1.21
 require (
 	github.com/josephburnett/jd v1.7.1
 	github.com/ohler55/ojg v1.21.1
-	github.com/ozontech/allure-go/pkg/allure v0.6.12
-	github.com/ozontech/allure-go/pkg/framework v0.6.29
+	github.com/ozontech/allure-go/pkg/allure v0.6.13-0.20240320124242-dd7f2ab15350
+	github.com/ozontech/allure-go/pkg/framework v0.6.30-0.20240320124242-dd7f2ab15350
 	github.com/stretchr/testify v1.8.4
 	github.com/xeipuuv/gojsonschema v1.2.0
 	moul.io/http2curl/v2 v2.3.0
