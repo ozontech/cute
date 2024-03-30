@@ -7,7 +7,7 @@ type OptionalError interface {
 	SetOptional(bool)
 }
 
-// NewOptionalError ...
+// NewOptionalError returns error with an Optional tag for Allure
 func NewOptionalError(err string) error {
 	return &CuteError{
 		Optional: true,

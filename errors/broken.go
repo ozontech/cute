@@ -8,7 +8,7 @@ type BrokenError interface {
 	Error() string
 }
 
-// NewBrokenError ...
+// NewBrokenError returns error with a Broken tag for Allure
 func NewBrokenError(err string) error {
 	return &CuteError{
 		Broken:  true,

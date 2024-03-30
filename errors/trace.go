@@ -1,6 +1,6 @@
 package errors
 
-// NewErrorWithTrace ...
+// NewErrorWithTrace is a function for create error with trace
 func NewErrorWithTrace(err, trace string) error {
 	return &CuteError{
 		Trace:   trace,
@@ -8,7 +8,7 @@ func NewErrorWithTrace(err, trace string) error {
 	}
 }
 
-// WrapErrorWithTrace ...
+// WrapErrorWithTrace is a function for wrap error with trace
 func WrapErrorWithTrace(err error, trace string) error {
 	return &CuteError{
 		Trace: trace,

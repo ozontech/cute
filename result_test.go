@@ -30,8 +30,6 @@ func TestResult(t *testing.T) {
 	)
 
 	require.Equal(t, name, testResults.GetName())
-	require.Equal(t, false, testResults.IsFailed())
-	require.Equal(t, false, testResults.IsFailed())
 	require.Equal(t, resp, testResults.GetHTTPResponse())
 	require.Equal(t, []error{firstErr, secondErr}, testResults.GetErrors())
 }

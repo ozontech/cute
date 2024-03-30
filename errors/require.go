@@ -12,7 +12,7 @@ type requireError struct {
 	require bool
 }
 
-// NewRequireError ...
+// NewRequireError returns error with flag for execute t.FailNow() and finish test after this error
 func NewRequireError(err string) error {
 	return &CuteError{
 		Require: true,

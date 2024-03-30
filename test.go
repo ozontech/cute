@@ -206,8 +206,10 @@ func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allurePr
 }
 
 // processTestErrors returns flag, which mean finish test or not.
-// true - need finish test
-// false - continue
+// If test has not optional errors, than test will be failed.
+// If test has broken errors, than test will be broken.
+// If test has require errors, than test will be failed.
+// If test has success, than test will be success.
 func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	if len(errs) == 0 {
 		return ResultStateSuccess
@@ -219,6 +221,8 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	)
 
 	for _, err := range errs {
+		message := fmt.Sprintf("Error %v", err.Error())
+
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
 				it.Info(t, "[OPTIONAL ERROR] %v", err.Error())
@@ -243,7 +247,16 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 			}
 		}
 
-		it.Error(t, "Error %v", err.Error())
+		if tErr, ok := err.(cuteErrors.WithFields); ok {
+			actual := tErr.GetFields()[cuteErrors.ActualField]
+			expected := tErr.GetFields()[cuteErrors.ExpectedField]
+
+			if actual != nil || expected != nil {
+				message = fmt.Sprintf("%s\nActual %v\nExpected %v", message, actual, expected)
+			}
+		}
+
+		it.Error(t, message)
 
 		countNotOptionalErrors++
 	}

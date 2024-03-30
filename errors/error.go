@@ -3,11 +3,13 @@ package errors
 import "fmt"
 
 const (
-	actualField   = "Actual"
-	expectedField = "Expected"
+	// ActualField is a key for actual value in error fields
+	ActualField = "Actual"
+	// ExpectedField is a key for expected value in error fields
+	ExpectedField = "Expected"
 )
 
-// AssertError ...
+// AssertError is a common interface for all errors in the package
 type AssertError interface {
 	error
 	WithNameError
@@ -30,6 +32,7 @@ type WithFields interface {
 	PutFields(map[string]interface{})
 }
 
+// WithTrace is interface for put trace in logs
 type WithTrace interface {
 	GetTrace() string
 	SetTrace(string)
@@ -67,8 +70,8 @@ func NewAssertError(name string, message string, actual interface{}, expected in
 		Name:    name,
 		Message: message,
 		Fields: map[string]interface{}{
-			actualField:   actual,
-			expectedField: expected,
+			ActualField:   actual,
+			ExpectedField: expected,
 		},
 	}
 }
