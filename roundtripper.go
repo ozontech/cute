@@ -87,6 +87,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 		// Add information (code, body, headers) about response to Allure step
 		if addErr := it.addInformationResponse(t, resp); addErr != nil {
 			it.Error(t, "[ERROR] Could not log information about response. Error %v", addErr)
+
 			// Ignore err return, because it's connected with test logic
 		}
 

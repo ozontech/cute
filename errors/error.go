@@ -51,16 +51,34 @@ type WithAttachments interface {
 	PutAttachment(a *Attachment)
 }
 
+// CuteError is a struct for error with additional fields for allure and logs
 type CuteError struct {
+	// Optional is a flag to determine if the error is optional
+	// If the error is optional, it will not fail the test
 	Optional bool
-	Require  bool
-	Broken   bool
+	// Require is a flag to determine if the error is required
+	// If the error is required, it will fail the test
+	Require bool
+	// Broken is a flag to determine if the error is broken
+	// If the error is broken, it will fail the test and mark the test as broken in allure
+	Broken bool
 
-	Name        string
-	Message     string
-	Err         error
-	Trace       string
-	Fields      map[string]interface{}
+	// Name is a name of the error
+	Name string
+	// Message is a message of the error
+	Message string
+	// Err is a wrapped error
+	Err error
+
+	// Trace is a trace of the error
+	// It could be a file path, function name, or any other information
+	Trace string
+
+	// Fields is a map of additional fields for the error
+	// It could be actual and expected values, parameters, or any other information
+	// ActualField and ExpectedField fields will be logged
+	Fields map[string]interface{}
+	// Attachments is a slice of attachments for the error
 	Attachments []*Attachment
 }
 
@@ -93,10 +111,12 @@ func NewEmptyAssertError(name string, message string) AssertError {
 	}
 }
 
+// Unwrap ...
 func (a *CuteError) Unwrap() error {
 	return a.Err
 }
 
+// Error ...
 func (a *CuteError) Error() string {
 	if a.Trace == "" {
 		return a.Message
@@ -111,60 +131,74 @@ func (a *CuteError) Error() string {
 	return fmt.Sprintf("%s\nCalled from: %s", errText, a.Trace)
 }
 
+// GetName ...
 func (a *CuteError) GetName() string {
 	return a.Name
 }
 
+// SetName ...
 func (a *CuteError) SetName(name string) {
 	a.Name = name
 }
 
+// GetFields ...
 func (a *CuteError) GetFields() map[string]interface{} {
 	return a.Fields
 }
 
+// PutFields ...
 func (a *CuteError) PutFields(fields map[string]interface{}) {
 	for k, v := range fields {
 		a.Fields[k] = v
 	}
 }
 
+// GetAttachments ...
 func (a *CuteError) GetAttachments() []*Attachment {
 	return a.Attachments
 }
 
+// PutAttachment ...
 func (a *CuteError) PutAttachment(attachment *Attachment) {
 	a.Attachments = append(a.Attachments, attachment)
 }
 
+// IsOptional ...
 func (a *CuteError) IsOptional() bool {
 	return a.Optional
 }
 
+// SetOptional ...
 func (a *CuteError) SetOptional(opt bool) {
 	a.Optional = opt
 }
 
+// IsRequire ...
 func (a *CuteError) IsRequire() bool {
 	return a.Require
 }
 
+// SetRequire ...
 func (a *CuteError) SetRequire(b bool) {
 	a.Require = b
 }
 
+// IsBroken ...
 func (a *CuteError) IsBroken() bool {
 	return a.Broken
 }
 
+// SetBroken ...
 func (a *CuteError) SetBroken(b bool) {
 	a.Broken = b
 }
 
+// GetTrace ...
 func (a *CuteError) GetTrace() string {
 	return a.Trace
 }
 
+// SetTrace ...
 func (a *CuteError) SetTrace(trace string) {
 	a.Trace = trace
 }

@@ -80,10 +80,12 @@ func wrapWithTrace(err error, trace string) error {
 func getTrace() string {
 	pcs := make([]uintptr, 10)
 	depth := runtime.Callers(3, pcs)
+
 	if depth == 0 {
 		fmt.Println("Couldn't get the stack information")
 		return ""
 	}
+
 	callers := runtime.CallersFrames(pcs[:depth])
 	caller, _ := callers.Next()
 
