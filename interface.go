@@ -21,7 +21,7 @@ type AllureBuilder interface {
 	Parallel() AllureBuilder
 }
 
-// AllureInfoBuilder ...
+// AllureInfoBuilder is a scope of methods for create allure information (Title, Tags, etc.)
 type AllureInfoBuilder interface {
 	// Title is a function for set title in allure information
 	Title(title string) AllureBuilder
@@ -33,7 +33,7 @@ type AllureInfoBuilder interface {
 	Stagef(format string, args ...interface{}) AllureBuilder
 }
 
-// AllureLinksBuilder ...
+// AllureLinksBuilder is a scope of methods to set allure links
 type AllureLinksBuilder interface {
 	SetIssue(issue string) AllureBuilder
 	SetTestCase(testCase string) AllureBuilder
@@ -42,7 +42,7 @@ type AllureLinksBuilder interface {
 	TmsLinks(tmsLinks ...string) AllureBuilder
 }
 
-// AllureLabelsBuilder ...
+// AllureLabelsBuilder is a scope of methods to set allure labels
 type AllureLabelsBuilder interface {
 	Feature(feature string) AllureBuilder
 	Epic(epic string) AllureBuilder
@@ -305,22 +305,19 @@ type ResultsHTTPBuilder interface {
 	GetErrors() []error
 	// GetName is a function, which returns name of Test
 	GetName() string
-	// IsFailed is a function, which returns flag about status of test
-	// Deprecated, use GetResultState()
-	IsFailed() bool
 	// GetResultState is a function, which returns state of test
 	// State could be ResultStateSuccess, ResultStateBroken, ResultStateFail
 	GetResultState() ResultState
 }
 
-// BeforeExecute ...
+// BeforeExecute is a function for processing request before test execution
 type BeforeExecute func(*http.Request) error
 
-// BeforeExecuteT ...
+// BeforeExecuteT is a function for processing request before test execution
 type BeforeExecuteT func(T, *http.Request) error
 
-// AfterExecute ...
+// AfterExecute is a function for processing response after test execution
 type AfterExecute func(*http.Response, []error) error
 
-// AfterExecuteT ...
+// AfterExecuteT is a function for processing response after test execution
 type AfterExecuteT func(T, *http.Response, []error) error

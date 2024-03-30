@@ -62,7 +62,6 @@ Response:
 ]
 
 */
-
 func (i *ExampleSuite) Test_OneStep(t provider.T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()

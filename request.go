@@ -4,7 +4,7 @@ import (
 	"net/url"
 )
 
-// RequestBuilder ...
+// RequestBuilder is a function for set options in request
 type RequestBuilder func(o *requestOptions)
 
 // File is struct for upload file in form field

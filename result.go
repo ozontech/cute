@@ -45,12 +45,10 @@ func (r *testResults) GetName() string {
 	return r.name
 }
 
-// IsFailed ...
-// Deprecated please use GetResultState
-func (r *testResults) IsFailed() bool {
-	return r.state == ResultStateFail || r.state == resultStateFailNow
-}
-
 func (r *testResults) GetResultState() ResultState {
+	if r.state == resultStateFailNow {
+		return ResultStateFail
+	}
+
 	return r.state
 }

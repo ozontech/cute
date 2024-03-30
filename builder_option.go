@@ -46,28 +46,28 @@ func WithCustomHTTPRoundTripper(r http.RoundTripper) Option {
 	}
 }
 
-// WithMiddlewareAfter ...
+// WithMiddlewareAfter is function for set function which will run AFTER test execution
 func WithMiddlewareAfter(after ...AfterExecute) Option {
 	return func(o *options) {
 		o.middleware.After = append(o.middleware.After, after...)
 	}
 }
 
-// WithMiddlewareAfterT ...
+// WithMiddlewareAfterT is function for set function which will run AFTER test execution
 func WithMiddlewareAfterT(after ...AfterExecuteT) Option {
 	return func(o *options) {
 		o.middleware.AfterT = append(o.middleware.AfterT, after...)
 	}
 }
 
-// WithMiddlewareBefore ...
+// WithMiddlewareBefore is function for set function which will run BEFORE test execution
 func WithMiddlewareBefore(before ...BeforeExecute) Option {
 	return func(o *options) {
 		o.middleware.Before = append(o.middleware.Before, before...)
 	}
 }
 
-// WithMiddlewareBeforeT ...
+// WithMiddlewareBeforeT is function for set function which will run BEFORE test execution
 func WithMiddlewareBeforeT(beforeT ...BeforeExecuteT) Option {
 	return func(o *options) {
 		o.middleware.BeforeT = append(o.middleware.BeforeT, beforeT...)

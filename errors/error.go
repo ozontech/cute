@@ -1,16 +1,21 @@
 package errors
 
+import "fmt"
+
 const (
-	actualField   = "Actual"
-	expectedField = "Expected"
+	// ActualField is a key for actual value in error fields
+	ActualField = "Actual"
+	// ExpectedField is a key for expected value in error fields
+	ExpectedField = "Expected"
 )
 
-// CuteError ...
-type CuteError interface {
+// AssertError is a common interface for all errors in the package
+type AssertError interface {
 	error
 	WithNameError
 	WithFields
 	WithAttachments
+	WithTrace
 }
 
 // WithNameError is interface for creates allure step.
@@ -27,6 +32,12 @@ type WithFields interface {
 	PutFields(map[string]interface{})
 }
 
+// WithTrace is interface for put trace in logs
+type WithTrace interface {
+	GetTrace() string
+	SetTrace(string)
+}
+
 // Attachment represents an attachment to Allure with properties like name, MIME type, and content.
 type Attachment struct {
 	Name     string // Name of the attachment.
@@ -40,96 +51,154 @@ type WithAttachments interface {
 	PutAttachment(a *Attachment)
 }
 
-type assertError struct {
-	optional bool
-	require  bool
-	broken   bool
+// CuteError is a struct for error with additional fields for allure and logs
+type CuteError struct {
+	// Optional is a flag to determine if the error is optional
+	// If the error is optional, it will not fail the test
+	Optional bool
+	// Require is a flag to determine if the error is required
+	// If the error is required, it will fail the test
+	Require bool
+	// Broken is a flag to determine if the error is broken
+	// If the error is broken, it will fail the test and mark the test as broken in allure
+	Broken bool
 
-	name        string
-	message     string
-	fields      map[string]interface{}
-	attachments []*Attachment
+	// Name is a name of the error
+	Name string
+	// Message is a message of the error
+	Message string
+	// Err is a wrapped error
+	Err error
+
+	// Trace is a trace of the error
+	// It could be a file path, function name, or any other information
+	Trace string
+
+	// Fields is a map of additional fields for the error
+	// It could be actual and expected values, parameters, or any other information
+	// ActualField and ExpectedField fields will be logged
+	Fields map[string]interface{}
+	// Attachments is a slice of attachments for the error
+	Attachments []*Attachment
 }
 
 // NewAssertError is the function, which creates error with "Actual" and "Expected" for allure
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
-	return &assertError{
-		name:    name,
-		message: message,
-		fields: map[string]interface{}{
-			actualField:   actual,
-			expectedField: expected,
+	return &CuteError{
+		Name:    name,
+		Message: message,
+		Fields: map[string]interface{}{
+			ActualField:   actual,
+			ExpectedField: expected,
 		},
 	}
 }
 
 // NewAssertErrorWithMessage ...
 func NewAssertErrorWithMessage(name string, message string) error {
-	return &assertError{
-		name:    name,
-		message: message,
+	return &CuteError{
+		Name:    name,
+		Message: message,
 	}
 }
 
 // NewEmptyAssertError ...
-func NewEmptyAssertError(name string, message string) CuteError {
-	return &assertError{
-		name:    name,
-		message: message,
-		fields:  map[string]interface{}{},
+func NewEmptyAssertError(name string, message string) AssertError {
+	return &CuteError{
+		Name:    name,
+		Message: message,
+		Fields:  map[string]interface{}{},
 	}
 }
 
-func (a *assertError) Error() string {
-	return a.message
+// Unwrap ...
+func (a *CuteError) Unwrap() error {
+	return a.Err
 }
 
-func (a *assertError) GetName() string {
-	return a.name
+// Error ...
+func (a *CuteError) Error() string {
+	if a.Trace == "" {
+		return a.Message
+	}
+
+	errText := a.Message
+
+	if a.Err != nil {
+		errText = a.Err.Error()
+	}
+
+	return fmt.Sprintf("%s\nCalled from: %s", errText, a.Trace)
 }
 
-func (a *assertError) SetName(name string) {
-	a.name = name
+// GetName ...
+func (a *CuteError) GetName() string {
+	return a.Name
 }
 
-func (a *assertError) GetFields() map[string]interface{} {
-	return a.fields
+// SetName ...
+func (a *CuteError) SetName(name string) {
+	a.Name = name
 }
 
-func (a *assertError) PutFields(fields map[string]interface{}) {
+// GetFields ...
+func (a *CuteError) GetFields() map[string]interface{} {
+	return a.Fields
+}
+
+// PutFields ...
+func (a *CuteError) PutFields(fields map[string]interface{}) {
 	for k, v := range fields {
-		a.fields[k] = v
+		a.Fields[k] = v
 	}
 }
 
-func (a *assertError) GetAttachments() []*Attachment {
-	return a.attachments
+// GetAttachments ...
+func (a *CuteError) GetAttachments() []*Attachment {
+	return a.Attachments
 }
 
-func (a *assertError) PutAttachment(attachment *Attachment) {
-	a.attachments = append(a.attachments, attachment)
+// PutAttachment ...
+func (a *CuteError) PutAttachment(attachment *Attachment) {
+	a.Attachments = append(a.Attachments, attachment)
 }
 
-func (a *assertError) IsOptional() bool {
-	return a.optional
+// IsOptional ...
+func (a *CuteError) IsOptional() bool {
+	return a.Optional
 }
 
-func (a *assertError) SetOptional(opt bool) {
-	a.optional = opt
+// SetOptional ...
+func (a *CuteError) SetOptional(opt bool) {
+	a.Optional = opt
 }
 
-func (a *assertError) IsRequire() bool {
-	return a.require
+// IsRequire ...
+func (a *CuteError) IsRequire() bool {
+	return a.Require
 }
 
-func (a *assertError) SetRequire(b bool) {
-	a.require = b
+// SetRequire ...
+func (a *CuteError) SetRequire(b bool) {
+	a.Require = b
 }
 
-func (a *assertError) IsBroken() bool {
-	return a.broken
+// IsBroken ...
+func (a *CuteError) IsBroken() bool {
+	return a.Broken
 }
 
-func (a *assertError) SetBroken(b bool) {
-	a.broken = b
+// SetBroken ...
+func (a *CuteError) SetBroken(b bool) {
+	a.Broken = b
+}
+
+// GetTrace ...
+func (a *CuteError) GetTrace() string {
+	return a.Trace
+}
+
+// SetTrace ...
+func (a *CuteError) SetTrace(trace string) {
+	a.Trace = trace
 }
