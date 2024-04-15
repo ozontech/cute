@@ -34,7 +34,7 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 
 	for i := 1; i <= countRepeat; i++ {
 		executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
-			resp, err = it.doRequest(t, req)
+			resp, err = it.doRequest(t, req, i)
 			if err != nil {
 				return []error{err}
 			}
@@ -56,7 +56,7 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	return resp, scope
 }
 
-func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
+func (it *Test) doRequest(t T, baseReq *http.Request, tryCount int) (*http.Response, error) {
 	// copy request, because body can be read once
 	req, err := copyRequest(baseReq.Context(), baseReq)
 	if err != nil {
@@ -90,7 +90,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 			it.Error(t, "[ERROR] Could not log information about response. Error %v", addErr)
 		}
 
-		if validErr := it.validateResponseCode(resp); validErr != nil {
+		if validErr := it.validateResponseCode(resp, tryCount); validErr != nil {
 			return nil, validErr
 		}
 	}
@@ -98,8 +98,11 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (it *Test) validateResponseCode(resp *http.Response) error {
+func (it *Test) validateResponseCode(resp *http.Response, tryCount int) error {
 	if it.Expect.Code != 0 && it.Expect.Code != resp.StatusCode {
+		if it.Request.Repeat.OptionalError && it.Request.Repeat.Count > 1 && tryCount < it.Request.Repeat.Count {
+			return cuteErrors.NewOptionalError(fmt.Sprintf("Response code expect %v, but was %v", it.Expect.Code, resp.StatusCode))
+		}
 		return cuteErrors.NewAssertError(
 			"Assert response code",
 			fmt.Sprintf("Response code expect %v, but was %v", it.Expect.Code, resp.StatusCode),

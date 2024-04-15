@@ -51,10 +51,12 @@ type Request struct {
 }
 
 // RequestRepeatPolitic is struct for repeat politic
-// If response.Code != Expect.Code, than request will repeat Count counts with Delay delay.
+// If response.Code != Expect.Code, then request will repeat Count counts with Delay delay.
+// If OptionalError is set to true, the first tries will not fail the test, only the last one will set the test result
 type RequestRepeatPolitic struct {
-	Count int
-	Delay time.Duration
+	Count         int
+	OptionalError bool
+	Delay         time.Duration
 }
 
 // Middleware is struct for executeInsideAllure something before or after test
