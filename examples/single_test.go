@@ -98,6 +98,42 @@ func Test_Single_Broken(t *testing.T) {
 		ExecuteTest(context.Background(), t)
 }
 
+func Test_Single_RepeatPolitic_Optional_Success_Test(t *testing.T) {
+	cute.NewTestBuilder().
+		Title("Test_Single_RepeatPolitic_Optional_Success_Test").
+		Create().
+		RequestRepeat(2).
+		RequestRepeatOptional(true).
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		BrokenAssertBodyT(func(t cute.T, body []byte) error {
+			return errors.New("example broken error")
+		}).
+		ExpectStatus(http.StatusCreated).
+		ExecuteTest(context.Background(), t)
+
+	t.Logf("You should see it")
+}
+
+func Test_Single_RepeatPolitic_Broken_Failed_Test(t *testing.T) {
+	cute.NewTestBuilder().
+		Title("Test_Single_RepeatPolitic_Broken_Failed_Test").
+		Create().
+		RequestRepeat(2).
+		RequestRepeatOptional(true).
+		RequestBuilder(
+			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+		).
+		BrokenAssertBodyT(func(t cute.T, body []byte) error {
+			return errors.New("example broken error")
+		}).
+		ExpectStatus(http.StatusCreated).
+		ExecuteTest(context.Background(), t)
+
+	t.Logf("You should see it")
+}
+
 func Test_Single_Broken_2(t *testing.T) {
 	cute.NewTestBuilder().
 		Title("Test_Single_Broken_2").

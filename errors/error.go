@@ -82,6 +82,14 @@ type CuteError struct {
 	Attachments []*Attachment
 }
 
+// NewCuteError is the function, which creates cute error with "Name" and "Message" for allure
+func NewCuteError(name string, err error) *CuteError {
+	return &CuteError{
+		Name: name,
+		Err:  err,
+	}
+}
+
 // NewAssertError is the function, which creates error with "Actual" and "Expected" for allure
 func NewAssertError(name string, message string, actual interface{}, expected interface{}) error {
 	return &CuteError{
@@ -94,15 +102,16 @@ func NewAssertError(name string, message string, actual interface{}, expected in
 	}
 }
 
-// NewAssertErrorWithMessage ...
+// NewAssertErrorWithMessage
+// Deprecated: use NewEmptyAssertError instead
 func NewAssertErrorWithMessage(name string, message string) error {
-	return &CuteError{
-		Name:    name,
-		Message: message,
-	}
+	return NewEmptyAssertError(name, message)
 }
 
-// NewEmptyAssertError ...
+// NewEmptyAssertError is the function, which creates error with "Name" and "Message" for allure
+// Returns AssertError with empty fields
+// You can use PutFields and PutAttachment to add additional information
+// You can use SetOptional, SetRequire, SetBroken to change error behavior
 func NewEmptyAssertError(name string, message string) AssertError {
 	return &CuteError{
 		Name:    name,

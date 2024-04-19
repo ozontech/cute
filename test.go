@@ -51,10 +51,15 @@ type Request struct {
 }
 
 // RequestRepeatPolitic is struct for repeat politic
+// if Optional is true and request is failed, than test step allure will be option, and t.Fail() will not execute.
+// If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will not execute.
+// If Optional and Broken is false, than test step will be failed, and t.Fail() will execute.
 // If response.Code != Expect.Code, than request will repeat Count counts with Delay delay.
 type RequestRepeatPolitic struct {
-	Count int
-	Delay time.Duration
+	Count    int
+	Delay    time.Duration
+	Optional bool
+	Broken   bool
 }
 
 // Middleware is struct for executeInsideAllure something before or after test
@@ -206,10 +211,9 @@ func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allurePr
 }
 
 // processTestErrors returns flag, which mean finish test or not.
-// If test has not optional errors, than test will be failed.
-// If test has broken errors, than test will be broken.
-// If test has require errors, than test will be failed.
-// If test has success, than test will be success.
+// If test has only optional errors, than test will be success
+// If test has broken errors, than test will be broken on allure and executed t.FailNow().
+// If test has require errors, than test will be failed on allure and executed t.FailNow().
 func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	if len(errs) == 0 {
 		return ResultStateSuccess
@@ -217,7 +221,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 
 	var (
 		countNotOptionalErrors = 0
-		state                  = ResultStateFail
+		state                  ResultState
 	)
 
 	for _, err := range errs {
@@ -226,6 +230,8 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
 				it.Info(t, "[OPTIONAL ERROR] %v", err.Error())
+
+				state = ResultStateSuccess
 
 				continue
 			}
@@ -262,6 +268,8 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	}
 
 	if countNotOptionalErrors != 0 {
+		state = ResultStateFail
+
 		it.Error(t, "Test finished with %v errors", countNotOptionalErrors)
 	}
 
