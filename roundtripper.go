@@ -107,16 +107,13 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func (it *Test) validateResponseCode(resp *http.Response) cuteErrors.AssertError {
+func (it *Test) validateResponseCode(resp *http.Response) error {
 	if it.Expect.Code != 0 && it.Expect.Code != resp.StatusCode {
-		err := cuteErrors.NewAssertError(
+		return cuteErrors.NewAssertError(
 			"Assert response code",
 			fmt.Sprintf("Response code expect %v, but was %v", it.Expect.Code, resp.StatusCode),
 			resp.StatusCode,
 			it.Expect.Code)
-
-		// it's safe to cast to AssertError, because we create it in this function
-		return err.(cuteErrors.AssertError)
 	}
 
 	return nil
