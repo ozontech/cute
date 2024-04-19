@@ -102,7 +102,7 @@ func NewAssertError(name string, message string, actual interface{}, expected in
 	}
 }
 
-// NewAssertErrorWithMessage
+// NewAssertErrorWithMessage is the function, which creates error with "Name" and "Message" for allure
 // Deprecated: use NewEmptyAssertError instead
 func NewAssertErrorWithMessage(name string, message string) error {
 	return NewEmptyAssertError(name, message)
@@ -120,12 +120,14 @@ func NewEmptyAssertError(name string, message string) AssertError {
 	}
 }
 
-// Unwrap ...
+// Unwrap is a method to get wrapped error
+// It is used for errors.Is and errors.As functions
 func (a *CuteError) Unwrap() error {
 	return a.Err
 }
 
-// Error ...
+// Error is a method to get error message
+// It is used for fmt.Errorf and fmt.Println functions
 func (a *CuteError) Error() string {
 	if a.Trace == "" {
 		return a.Message
@@ -140,12 +142,14 @@ func (a *CuteError) Error() string {
 	return fmt.Sprintf("%s\nCalled from: %s", errText, a.Trace)
 }
 
-// GetName ...
+// GetName is a method to get error name
+// It is used for allure step name
 func (a *CuteError) GetName() string {
 	return a.Name
 }
 
-// SetName ...
+// SetName is a method to set error name
+// It is used for allure step name
 func (a *CuteError) SetName(name string) {
 	a.Name = name
 }
