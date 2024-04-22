@@ -25,7 +25,7 @@ func (qt *cute) RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder {
 
 // RequestRepeatPolitic set politic for request repeat.
 // if response.Code != Expect.Code, than request will repeat Count counts with Delay delay.
-// if Optional is true and request is failed, than test step allure will be option, and t.Fail() will not execute.
+// if Optional is true and request is failed, than test step allure will be skipped, and t.Fail() will not execute.
 // If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will not execute.
 func (qt *cute) RequestRepeatPolitic(politic *RequestRepeatPolitic) RequestHTTPBuilder {
 	if politic == nil {
@@ -37,8 +37,8 @@ func (qt *cute) RequestRepeatPolitic(politic *RequestRepeatPolitic) RequestHTTPB
 	return qt
 }
 
-// RequestRepeatOption set option politic for request repeat.
-// if Optional is true and request is failed, than test step allure will be option, and t.Fail() will not execute.
+// RequestRepeatOptional set option politic for request repeat.
+// if Optional is true and request is failed, than test step allure will be skipped, and t.Fail() will not execute.
 func (qt *cute) RequestRepeatOptional(option bool) RequestHTTPBuilder {
 	qt.tests[qt.countTests].Request.Repeat.Optional = option
 

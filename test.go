@@ -51,7 +51,7 @@ type Request struct {
 }
 
 // RequestRepeatPolitic is struct for repeat politic
-// if Optional is true and request is failed, than test step allure will be option, and t.Fail() will not execute.
+// if Optional is true and request is failed, than test step allure will be skip, and t.Fail() will not execute.
 // If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will not execute.
 // If Optional and Broken is false, than test step will be failed, and t.Fail() will execute.
 // If response.Code != Expect.Code, than request will repeat Count counts with Delay delay.
