@@ -144,11 +144,11 @@ type TableTest interface {
 	ControlTest
 }
 
-// RequestHTTPBuilder is a scope of methods for create HTTP requests
+// RequestHTTPBuilder is a scope of methods to create HTTP requests
 type RequestHTTPBuilder interface {
 	// Request is function for set http.Request
 	Request(r *http.Request) ExpectHTTPBuilder
-	// RequestBuilder is function for create http.Request with help builder.
+	// RequestBuilder is function for set http.Request with builders
 	// Available builders:
 	// WithMethod
 	// WithURL
@@ -169,13 +169,31 @@ type RequestHTTPBuilder interface {
 	RequestParams
 }
 
-// RequestParams is a scope of methods for configurate http request
+// RequestParams is a scope of methods to configure request
 type RequestParams interface {
-	// RequestRepeat is a count of repeat request, if request was failed.
+	// RequestRepeat is a function for set options in request
+	// if response.Code != Expect.Code, than request will repeat counts with delay.
+	// Default delay is 1 second.
 	RequestRepeat(count int) RequestHTTPBuilder
-	// RequestRepeatDelay is a time between repeat request, if request was failed.
-	// Default 1 second
+
+	// RequestRepeatDelay set delay for request repeat.
+	// if response.Code != Expect.Code, than request will repeat counts with delay.
+	// Default delay is 1 second.
 	RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder
+
+	// RequestRepeatPolitic is a politic for repeat request.
+	// if response.Code != Expect.Code, than request will repeat counts with delay.
+	// if Optional is true and request is failed, than test step allure will be skipped, and t.Fail() will not execute.
+	// If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will execute.
+	RequestRepeatPolitic(politic *RequestRepeatPolitic) RequestHTTPBuilder
+
+	// RequestRepeatOptional is a option politic for repeat request.
+	// if Optional is true and request is failed, than test step allure will be skipped, and t.Fail() will not execute.
+	RequestRepeatOptional(optional bool) RequestHTTPBuilder
+
+	// RequestRepeatBroken is a broken politic for repeat request.
+	// If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will execute.
+	RequestRepeatBroken(broken bool) RequestHTTPBuilder
 }
 
 // ExpectHTTPBuilder is a scope of methods for validate http response

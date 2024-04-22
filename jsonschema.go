@@ -35,7 +35,7 @@ func checkJSONSchema(expect gojsonschema.JSONLoader, data []byte) []error {
 
 	validateResult, err := gojsonschema.Validate(expect, gojsonschema.NewBytesLoader(data))
 	if err != nil {
-		return []error{errors.NewAssertErrorWithMessage("could not validate json schema", err.Error())}
+		return []error{errors.NewEmptyAssertError("could not validate json schema", err.Error())}
 	}
 
 	if !validateResult.Valid() && len(validateResult.Errors()) > 0 {

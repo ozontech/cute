@@ -36,6 +36,14 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 		executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
 			resp, err = it.doRequest(t, req)
 			if err != nil {
+				if it.Request.Repeat.Broken {
+					err = wrapBrokenError(err)
+				}
+
+				if it.Request.Repeat.Optional {
+					err = wrapOptionalError(err)
+				}
+
 				return []error{err}
 			}
 
@@ -60,10 +68,13 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// copy request, because body can be read once
 	req, err := copyRequest(baseReq.Context(), baseReq)
 	if err != nil {
-		return nil, err
+		return nil, cuteErrors.NewCuteError("[Internal] Could not copy request", err)
 	}
 
 	resp, httpErr := it.httpClient.Do(req)
+	if resp == nil {
+		return nil, cuteErrors.NewCuteError("[HTTP] Response is nil", httpErr)
+	}
 
 	// BAD CODE. Need to copy body, because we can't read body again from resp.Request.Body. Problem is io.Reader
 	resp.Request.Body, baseReq.Body, err = utils.DrainBody(baseReq.Body)
@@ -80,19 +91,17 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	}
 
 	if httpErr != nil {
-		return nil, httpErr
+		return nil, cuteErrors.NewCuteError("[HTTP] Could not do request", httpErr)
 	}
 
-	if resp != nil {
-		// Add information (code, body, headers) about response to Allure step
-		if addErr := it.addInformationResponse(t, resp); addErr != nil {
-			// Ignore err return, because it's connected with test logic
-			it.Error(t, "[ERROR] Could not log information about response. Error %v", addErr)
-		}
+	// Add information (code, body, headers) about response to Allure step
+	if addErr := it.addInformationResponse(t, resp); addErr != nil {
+		// Ignore err return, because it's connected with test logic
+		it.Error(t, "[ERROR] Could not log information about response. Error %v", addErr)
+	}
 
-		if validErr := it.validateResponseCode(resp); validErr != nil {
-			return nil, validErr
-		}
+	if validErr := it.validateResponseCode(resp); validErr != nil {
+		return nil, validErr
 	}
 
 	return resp, nil

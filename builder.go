@@ -19,6 +19,16 @@ type HTTPTestMaker struct {
 }
 
 // NewHTTPTestMaker is function for set options for all cute.
+// For example, you can set timeout for all requests  or set custom http client
+// Options:
+// - WithCustomHTTPTimeout - set timeout for all requests
+// - WithHTTPClient - set custom http client
+// - WithCustomHTTPRoundTripper - set custom http round tripper
+// - WithJSONMarshaler - set custom json marshaler
+// - WithMiddlewareAfter - set function which will run AFTER test execution
+// - WithMiddlewareAfterT - set function which will run AFTER test execution with TB
+// - WithMiddlewareBefore - set function which will run BEFORE test execution
+// - WithMiddlewareBeforeT - set function which will run BEFORE test execution with TB
 func NewHTTPTestMaker(opts ...Option) *HTTPTestMaker {
 	var (
 		o = &options{
