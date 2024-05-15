@@ -72,7 +72,15 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	}
 
 	resp, httpErr := it.httpClient.Do(req)
+
+	// http client has case wheh it return response and error in one time
+	// we have to check this case
 	if resp == nil {
+		if httpErr != nil {
+			return nil, cuteErrors.NewCuteError("[HTTP] Could not do request", httpErr)
+		}
+
+		// if response is nil, we can't get information about request and response
 		return nil, cuteErrors.NewCuteError("[HTTP] Response is nil", httpErr)
 	}
 
