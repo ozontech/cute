@@ -4,12 +4,14 @@
 
 # CUTE — create your tests easily
 
-HTTP and REST API testing for Go.
+HTTP and REST API testing for Go using Allure reports.
 
-Three steps for testing your HTTP service:
-1) Create request and write assets
-2) Run tests
-3) Check allure
+## Features
+
+- Expressive and intuitive syntax.
+- Built-in JSON support.
+- Custom asserts.
+- One step to BDD.
 
 ---
 
@@ -36,6 +38,11 @@ Three steps for testing your HTTP service:
       3. [Errors](#assert_errors)
 7. [Global Environment Keys](#global_env_keys)
 
+## Workflow
+1. Create a request and write assets.
+2. Run tests.
+3. Check Allure reports.
+
 ## Installation
 
 ```bash
@@ -46,38 +53,35 @@ Three steps for testing your HTTP service:
 
 - Go 1.17+
 
-## Features
-
-- Full integration with Allure
-- Expressive and intuitive syntax
-- Built-in JSON support
-- Custom asserts
-- One step to BDD
 
 ## Demo
 
-1) Install allure
-```bash
-  brew install allure
-  ```
-2) Run example
+Run example.
  ```bash
   make example
 ```
+To view detailed test reports, install Allure framework. It's optional.
 
-3) Run allure
+[Learn more about Allure reports](https://github.com/allure-framework)
+
+```bash
+  brew install allure
+  ```
+
+Run Allure.
+
 ```bash
   allure serve ./examples/allure-results
 ```
 
-## Examples
+## Test examples
 
-See [examples](examples) directory for featured examples.
+See [Examples](examples) directory for featured examples.
 
-## <a name="example_single_test"/>Single test
+### <a name="example_single_test"/>Single-step test
 
-See an example of creating a single test. \
-For a result with **allure information** you can use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/blob/master/README_en.md#pkgprovidert).
+Allows implementing single-request tests. See full example in the [Examples](examples) directory.
+To view an Allure report, use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/blob/master/README_en.md#pkgprovidert).
 
 ```go
 import (
@@ -109,20 +113,78 @@ func TestExample(t *testing.T) {
         ExecuteTest(context.Background(), t)
 }
 ```
-
-See full example [here](examples/single_test.go)
-
-**Allure:**
+<details>
+  <summary>Allure report</summary>
 
 ![img.png](.images/simple.png)
 
+</details>
+
+
+## <a name="example_multi_step_test"/>Multi-step test
+
+Allows implementing several requests within one test.
+
+```go
+import (
+    "context"
+    "fmt"
+    "net/http"
+    "testing"
+
+    "github.com/ozontech/cute"
+)
+    
+func Test_TwoSteps(t *testing.T) {
+    responseCode := 0
+
+    // First step
+    cute.NewTestBuilder().
+        Title("Test with two requests and parse body.").
+        Tag("two_steps").
+        Create().
+        RequestBuilder(
+            cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+            cute.WithMethod(http.MethodGet),
+        ).
+        ExpectStatus(http.StatusOK).
+        NextTest().
+
+        // Execute after first step and parse response code
+        AfterTestExecute(func(response *http.Response, errors []error) error { 
+            responseCode = response.StatusCode
+
+            return nil
+        }).
+
+        // Second step
+        Create().
+        RequestBuilder(
+            cute.WithURI("https://jsonplaceholder.typicode.com/posts/2/comments"),
+            cute.WithMethod(http.MethodDelete),
+        ).
+        ExecuteTest(context.Background(), t)
+
+        fmt.Println("Response code from first request", responseCode)
+}
+```
+See full in the [Examples](examples/two_step_test.go) directory.
+
+<details>
+  <summary>Allure report</summary>
+
+![multistep_test.png](.images/multistep_test.png)
+
+</details>
+
 ## <a name="example_suite_test"/>Suite
 
-Suite provides a structure in which you can describe tests by grouping them into test suites. This can be useful if you have a lot of different tests and it is difficult to navigate through them without having additional "layers nesting levels" of test calls.
+Suite provides a structure for describing tests by organizing them into test suites. It's helpful if you have a large number of different tests and find it difficult to browse through them without using additional layer nesting levels of test calls.
 
-You can read about `Allure.Suite` [here](https://github.com/ozontech/allure-go#suite)
+[Learn more about suite with Allure reports](https://github.com/ozontech/allure-go#suite)
 
-1) Declare a structure with `suite.Suite` and `*cute.HTTPTestMaker`
+
+1. Declare a structure with `suite.Suite` and `*cute.HTTPTestMaker`.
 
 ```go
 import (
@@ -152,7 +214,7 @@ func (i *ExampleSuite) BeforeAll(t provider.T) {
 }
 
 ```
-2) Declare test
+2. Declare a test.
 
 ```go
 import (
@@ -164,7 +226,7 @@ func TestExampleTest(t *testing.T) {
 }
 ```
 
-3) Just relax and describe tests
+3. Describe tests.
 
 ```go
 import (
@@ -217,70 +279,18 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
         ExecuteTest(context.Background(), t)
 }
 ```
-See full example [here](examples/suite)
+See full example in the [Examples](examples/suite) directory.
 
-**Allure:**
+<details>
+  <summary>Allure report</summary>
 
 ![one_step.png](.images/one_step.png)
 
-
-## <a name="example_multi_step_test"/>Multi-step test
-
-```go
-import (
-    "context"
-    "fmt"
-    "net/http"
-    "testing"
-
-    "github.com/ozontech/cute"
-)
-    
-func Test_TwoSteps(t *testing.T) {
-    responseCode := 0
-
-    // First step.
-    cute.NewTestBuilder().
-        Title("Test with two requests and parse body.").
-        Tag("two_steps").
-        Create().
-        RequestBuilder(
-            cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
-            cute.WithMethod(http.MethodGet),
-        ).
-        ExpectStatus(http.StatusOK).
-        NextTest().
-
-        // Execute after first step and parse response code
-        AfterTestExecute(func(response *http.Response, errors []error) error { 
-            responseCode = response.StatusCode
-
-            return nil
-        }).
-
-        // Second step
-        Create().
-        RequestBuilder(
-            cute.WithURI("https://jsonplaceholder.typicode.com/posts/2/comments"),
-            cute.WithMethod(http.MethodDelete),
-        ).
-        ExecuteTest(context.Background(), t)
-
-        fmt.Println("Response code from first request", responseCode)
-}
-```
-See full example [here](examples/two_step_test.go)
-
-**Allure:**
-
-![multistep_test.png](.images/multistep_test.png)
-
+</details>
 
 ## <a name="example_table_tests"/>Table tests
 
-One step to table tests... 
-
-You have 2 ways to create table test. These ways have same allure reports. 
+You can create a table test in 2 ways. They'll have the same Allure reports.
 
 ### <a name="example_table_tests_builder"/>Builder table tests
 
@@ -388,11 +398,14 @@ func Test_Execute_Array(t *testing.T) {
 }
 ```
 
-See full example [here](examples/table_test/table_test.go)
+See full example in the [Examples](examples/table_test/table_test.go) directory.
+
+<details>
+  <summary>Allure report</summary>
 
 **Common allure for all table tests:**
 
-Report has **2 different** tests/suites:
+The report has 2 different tests or suites:
 
 ![table_tests_execute_array.png](.images/table_tests_execute_array.png)
 
@@ -400,9 +413,12 @@ Report has **2 different** tests/suites:
 
 ![table_tests_execute_array_test_1.png](.images/table_tests_execute_array_test_1.png)
 
+</details>
+
 ## <a name="asserts"/>Asserts
 
-You can create your own asserts or use ready-made asserts from the package asserts
+You can create your own asserts or use ready-made from the package asserts.
+
 
 ### <a name="asserts_json"/>JSON asserts:
 
@@ -434,9 +450,12 @@ There are three ways to validate a JSON Schema. It all depends on where you have
 - `ExpectJSONSchemaByte([]byte)` - is a function for compares a JSON schema from an array of bytes.
 - `ExpectJSONSchemaFile(string)` - is a function for compares a JSON schema from a file or remote resource.
 
-**Allure:**
+<details>
+  <summary>Allure report</summary>
 
 ![img.png](.images/json_schema.png)
+
+</details>
 
 ## <a name="asserts_custom"/>Custom asserts
 
@@ -511,9 +530,12 @@ func customAssertBodySuite() cute.AssertBodyT {
 
 ```
 
-**Allure:**
+<details>
+  <summary>Allure report</summary>
 
 ![custom_assert.png](.images/custom_assert.png)
+
+</details>
 
 ### <a name="asserts_errors"/>Assert errors
 
@@ -556,9 +578,12 @@ type WithFields interface {
 }
 ```
 
-**Allure:**
+<details>
+  <summary>Allure report</summary>
 
 ![assert_error.png](.images/assert_error.png)
+
+</details>
 
 #### Optional assert
 If assert returns optional error step will be **failed** but test will be success.
@@ -591,9 +616,12 @@ type OptionalError interface {
 }
 ```
 
-**Allure:**
+<details>
+  <summary>Allure report</summary>
 
 ![optional_error.png](.images/optional_error.png)
+
+</details>
 
 ## <a name="global_env_keys"/>Global Environment Keys
 
