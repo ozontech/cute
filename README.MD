@@ -15,28 +15,29 @@ HTTP and REST API testing for Go using Allure reports.
 
 ---
 
-## Head of contents:
+## Head of contents
 
-1. [Head of contents](#head-of-contents)
-2. [Installation](#installation)
-3. [Features](#features)
-4. [Demo](#demo)
-5. [Examples](#examples)
-   1. [Single test with Allure](#example_single_test)
-   2. [Suite tests](#example_suite_test)
-   3. [Multi-step test](#example_multi_step_test)
-   4. [Table tests](#example_table_tests)
-      1. [Builder](#example_table_tests_builder)
-      2. [Array](#example_table_tests_builder)
-6. [Asserts](#asserts)
-   1. [JSON asserts](#asserts_json)
-   2. [Headers asserts](#asserts_headers)
-   3. [JSON schema](#assert_json_schema)
-   4. [Custom asserts](#asserts_custom)
-      1. [Base](#asserts_custom_base)
-      2. [T](#asserts_custom_t)
-      3. [Errors](#assert_errors)
-7. [Global Environment Keys](#global_env_keys)
+- [Features](#features)
+- [Workflow](#workflow)
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Demo](#demo)
+- [Test examples](#test-examples)
+    - [Single test](#single-step-test)
+    - [Multi-step test](#multi-step-test)
+    - [Suite tests](#suite)
+    - [Table tests](#table-tests)
+- [Asserts](#asserts)
+    - [Ready-made asserts](#ready-made-asserts)
+        - [JSON asserts](#asserts_json)
+        - [Headers asserts](#asserts_headers)
+        - [JSON schema](#assert_json_schema)
+    - [Custom asserts](#asserts_custom)
+        - [Base](#asserts_custom_base)
+        - [T](#asserts_custom_t)
+        - [Errors](#assert_errors)
+- [Global Environment Keys](#global_env_keys)
+
 
 ## Workflow
 1. Create a request and write assets.
@@ -76,11 +77,11 @@ Run Allure.
 
 ## Test examples
 
-See [Examples](examples) directory for featured examples.
+See [**Examples**](examples) directory for featured examples.
 
-### <a name="example_single_test"/>Single-step test
+### <h3><a href="example_single_test">Single-step test</a></h3>
 
-Allows implementing single-request tests. See full example in the [Examples](examples) directory.
+Allows implementing single-request tests. See full example in the [**Examples**](examples) directory.
 To view an Allure report, use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/blob/master/README_en.md#pkgprovidert).
 
 ```go
@@ -121,7 +122,7 @@ func TestExample(t *testing.T) {
 </details>
 
 
-## <a name="example_multi_step_test"/>Multi-step test
+### <h3><a href="example_multi_step_test">Multi-step test</a></h3>
 
 Allows implementing several requests within one test.
 
@@ -168,7 +169,7 @@ func Test_TwoSteps(t *testing.T) {
         fmt.Println("Response code from first request", responseCode)
 }
 ```
-See full in the [Examples](examples/two_step_test.go) directory.
+See full in the [**Examples**](examples/two_step_test.go) directory.
 
 <details>
   <summary>Allure report</summary>
@@ -177,7 +178,7 @@ See full in the [Examples](examples/two_step_test.go) directory.
 
 </details>
 
-## <a name="example_suite_test"/>Suite
+### <h3><a href="example_suite_test">Suite</a></h3>
 
 Suite provides a structure for describing tests by organizing them into test suites. It's helpful if you have a large number of different tests and find it difficult to browse through them without using additional layer nesting levels of test calls.
 
@@ -279,7 +280,7 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
         ExecuteTest(context.Background(), t)
 }
 ```
-See full example in the [Examples](examples/suite) directory.
+See full example in the [**Examples**](examples/suite) directory.
 
 <details>
   <summary>Allure report</summary>
@@ -288,11 +289,11 @@ See full example in the [Examples](examples/suite) directory.
 
 </details>
 
-## <a name="example_table_tests"/>Table tests
+## <h2><a href="example_table_tests">Table tests</a></h2>
 
 You can create a table test in 2 ways. They'll have the same Allure reports.
 
-### <a name="example_table_tests_builder"/>Builder table tests
+### <h3><a href="example_table_tests_builder">Builder table tests</a></h3>
 
 ```go
 import (
@@ -351,8 +352,7 @@ func Test_Table_Array(t *testing.T) {
 }
 ```
 
-
-### <a name="example_table_tests_array"/>Array tests
+### <h3><a href="example_table_tests_array">Array tests</a></h3>
 
 ```go
 func Test_Execute_Array(t *testing.T) {
@@ -398,57 +398,64 @@ func Test_Execute_Array(t *testing.T) {
 }
 ```
 
-See full example in the [Examples](examples/table_test/table_test.go) directory.
+See full example in the [**Examples**](examples/table_test/table_test.go) directory.
 
 <details>
   <summary>Allure report</summary>
 
-**Common allure for all table tests:**
-
-The report has 2 different tests or suites:
+Common report for all table tests:
 
 ![table_tests_execute_array.png](.images/table_tests_execute_array.png)
 
-**Main report:**
+Main report:
 
 ![table_tests_execute_array_test_1.png](.images/table_tests_execute_array_test_1.png)
 
 </details>
 
-## <a name="asserts"/>Asserts
+<h2><a href="asserts">Asserts</a></h2>
 
 You can create your own asserts or use ready-made from the package asserts.
 
+### Ready-made asserts
 
-### <a name="asserts_json"/>JSON asserts:
+#### <h4><a href="asserts_json">JSON asserts</a></h4>
 
-You can find implementation [here](asserts/json/json.go)
 
-- `Equal` is a function to assert that a jsonpath expression matches the given value
-- `NotEqual` is a function to check that jsonpath expression value is not equal to the given value
-- `Length` is a function to assert that value is the expected length
-- `GreaterThan` is a function to assert that value is greater than the given length
-- `GreaterOrEqualThan` is a function to assert that value is greater or equal than the given length
-- `LessThan` is a function to assert that value is less than the given length
-- `LessOrEqualThan` is a function to assert that value is less or equal than the given length
-- `Present` is a function to assert that value is present (value can be 0 or null)
-- `NotEmpty` is a function to assert that value is present and not empty (value can't be 0 or null)
-- `NotPresent` is a function to assert that value is not present
+- `Equal` is a function to assert that a JSONPath expression matches the given value.
+- `NotEqual` is a function to check that a JSONPath expression value isn't equal to the given value.
+- `Length` is a function to assert that value is the expected length.
+    - `GreaterThan` is a function to assert that value is greater than the given length.
+    - `GreaterOrEqualThan` is a function to assert that value is greater or equal to the given length.
+    - `LessThan` is a function to assert that value is less than the given length.
+    - `LessOrEqualThan` is a function to assert that value is less or equal to the given length.
+- `Present` is a function to assert that value is present. Value can be 0 or null.
+- `NotEmpty` is a function to assert that value is present and not empty. Value can't be 0 or null.
+- `NotPresent` is a function to assert that value isn't present.
+- `Diff` is a function to compare two JSONs.
+- `Contains` is a function to assert that a JSONPath expression extracts a value in an array.
+- `EqualJSON` is a function to check that a JSON path expression value is equal to given JSON.
+- `NotEqualJSON` is a function to check that a JSONPath expression value isn't equal to given JSON.
+- `GetValueFromJSON` is a function for getting a value from a JSON.
 
-### <a name="asserts_headers"/>Headers asserts:
+[Learn more about expressions](https://goessner.net/articles/JsonPath/)
 
-See implementation [here](asserts/headers/headers.go)
+[Learn more about asserts implementation](https://github.com/ozontech/cute/blob/master/asserts/json/json.go)
 
-- `Present` is a function to assert that header is present
-- `NotPresent` is a function to assert that header is not present
+#### <h4><a href="asserts_headers">Headers asserts</a></h4>
 
-### <a name="assert_json_schema"/>JSON schema validations:
+- `Present` is a function to assert that header is present.
+- `NotPresent` is a function to assert that header isn't present.
 
-There are three ways to validate a JSON Schema. It all depends on where you have it.
+[Learn more about asserts implementation](asserts/headers/headers.go)
 
-- `ExpectJSONSchemaString(string)` - is a function for compares a JSON schema from a string.
-- `ExpectJSONSchemaByte([]byte)` - is a function for compares a JSON schema from an array of bytes.
-- `ExpectJSONSchemaFile(string)` - is a function for compares a JSON schema from a file or remote resource.
+#### <h4><a href="assert_json_schema">JSON schema validations</a></h4>
+
+You can validate a JSON schema in 3 ways. Choose a way depending on JSON schema location.
+
+- `ExpectJSONSchemaString(string)` is a function for validating a JSON schema from a string.
+- `ExpectJSONSchemaByte([]byte)` is a function for validating a JSON schema from an array of bytes.
+- `ExpectJSONSchemaFile(string)` is a function for validating a JSON schema from a file or remote resource.
 
 <details>
   <summary>Allure report</summary>
@@ -457,11 +464,11 @@ There are three ways to validate a JSON Schema. It all depends on where you have
 
 </details>
 
-## <a name="asserts_custom"/>Custom asserts
+### <h3><a href="asserts_custom">Custom asserts</a></h3>
 
 You can implement [3 type of asserts](assert.go):
 
-### <a name="asserts_custom_base"/>Base
+#### <h4><a href="asserts_custom_base">Base</a></h4>
 
 Types for creating custom assertions.
 
@@ -471,7 +478,7 @@ Types for creating custom assertions.
     type AssertResponse func(response *http.Response) error
 ```
 
-**Example:**
+Example:
 
 ```go
 func customAssertBody() cute.AssertBody {
@@ -485,11 +492,14 @@ func customAssertBody() cute.AssertBody {
 }
 ```
 
-### <a name="asserts_custom_t"/>T
+#### <h4><a href="asserts_custom_t">T</a></h4>
 
-Types for creating custom assertions using Allure [Actions](https://github.com/ozontech/allure-go#suite) and [testing.TB](https://pkg.go.dev/testing#TB). \
-You can log some information to Allure. \
-Also you can log error on Allure yourself or just return error.
+Used for creating custom asserts via Allure Actions](https://github.com/ozontech/allure-go#suite) and [testing.TB](https://pkg.go.dev/testing#TB).
+You can:
+
+- log information to Allure,
+- log error on Allure yourself,
+- return an error.
 
 ```go
     type AssertBodyT func(t cute.T, body []byte) error
@@ -497,7 +507,7 @@ Also you can log error on Allure yourself or just return error.
     type AssertResponseT func(t cute.T, response *http.Response) error
 ```
 
-**Example with T:**
+Example with T:
 
 ```go
 func customAssertBodyT() cute.AssertBodyT {
@@ -508,7 +518,8 @@ func customAssertBodyT() cute.AssertBodyT {
 }
 ```
 
-**Example with step creations:**
+Example with creating steps:
+
 ```go
 func customAssertBodySuite() cute.AssertBodyT {
     return func(t cute.T, bytes []byte) error {
@@ -537,11 +548,12 @@ func customAssertBodySuite() cute.AssertBodyT {
 
 </details>
 
-### <a name="asserts_errors"/>Assert errors
+#### <h4><a href="asserts_errors">Assert errors</a></h4>
 
-You can use method `errors.NewAssertError` from package [errors](errors/error.go):
+You can use `errors.NewAssertError` method from [errors](errors/error.go) package.
 
 Example:
+
 ```go
 import (
     "github.com/ozontech/cute"
@@ -558,9 +570,9 @@ func customAssertBodyWithCustomError() cute.AssertBody {
     }
 }
 ```
-If you'd like to create a pretty **error in your custom** assert you should implement error with [interfaces](errors/error.go):
+To create a pretty-error in your custom assert, implement it with [interfaces](errors/error.go):
 
-##### With name
+- Name.
 
 ```go
 type WithNameError interface {
@@ -569,7 +581,7 @@ type WithNameError interface {
 }
 ```
 
-#### With parameters for allure step
+- Parameters for Allure step.
 
 ```go
 type WithFields interface {
@@ -586,9 +598,10 @@ type WithFields interface {
 </details>
 
 #### Optional assert
-If assert returns optional error step will be **failed** but test will be success.
 
-You can use method `errors.NewOptionalError(error)` from package [errors](errors/error.go):
+If assert returns an optional error, step fails but the test is successful.
+
+You can use  `errors.NewOptionalError(error)` method from [errors](errors/error.go) package.
 
 ```go
 import (
@@ -607,7 +620,7 @@ func customAssertBodyWithCustomError() cute.AssertBody {
 }
 ```
 
-To create optional error you should implement error with interface
+To create optional error, implement error with interface:
 
 ```go
 type OptionalError interface {
@@ -623,13 +636,13 @@ type OptionalError interface {
 
 </details>
 
-## <a name="global_env_keys"/>Global Environment Keys
+## <h2><a href="global_env_keys">Global Environment Keys</a></h2>
 
 
 | Key | Meaning                                                       | Default                 |
 |---|---------------------------------------------------------------|-------------------------|
-|`ALLURE_OUTPUT_PATH`| Path to output allure results                                 | `.` (Folder with tests) |
-|`ALLURE_OUTPUT_FOLDER`| Name result folder                                            | `/allure-results`       |
-|`ALLURE_ISSUE_PATTERN`| Url pattepn to issue. **Must contain `%s`**                   |                         |
-|`ALLURE_TESTCASE_PATTERN`| URL pattern to TestCase. **Must contain `%s`**.               |                         |
+|`ALLURE_OUTPUT_PATH`| Path to output allure results.                                 | `.` (Folder with tests) |
+|`ALLURE_OUTPUT_FOLDER`| Name result folder.                                            | `/allure-results`       |
+|`ALLURE_ISSUE_PATTERN`| Url pattepn to issue. Must contain `%s`.                   |                         |
+|`ALLURE_TESTCASE_PATTERN`| URL pattern to TestCase. Must contain `%s`.               |                         |
 |`ALLURE_LAUNCH_TAGS`| Default tags for all tests. Tags must be separated by commas. |                         |
