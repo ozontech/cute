@@ -637,7 +637,7 @@ type OptionalError interface {
 
 </details>
 
-## Global Environment Keys
+## <h2><a href="https://github.com/ozontech/allure-go?tab=readme-ov-file#wrench-configure-your-environment">Global Environment Keys</a></h2>
 
 
 | Key | Meaning                                                       | Default                 |
