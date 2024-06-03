@@ -83,7 +83,7 @@ See [**Examples**](examples) directory for featured examples.
 ### <h3><a href="examples/single_test.go">Single-step test</a></h3>
 
 Allows implementing single-request tests. See full example in the [**Examples**](examples) directory.
-To view an Allure report, use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/blob/master/README_en.md#pkgprovidert).
+To view an Allure report, use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/tree/master?tab=readme-ov-file).
 
 ```go
 import (
@@ -495,7 +495,7 @@ func customAssertBody() cute.AssertBody {
 
 #### T
 
-Used for creating custom asserts via Allure Actions](https://github.com/ozontech/allure-go#suite) and [testing.TB](https://pkg.go.dev/testing#TB).
+Used for creating custom asserts via [Allure Actions](https://github.com/ozontech/allure-go#suite) and [testing.TB](https://pkg.go.dev/testing#TB).
 You can:
 
 - log information to Allure,
@@ -637,7 +637,7 @@ type OptionalError interface {
 
 </details>
 
-## <h2><a href="global_env_keys">Global Environment Keys</a></h2>
+## Global Environment Keys
 
 
 | Key | Meaning                                                       | Default                 |
