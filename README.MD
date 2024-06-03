@@ -30,14 +30,14 @@ HTTP and REST API testing for Go using Allure reports.
     - [Table tests](#table-tests)
 - [Asserts](#asserts)
     - [Ready-made asserts](#ready-made-asserts)
-        - [JSON asserts](#asserts_json)
-        - [Headers asserts](#asserts_headers)
-        - [JSON schema](#assert_json_schema)
-    - [Custom asserts](#asserts_custom)
-        - [Base](#asserts_custom_base)
-        - [T](#asserts_custom_t)
-        - [Errors](#assert_errors)
-- [Global Environment Keys](#global_env_keys)
+        - [JSON asserts](#json-asserts)
+        - [Headers asserts](#headers-asserts)
+        - [JSON schema](#json-schema-validations)
+    - [Custom asserts](#custom-asserts)
+        - [Base](#base)
+        - [T](#t)
+        - [Errors](#assert-errors)
+- [Global Environment Keys](#global-environment-keys)
 
 
 ## Workflow
@@ -59,7 +59,7 @@ HTTP and REST API testing for Go using Allure reports.
 ## Demo
 
 Run example.
- ```bash
+```bash
   make example
 ```
 To view detailed test reports, install Allure framework. It's optional.
@@ -179,7 +179,7 @@ See full in the [**Examples**](examples/two_step_test.go) directory.
 
 </details>
 
-### <h3><a href="example_suite_test">Suite</a></h3>
+### <h3><a href="examples/suite">Suite</a></h3>
 
 Suite provides a structure for describing tests by organizing them into test suites. It's helpful if you have a large number of different tests and find it difficult to browse through them without using additional layer nesting levels of test calls.
 
@@ -290,11 +290,11 @@ See full example in the [**Examples**](examples/suite) directory.
 
 </details>
 
-## <h2><a href="example_table_tests">Table tests</a></h2>
+## <h2><a href="examples/table_test/table_test.go">Table tests</a></h2>
 
 You can create a table test in 2 ways. They'll have the same Allure reports.
 
-### <h3><a href="example_table_tests_builder">Builder table tests</a></h3>
+### Builder table tests
 
 ```go
 import (
@@ -353,7 +353,7 @@ func Test_Table_Array(t *testing.T) {
 }
 ```
 
-### <h3><a href="example_table_tests_array">Array tests</a></h3>
+### Array tests
 
 ```go
 func Test_Execute_Array(t *testing.T) {
@@ -420,7 +420,7 @@ You can create your own asserts or use ready-made from the package asserts.
 
 ### Ready-made asserts
 
-#### <h4><a href="asserts_json">JSON asserts</a></h4>
+#### <h4><a href="asserts/json">JSON asserts</a></h4>
 
 
 - `Equal` is a function to assert that a JSONPath expression matches the given value.
@@ -443,14 +443,14 @@ You can create your own asserts or use ready-made from the package asserts.
 
 [Learn more about asserts implementation](https://github.com/ozontech/cute/blob/master/asserts/json/json.go)
 
-#### <h4><a href="asserts_headers">Headers asserts</a></h4>
+#### <h4><a href="asserts/headers">Headers asserts</a></h4>
 
 - `Present` is a function to assert that header is present.
 - `NotPresent` is a function to assert that header isn't present.
 
 [Learn more about asserts implementation](asserts/headers/headers.go)
 
-#### <h4><a href="assert_json_schema">JSON schema validations</a></h4>
+#### <h4><a href="jsonschema.go">JSON schema validations</a></h4>
 
 You can validate a JSON schema in 3 ways. Choose a way depending on JSON schema location.
 
@@ -465,11 +465,11 @@ You can validate a JSON schema in 3 ways. Choose a way depending on JSON schema 
 
 </details>
 
-### <h3><a href="asserts_custom">Custom asserts</a></h3>
+### <h3><a href="assert.go">Custom asserts</a></h3>
 
 You can implement [3 type of asserts](assert.go):
 
-#### <h4><a href="asserts_custom_base">Base</a></h4>
+#### Base
 
 Types for creating custom assertions.
 
@@ -493,7 +493,7 @@ func customAssertBody() cute.AssertBody {
 }
 ```
 
-#### <h4><a href="asserts_custom_t">T</a></h4>
+#### T
 
 Used for creating custom asserts via Allure Actions](https://github.com/ozontech/allure-go#suite) and [testing.TB](https://pkg.go.dev/testing#TB).
 You can:
@@ -549,7 +549,7 @@ func customAssertBodySuite() cute.AssertBodyT {
 
 </details>
 
-#### <h4><a href="asserts_errors">Assert errors</a></h4>
+#### <h4><a href="errors/error.go">Assert errors</a></h4>
 
 You can use `errors.NewAssertError` method from [errors](errors/error.go) package.
 
