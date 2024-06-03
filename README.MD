@@ -12,6 +12,7 @@ HTTP and REST API testing for Go using Allure reports.
 - Built-in JSON support.
 - Custom asserts.
 - One step to BDD.
+- Allure reports.
 
 ---
 
@@ -67,7 +68,7 @@ To view detailed test reports, install Allure framework. It's optional.
 
 ```bash
   brew install allure
-  ```
+```
 
 Run Allure.
 
@@ -79,7 +80,7 @@ Run Allure.
 
 See [**Examples**](examples) directory for featured examples.
 
-### <h3><a href="example_single_test">Single-step test</a></h3>
+### <h3><a href="examples/single_test.go">Single-step test</a></h3>
 
 Allows implementing single-request tests. See full example in the [**Examples**](examples) directory.
 To view an Allure report, use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/blob/master/README_en.md#pkgprovidert).
@@ -122,7 +123,7 @@ func TestExample(t *testing.T) {
 </details>
 
 
-### <h3><a href="example_multi_step_test">Multi-step test</a></h3>
+### <h3><a href="examples/two_step_test.go">Multi-step test</a></h3>
 
 Allows implementing several requests within one test.
 
@@ -642,7 +643,7 @@ type OptionalError interface {
 | Key | Meaning                                                       | Default                 |
 |---|---------------------------------------------------------------|-------------------------|
 |`ALLURE_OUTPUT_PATH`| Path to output allure results.                                 | `.` (Folder with tests) |
-|`ALLURE_OUTPUT_FOLDER`| Name result folder.                                            | `/allure-results`       |
+|`ALLURE_OUTPUT_FOLDER`| Name of result folder.                                            | `/allure-results`       |
 |`ALLURE_ISSUE_PATTERN`| Url pattepn to issue. Must contain `%s`.                   |                         |
 |`ALLURE_TESTCASE_PATTERN`| URL pattern to TestCase. Must contain `%s`.               |                         |
 |`ALLURE_LAUNCH_TAGS`| Default tags for all tests. Tags must be separated by commas. |                         |
