@@ -30,16 +30,32 @@ var (
 
 // Test is a main struct of test.
 // You may field Request and Expect for create simple test
+// Parallel can be used to control the parallelism of a Test
 type Test struct {
 	httpClient    *http.Client
 	jsonMarshaler JSONMarshaler
 
-	Name string
+	Name     string
+	Parallel bool
+	Retry    Retry
 
 	AllureStep *AllureStep
 	Middleware *Middleware
 	Request    *Request
 	Expect     *Expect
+}
+
+// Retry is a struct to control the retry of a whole single test (not only the request)
+// The test will be retried up to MaxAttempts times
+// The retries will only be executed if the test is having errors
+// If the test is successful at any iteration between attempt 1 and MaxAttempts, the loop will break and return the result as successful
+// The status of the test (success or fail) will be based on either the first attempt that is successful, or, if no attempt
+// is successful, it will be based on the latest execution
+// Delay is the number of seconds to wait before attempting to run the test again. It will only wait if Delay is set.
+type Retry struct {
+	currentCount int
+	MaxAttempts  int
+	Delay        time.Duration
 }
 
 // Request is struct with HTTP request.
@@ -126,6 +142,9 @@ func (it *Test) Execute(ctx context.Context, t tProvider) ResultsHTTPBuilder {
 	}
 
 	internalT.Run(it.Name, func(inT provider.T) {
+		if it.Parallel {
+			inT.Parallel()
+		}
 		res = it.executeInsideAllure(ctx, inT)
 	})
 
@@ -290,6 +309,22 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	return state
 }
 
+// processRetryErrors check whether there is error and whether we are in a retry context
+// if we are in a retry context, it will return true to tell the loop to break and false to tell the loop to continue
+// if not, it will return false by default to tell the loop to continue
+func (it *Test) processRetryErrors(hasNoError bool, t internalT) bool {
+	if it.Retry.MaxAttempts > 0 && it.Retry.currentCount < it.Retry.MaxAttempts {
+		if hasNoError {
+			it.Info(t, "The test was successful, not retrying.")
+			return true
+		} else {
+			it.Info(t, "The test had errors, retrying...")
+			return false
+		}
+	}
+	return false
+}
+
 func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {
 	var (
 		resp *http.Response
@@ -313,46 +348,80 @@ func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Respo
 func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []error) {
 	var (
 		resp *http.Response
-		err  error
+		errs []error
 	)
+	// Execute the test up to it.Retry.MaxAttempts tries
+	for it.Retry.currentCount = 0; it.Retry.currentCount <= it.Retry.MaxAttempts; it.Retry.currentCount++ {
+		// CreateWithStep executeInsideAllure timer
+		if it.Expect.ExecuteTime == 0 {
+			it.Expect.ExecuteTime = defaultExecuteTestTime
+		}
+		// Only wait if the Delay is set and if it is not the first attempt
+		if it.Retry.Delay > 0 && it.Retry.currentCount > 0 {
+			time.Sleep(it.Retry.Delay * time.Second)
+		}
 
-	// CreateWithStep executeInsideAllure timer
-	if it.Expect.ExecuteTime == 0 {
-		it.Expect.ExecuteTime = defaultExecuteTestTime
+		ctx, cancel := context.WithTimeout(ctx, it.Expect.ExecuteTime)
+		defer cancel()
+
+		// CreateWithStep request
+		req, err := it.createRequest(ctx)
+		if err != nil {
+			// Return the error only if there is no retry expected or if we are running the last attempt
+			if it.Retry.MaxAttempts == 0 || it.Retry.MaxAttempts == it.Retry.currentCount {
+				return nil, []error{err}
+			} else {
+				// If it has error and we are in a retry context, process the errors and continue to next loop
+				if !it.processRetryErrors((err == nil), t) {
+					continue
+				}
+			}
+		}
+		// Execute Before and only return the error if we are not in a retry context
+		if errs = it.beforeTest(t, req); len(errs) > 0 && it.Retry.MaxAttempts == 0 {
+			return nil, errs
+		}
+
+		it.Info(t, "Start make request")
+
+		// Make request
+		resp, errsRequest := it.makeRequest(t, req)
+		errs = append(errs, errsRequest...)
+		if len(errsRequest) > 0 {
+			// Return the error only if there is no retry expected or if we are running the last attempt
+			if it.Retry.MaxAttempts == 0 || it.Retry.MaxAttempts == it.Retry.currentCount {
+				return resp, errs
+			} else {
+				// If it has error and we are in a retry context, process the errors and continue to next loop
+				if !it.processRetryErrors((len(errsRequest) == 0), t) {
+					continue
+				}
+			}
+		}
+
+		it.Info(t, "Finish make request")
+
+		// Validate response body
+		errs = append(errs, it.validateResponse(t, resp)...)
+
+		// Execute After
+		afterTestErrs := it.afterTest(t, resp, errs)
+
+		// Return results
+		errs = append(errs, afterTestErrs...)
+		
+		// If there is no error, we break the loop i.e. the test is successful, so no retry
+		if it.processRetryErrors(len(errs) == 0, t) {
+			break
+		// Else we continue to the next loop and try again (providing currentCount < MaxAttempts)
+		} else {
+			continue
+		}
 	}
-
-	ctx, cancel := context.WithTimeout(ctx, it.Expect.ExecuteTime)
-	defer cancel()
-
-	// CreateWithStep request
-	req, err := it.createRequest(ctx)
-	if err != nil {
-		return nil, []error{err}
+	// Reset the currentCount to MaxRetry value for proper logging
+	if it.Retry.currentCount > it.Retry.MaxAttempts {
+		it.Retry.currentCount = it.Retry.MaxAttempts
 	}
-
-	// Execute Before
-	if errs := it.beforeTest(t, req); len(errs) > 0 {
-		return nil, errs
-	}
-
-	it.Info(t, "Start make request")
-
-	// Make request
-	resp, errs := it.makeRequest(t, req)
-	if len(errs) > 0 {
-		return resp, errs
-	}
-
-	it.Info(t, "Finish make request")
-
-	// Validate response body
-	errs = it.validateResponse(t, resp)
-
-	// Execute After
-	afterTestErrs := it.afterTest(t, resp, errs)
-
-	// Return results
-	errs = append(errs, afterTestErrs...)
 	if len(errs) > 0 {
 		return resp, errs
 	}
@@ -365,7 +434,7 @@ func (it *Test) afterTest(t internalT, resp *http.Response, errs []error) []erro
 		return nil
 	}
 
-	return executeWithStep(t, "After", func(t T) []error {
+	return executeWithStep(it, t, "After", func(t T) []error {
 		scope := make([]error, 0)
 
 		for _, execute := range it.Middleware.After {
@@ -389,7 +458,7 @@ func (it *Test) beforeTest(t internalT, req *http.Request) []error {
 		return nil
 	}
 
-	return executeWithStep(t, "Before", func(t T) []error {
+	return executeWithStep(it, t, "Before", func(t T) []error {
 		scope := make([]error, 0)
 
 		for _, execute := range it.Middleware.Before {
