@@ -2,6 +2,7 @@ package cute
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -72,10 +73,22 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	}
 
 	resp, httpErr := it.httpClient.Do(req)
-
+	// if the timeout is triggered, we properly log the timeout error on allure and in traces
+	if errors.Is(httpErr, context.DeadlineExceeded) {
+		curl, err := http2curl.GetCurlCommand(req)
+		if err != nil {
+			return nil, err
+		}
+		it.Error(t, "Request timeout Curl: %v", curl)
+		cuteError := cuteErrors.NewCuteError("[HTTP] Request timeout", httpErr)
+		cuteError.Fields = map[string]interface{}{"curl": curl}
+		cuteError.Message = "Request timeout"
+		return nil, cuteError
+	}
+	
 	// http client has case wheh it return response and error in one time
 	// we have to check this case
-	if resp == nil {
+	if resp == nil {		
 		if httpErr != nil {
 			return nil, cuteErrors.NewCuteError("[HTTP] Could not do request", httpErr)
 		}
