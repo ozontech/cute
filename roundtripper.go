@@ -79,16 +79,18 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		it.Error(t, "Request timeout Curl: %v", curl)
+
 		cuteError := cuteErrors.NewCuteError("[HTTP] Request timeout", httpErr)
 		cuteError.Fields = map[string]interface{}{"curl": curl}
 		cuteError.Message = "Request timeout"
 		return nil, cuteError
 	}
-	
+
 	// http client has case wheh it return response and error in one time
 	// we have to check this case
-	if resp == nil {		
+	if resp == nil {
 		if httpErr != nil {
 			return nil, cuteErrors.NewCuteError("[HTTP] Could not do request", httpErr)
 		}
