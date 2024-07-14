@@ -40,6 +40,11 @@ type Test struct {
 	Middleware *Middleware
 	Request    *Request
 	Expect     *Expect
+
+	HideBody            bool
+	HideHeaders         bool
+	HideResponse        bool
+	HideResponseHeaders bool
 }
 
 // Request is struct with HTTP request.
@@ -200,7 +205,6 @@ func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allurePr
 		// Execute test inside step
 		resp, errs = it.startTestWithStep(ctx, allureProvider)
 	} else {
-
 		// Execute Test
 		resp, errs = it.startTest(ctx, allureProvider)
 	}
@@ -470,7 +474,6 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 	body := o.body
 	if o.bodyMarshal != nil {
 		body, err = it.jsonMarshaler.Marshal(o.bodyMarshal)
-
 		if err != nil {
 			return nil, err
 		}

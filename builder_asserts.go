@@ -367,3 +367,27 @@ func (qt *cute) ExpectJSONSchemaFile(filePath string) ExpectHTTPBuilder {
 
 	return qt
 }
+
+func (qt *cute) HideBody() ExpectHTTPBuilder {
+	qt.tests[qt.countTests].HideBody = true
+
+	return qt
+}
+
+func (qt *cute) HideHeaders() ExpectHTTPBuilder {
+	qt.tests[qt.countTests].HideHeaders = true
+
+	return qt
+}
+
+func (qt *cute) HideResponse() ExpectHTTPBuilder {
+	qt.tests[qt.countTests].HideResponse = true
+
+	return qt
+}
+
+func (qt *cute) HideResponseHeaders() ExpectHTTPBuilder {
+	qt.tests[qt.countTests].HideResponseHeaders = true
+
+	return qt
+}

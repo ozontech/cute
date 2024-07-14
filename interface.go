@@ -296,6 +296,15 @@ type ExpectHTTPBuilder interface {
 	// Mark in allure as Broken
 	BrokenAssertResponseT(asserts ...AssertResponseT) ExpectHTTPBuilder
 
+	// HideBody is function for hide request body.
+	HideBody() ExpectHTTPBuilder
+	// HideHeaders is function for hide request headers.
+	HideHeaders() ExpectHTTPBuilder
+	// HideResponse is function for hide response body.
+	HideResponse() ExpectHTTPBuilder
+	// HideResponseHeaders is function for hide response headers.
+	HideResponseHeaders() ExpectHTTPBuilder
+
 	After
 	ControlTest
 }

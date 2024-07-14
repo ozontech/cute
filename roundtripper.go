@@ -144,21 +144,29 @@ func (it *Test) addInformationRequest(t T, req *http.Request) error {
 		it.Info(t, "[Request] Do request")
 	}
 
-	// Do not change to JSONMarshaler
-	// In this case we can keep default for keep JSON, independence from JSONMarshaler
-	headers, err := utils.ToJSON(req.Header)
-	if err != nil {
-		return err
+	t.WithNewParameters(
+		"method", req.Method,
+		"host", req.Host,
+	)
+
+	if !it.HideHeaders {
+		// Do not change to JSONMarshaler
+		// In this case we can keep default for keep JSON, independence from JSONMarshaler
+		headers, err := utils.ToJSON(req.Header)
+		if err != nil {
+			return err
+		}
+
+		t.WithNewParameters("headers", headers)
 	}
 
-	t.WithParameters(
-		allure.NewParameters(
-			"method", req.Method,
-			"host", req.Host,
-			"headers", headers,
-			"curl", curl.String(),
-		)...,
-	)
+	if it.HideBody {
+		return nil
+	}
+
+	if !it.HideBody && !it.HideHeaders {
+		t.WithNewParameters("curl", curl.String())
+	}
 
 	if req.Body != nil {
 		saveBody, req.Body, err = utils.DrainBody(req.Body)
@@ -200,15 +208,17 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 		err      error
 	)
 
-	headers, _ := utils.ToJSON(response.Header)
-	if headers != "" {
-		t.WithNewParameters("response_headers", headers)
+	if !it.HideResponseHeaders {
+		headers, _ := utils.ToJSON(response.Header)
+		if headers != "" {
+			t.WithNewParameters("response_headers", headers)
+		}
 	}
 
 	t.WithNewParameters("response_code", fmt.Sprint(response.StatusCode))
 	it.Info(t, "[Response] Status: "+response.Status)
 
-	if response.Body == nil {
+	if it.HideResponse || response.Body == nil {
 		return nil
 	}
 
