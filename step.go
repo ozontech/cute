@@ -1,16 +1,20 @@
 package cute
 
 import (
+	"fmt"
 	"github.com/ozontech/allure-go/pkg/allure"
 	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute/errors"
 )
 
-func executeWithStep(t internalT, stepName string, execute func(t T) []error) []error {
+func executeWithStep(it *Test, t internalT, stepName string, execute func(t T) []error) []error {
 	var (
 		errs []error
 	)
-
+	// Add attempt indication in Allure if more than 1 attempt
+	if it.Retry.MaxAttempts > 0 {
+		stepName = fmt.Sprintf("[Attempt #%d] %v", it.Retry.currentCount+1, stepName)
+	}
 	t.WithNewStep(stepName, func(stepCtx provider.StepCtx) {
 		errs = execute(stepCtx)
 		processStepErrors(stepCtx, errs)

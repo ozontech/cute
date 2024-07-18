@@ -34,7 +34,7 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	}
 
 	for i := 1; i <= countRepeat; i++ {
-		executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
+		executeWithStep(it, t, createTitle(i, countRepeat, req), func(t T) []error {
 			resp, err = it.doRequest(t, req)
 			if err != nil {
 				if it.Request.Repeat.Broken {
