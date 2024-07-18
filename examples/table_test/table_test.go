@@ -62,7 +62,7 @@ func Test_Table_Array(t *testing.T) {
 				},
 			},
 			Expect: &cute.Expect{
-				Code: 200,
+				Code: 201,
 			},
 		},
 		{
@@ -123,7 +123,7 @@ func Test_Array(t *testing.T) {
 				},
 			},
 			Expect: &cute.Expect{
-				Code: 200,
+				Code: 201,
 			},
 		},
 		{
@@ -144,6 +144,185 @@ func Test_Array(t *testing.T) {
 						return errors.NewAssertError("example error", "example message", nil, nil)
 					},
 				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
+func Test_Array_All_Parallel(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name:       "test_201",
+			Parallel:   true,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/201"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name:       "test_200_delay_5s",
+			Parallel:   true,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/200?sleep=5000"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 200,
+			},
+		},
+		{
+			Name:       "test_202_delay_3s",
+			Parallel:   true,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/202?sleep=3000"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 202,
+			},
+		},
+		{
+			Name:       "test_203",
+			Parallel:   true,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/203"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 203,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
+func Test_Array_Some_Parallel(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name:       "test_parallel_1",
+			Parallel:   true,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/201?sleep=1000"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name:       "test_parallel_2",
+			Parallel:   true,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/202?sleep=1000"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 202,
+			},
+		},
+		{
+			Name:       "test_1_sequential",
+			Parallel:   false,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+					cute.WithMethod(http.MethodPost),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name:       "test_2_sequential",
+			Parallel:   false,
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 200,
+				AssertBody: []cute.AssertBody{
+					json.Equal("$[0].email", "Eliseo@gardner.biz"),
+					json.Present("$[1].name"),
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
+func Test_Array_Retry(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name:     "test_1",
+			Parallel: true,
+			Retry: cute.Retry{
+				MaxAttempts: 10,
+				Delay:       1,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/201,202"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name:     "test_2",
+			Parallel: true,
+			Retry: cute.Retry{
+				MaxAttempts: 10,
+				Delay:       1,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/403,404"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 404,
 			},
 		},
 	}
