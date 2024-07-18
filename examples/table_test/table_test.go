@@ -331,3 +331,26 @@ func Test_Array_Retry(t *testing.T) {
 		test.Execute(context.Background(), t)
 	}
 }
+
+func Test_Array_Timeout(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name:       "test_timeout",
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/202?sleep=3000"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code:        202,
+				ExecuteTime: 2,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}

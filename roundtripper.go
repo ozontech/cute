@@ -2,6 +2,7 @@ package cute
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -73,6 +74,20 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 
 	resp, httpErr := it.httpClient.Do(req)
 
+	// if the timeout is triggered, we properly log the timeout error on allure and in traces
+	if errors.Is(httpErr, context.DeadlineExceeded) {
+		// Add information (method, host, curl) about request to Allure step
+		// should be after httpClient.Do and from resp.Request, because in roundTripper request may be changed
+		if addErr := it.addInformationRequest(t, req); addErr != nil {
+			it.Error(t, "Could not log information about request. Error %v", addErr)
+			// Ignore err return, because it's connected with test logic
+		}
+
+		return nil, cuteErrors.NewEmptyAssertError(
+			"Request timeout",
+			fmt.Sprintf("expected request to be completed in %v, but was not", it.Expect.ExecuteTime))
+	}
+
 	// http client has case wheh it return response and error in one time
 	// we have to check this case
 	if resp == nil {
@@ -94,7 +109,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// Add information (method, host, curl) about request to Allure step
 	// should be after httpClient.Do and from resp.Request, because in roundTripper request may be changed
 	if addErr := it.addInformationRequest(t, resp.Request); addErr != nil {
-		it.Error(t, "[ERROR] Could not log information about request. Error %v", addErr)
+		it.Error(t, "Could not log information about request. Error %v", addErr)
 		// Ignore err return, because it's connected with test logic
 	}
 
@@ -105,7 +120,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// Add information (code, body, headers) about response to Allure step
 	if addErr := it.addInformationResponse(t, resp); addErr != nil {
 		// Ignore err return, because it's connected with test logic
-		it.Error(t, "[ERROR] Could not log information about response. Error %v", addErr)
+		it.Error(t, "Could not log information about response. Error %v", addErr)
 	}
 
 	if validErr := it.validateResponseCode(resp); validErr != nil {
