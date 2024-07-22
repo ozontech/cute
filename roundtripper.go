@@ -73,7 +73,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	}
 
 	resp, httpErr := it.httpClient.Do(req)
-	
+
 	// if the timeout is triggered, we properly log the timeout error on allure and in traces
 	if errors.Is(httpErr, context.DeadlineExceeded) {
 		// Add information (method, host, curl) about request to Allure step
