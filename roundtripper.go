@@ -78,8 +78,8 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	if errors.Is(httpErr, context.DeadlineExceeded) {
 		// Add information (method, host, curl) about request to Allure step
 		// should be after httpClient.Do and from resp.Request, because in roundTripper request may be changed
-		if addErr := it.addInformationRequest(t, req); addErr != nil {
-			it.Info(t, "Could not log information about request. Error %v", baseReq)
+		if addErr := it.addInformationRequest(t, baseReq); addErr != nil {
+			it.Info(t, "Could not log information about request. Error %v", addErr)
 			// Ignore err return, because it's connected with test logic
 		}
 
