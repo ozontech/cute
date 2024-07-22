@@ -345,7 +345,47 @@ func Test_Array_Timeout(t *testing.T) {
 			},
 			Expect: &cute.Expect{
 				Code:        202,
-				ExecuteTime: 2,
+				ExecuteTime: 2 * time.Second,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
+var executeTimeout = 3000
+
+func Test_Array_TimeoutRetry(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Retry: cute.Retry{
+				MaxAttempts: 2,
+			},
+			Name: "test_timeout",
+			Middleware: &cute.Middleware{
+				Before: []cute.BeforeExecute{
+					cute.BeforeExecute(func(request *http.Request) error {
+						query := request.URL.Query()
+						query.Set("sleep", strconv.Itoa(executeTimeout))
+						request.URL.RawQuery = query.Encode()
+						//request.URL.Path = request.URL.Path + "?sleep=" + strconv.Itoa(executeTimeout)
+						executeTimeout = executeTimeout - 1000
+						return nil
+					}),
+				},
+			},
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/202?sleep=3000"),
+					cute.WithBody([]byte("{\"test\":\"abc\"}")),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code:        202,
+				ExecuteTime: 3 * time.Second,
 			},
 		},
 	}
