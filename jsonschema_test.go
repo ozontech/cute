@@ -23,6 +23,7 @@ func TestValidateJSONSchemaFromString(t *testing.T) {
 		tBuilder = createDefaultTest(&HTTPTestMaker{middleware: new(Middleware)})
 		tempT    = createAllureT(t)
 	)
+
 	tBuilder.initEmptyFields()
 
 	body := []byte(`

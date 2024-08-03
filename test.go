@@ -261,7 +261,7 @@ func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTT
 
 		// if we have a delay, we wait before the next attempt
 		// and we only wait if we are not at the last attempt
-		if it.Retry.MaxAttempts != it.Retry.MaxAttempts && it.Retry.Delay != 0 {
+		if it.Retry.currentCount != it.Retry.MaxAttempts && it.Retry.Delay != 0 {
 			it.Info(t, "The test had errors, retrying...")
 			time.Sleep(it.Retry.Delay)
 		}
