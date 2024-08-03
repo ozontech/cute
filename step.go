@@ -2,6 +2,7 @@ package cute
 
 import (
 	"fmt"
+
 	"github.com/ozontech/allure-go/pkg/allure"
 	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute/errors"
