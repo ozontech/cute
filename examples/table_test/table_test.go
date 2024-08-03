@@ -111,7 +111,7 @@ func Test_One_Execute(t *testing.T) {
 	test.Execute(context.Background(), t)
 }
 
-func Test_Array(t *testing.T) { // не полный отчет в аллюре
+func Test_Array(t *testing.T) {
 	tests := []*cute.Test{
 		{
 			Name:       "test_1",
