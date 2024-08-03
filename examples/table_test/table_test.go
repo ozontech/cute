@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/ozontech/cute"
 	"github.com/ozontech/cute/asserts/json"
@@ -109,6 +111,45 @@ func Test_One_Execute(t *testing.T) {
 	}
 
 	test.Execute(context.Background(), t)
+}
+
+func Test_Array_TimeoutRetry(t *testing.T) {
+	var executeTimeout = 3000
+
+	tests := []*cute.Test{
+		{
+			Retry: &cute.Retry{
+				MaxAttempts: 2,
+			},
+			Name: "test_timeout",
+			Middleware: &cute.Middleware{
+				Before: []cute.BeforeExecute{
+					cute.BeforeExecute(func(request *http.Request) error {
+						query := request.URL.Query()
+						query.Set("sleep", strconv.Itoa(executeTimeout))
+						request.URL.RawQuery = query.Encode()
+						executeTimeout = executeTimeout - 1000
+						return nil
+					}),
+				},
+			},
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/202?sleep=3000"),
+					cute.WithBody([]byte("{\"test\":\"abc\"}")),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code:        202,
+				ExecuteTime: 3 * time.Second,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
 }
 
 func Test_Array(t *testing.T) {
