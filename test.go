@@ -37,7 +37,7 @@ type Test struct {
 
 	Name     string
 	Parallel bool
-	Retry    Retry
+	Retry    *Retry
 
 	AllureStep *AllureStep
 	Middleware *Middleware
@@ -63,14 +63,23 @@ type Retry struct {
 type Request struct {
 	Base     *http.Request
 	Builders []RequestBuilder
-	Repeat   *RequestRepeatPolitic
+	Retry    *RequestRetryPolitic
 }
 
-// RequestRepeatPolitic is struct for repeat politic
+// RequestRetryPolitic is struct for repeat politic
 // if Optional is true and request is failed, than test step allure will be skip, and t.Fail() will not execute.
 // If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will not execute.
 // If Optional and Broken is false, than test step will be failed, and t.Fail() will execute.
 // If response.Code != Expect.Code, than request will repeat Count counts with Delay delay.
+type RequestRetryPolitic struct {
+	Count    int
+	Delay    time.Duration
+	Optional bool
+	Broken   bool
+}
+
+// RequestRepeatPolitic is struct for repeat politic
+// Deprecated: use RequestRetryPolitic
 type RequestRepeatPolitic struct {
 	Count    int
 	Delay    time.Duration
@@ -156,7 +165,7 @@ func (it *Test) clearFields() {
 	it.Middleware = new(Middleware)
 	it.Expect = new(Expect)
 	it.Request = new(Request)
-	it.Request.Repeat = new(RequestRepeatPolitic)
+	it.Request.Retry = new(RequestRetryPolitic)
 	it.Expect.JSONSchema = new(ExpectJSONSchema)
 }
 
@@ -181,52 +190,103 @@ func (it *Test) initEmptyFields() {
 		it.Request = new(Request)
 	}
 
-	if it.Request.Repeat == nil {
-		it.Request.Repeat = new(RequestRepeatPolitic)
+	if it.Request.Retry == nil {
+		it.Request.Retry = new(RequestRetryPolitic)
 	}
 
 	if it.Expect.JSONSchema == nil {
 		it.Expect.JSONSchema = new(ExpectJSONSchema)
 	}
+
+	if it.Retry == nil {
+		it.Retry = &Retry{
+			// we set the default value to 1, because we count the first attempt as 1
+			MaxAttempts:  1,
+			currentCount: 1,
+		}
+	}
+
+	// We need to set the current count to 1 here, because we count the first attempt as 1
+	it.Retry.currentCount = 1
 }
 
 // executeInsideStep is method for start test with provider.StepCtx
 // It's test inside the step
 func (it *Test) executeInsideStep(ctx context.Context, t internalT) ResultsHTTPBuilder {
-	resp, errs := it.startTest(ctx, t)
-
-	resultState := it.processTestErrors(t, errs)
-
-	return newTestResult(t.Name(), resp, resultState, errs)
-}
-
-func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
-	var (
-		resp *http.Response
-		errs []error
-		name = allureProvider.Name() + "_" + it.Name
-	)
-
-	it.Info(allureProvider, "Start test")
-
 	// Set empty fields in test
 	it.initEmptyFields()
 
+	// we don't want to defer the finish message, because it will be logged in processTestErrors
+	it.Info(t, "Start test")
+
+	return it.startRepeatableTest(ctx, t)
+}
+
+func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
+	// Set empty fields in test
+	it.initEmptyFields()
+
+	// we don't want to defer the finish message, because it will be logged in processTestErrors
+	it.Info(allureProvider, "Start test")
+
 	if it.AllureStep.Name != "" {
-		// Set name of test for results
-		name = it.AllureStep.Name
-
 		// Execute test inside step
-		resp, errs = it.startTestWithStep(ctx, allureProvider)
+		return it.startTestInsideStep(ctx, allureProvider)
 	} else {
-
 		// Execute Test
-		resp, errs = it.startTest(ctx, allureProvider)
+		return it.startRepeatableTest(ctx, allureProvider)
+	}
+}
+
+// startRepeatableTest is method for start test with repeatable execution
+func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTTPBuilder {
+	var (
+		resp        *http.Response
+		errs        []error
+		resultState ResultState
+	)
+
+	for ; it.Retry.currentCount <= it.Retry.MaxAttempts; it.Retry.currentCount++ {
+		resp, errs = it.startTest(ctx, t)
+
+		resultState = it.processTestErrors(t, errs)
+
+		// if the test is successful, we break the loop
+		if resultState == ResultStateSuccess {
+			break
+		}
+
+		// we want to keep the errors from the previous attempt, so we append them to the new errors
+		errs = append(errs, errs...)
+
+		// if we have a delay, we wait before the next attempt
+		// and we only wait if we are not at the last attempt
+		if it.Retry.MaxAttempts != it.Retry.MaxAttempts && it.Retry.Delay != 0 {
+			it.Info(t, "The test had errors, retrying...")
+			time.Sleep(it.Retry.Delay)
+		}
 	}
 
-	resultState := it.processTestErrors(allureProvider, errs)
+	return newTestResult(it.Name, resp, resultState, errs)
+}
 
-	return newTestResult(name, resp, resultState, errs)
+func (it *Test) startTestInsideStep(ctx context.Context, t internalT) ResultsHTTPBuilder {
+	var (
+		result ResultsHTTPBuilder
+	)
+
+	t.WithNewStep(it.AllureStep.Name, func(stepCtx provider.StepCtx) {
+		it.Info(t, "Start step %v", it.AllureStep.Name)
+		defer it.Info(t, "Finish step %v", it.AllureStep.Name)
+
+		result = it.startRepeatableTest(ctx, stepCtx)
+
+		if result.GetResultState() == ResultStateFail {
+			stepCtx.Fail()
+		}
+	})
+
+	return result
 }
 
 // processTestErrors returns flag, which mean finish test or not.
@@ -235,6 +295,8 @@ func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allurePr
 // If test has require errors, than test will be failed on allure and executed t.FailNow().
 func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	if len(errs) == 0 {
+		it.Info(t, "Test finished successfully")
+
 		return ResultStateSuccess
 	}
 
@@ -244,7 +306,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	)
 
 	for _, err := range errs {
-		message := fmt.Sprintf("Error %v", err.Error())
+		message := fmt.Sprintf("error %v", err.Error())
 
 		if tErr, ok := err.(cuteErrors.OptionalError); ok {
 			if tErr.IsOptional() {
@@ -294,7 +356,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 
 	switch state {
 	case ResultStateBroken:
-		t.FailNow()
+		t.BrokenNow()
 		it.Info(t, "Test broken")
 	case ResultStateFail:
 		t.Fail()
@@ -303,125 +365,55 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 		t.FailNow()
 		it.Error(t, "Test failed")
 	case ResultStateSuccess:
-		it.Info(t, "Test success")
+		it.Info(t, "Test finished successfully")
 	}
 
 	return state
 }
 
-// processRetryErrors check whether there is error and whether we are in a retry context
-// if we are in a retry context, it will return true to tell the loop to break and false to tell the loop to continue
-// if not, it will return false by default to tell the loop to continue
-func (it *Test) processRetryErrors(hasNoError bool, t internalT) bool {
-	if it.Retry.MaxAttempts > 0 && it.Retry.currentCount < it.Retry.MaxAttempts {
-		if hasNoError {
-			it.Info(t, "The test was successful, not retrying.")
-			return true
-		} else {
-			it.Info(t, "The test had errors, retrying...")
-			return false
-		}
-	}
-	return false
-}
-
-func (it *Test) startTestWithStep(ctx context.Context, t internalT) (*http.Response, []error) {
-	var (
-		resp *http.Response
-		errs []error
-	)
-
-	t.WithNewStep(it.AllureStep.Name, func(stepCtx provider.StepCtx) {
-		it.Info(t, "Start step %v", it.AllureStep.Name)
-		defer it.Info(t, "Finish step %v", it.AllureStep.Name)
-
-		resp, errs = it.startTest(ctx, stepCtx)
-
-		if len(errs) != 0 {
-			stepCtx.Fail()
-		}
-	})
-
-	return resp, errs
-}
-
 func (it *Test) startTest(ctx context.Context, t internalT) (*http.Response, []error) {
 	var (
 		resp *http.Response
-		errs []error
+		err  error
 	)
-	// Execute the test up to it.Retry.MaxAttempts tries
-	for it.Retry.currentCount = 0; it.Retry.currentCount <= it.Retry.MaxAttempts; it.Retry.currentCount++ {
-		// CreateWithStep executeInsideAllure timer
-		if it.Expect.ExecuteTime == 0 {
-			it.Expect.ExecuteTime = defaultExecuteTestTime
-		}
-		// Only wait if the Delay is set and if it is not the first attempt
-		if it.Retry.Delay > 0 && it.Retry.currentCount > 0 {
-			time.Sleep(it.Retry.Delay * time.Second)
-		}
 
-		ctx, cancel := context.WithTimeout(ctx, it.Expect.ExecuteTime)
-		defer cancel()
-
-		// CreateWithStep request
-		req, err := it.createRequest(ctx)
-		if err != nil {
-			// Return the error only if there is no retry expected or if we are running the last attempt
-			if it.Retry.MaxAttempts == 0 || it.Retry.MaxAttempts == it.Retry.currentCount {
-				return nil, []error{err}
-			} else {
-				// If it has error and we are in a retry context, process the errors and continue to next loop
-				if !it.processRetryErrors((err == nil), t) {
-					continue
-				}
-			}
-		}
-		// Execute Before and only return the error if we are not in a retry context
-		if errs = it.beforeTest(t, req); len(errs) > 0 && it.Retry.MaxAttempts == 0 {
-			return nil, errs
-		}
-
-		it.Info(t, "Start make request")
-
-		// Make request
-		resp, errsRequest := it.makeRequest(t, req)
-		errs = append(errs, errsRequest...)
-		if len(errsRequest) > 0 {
-			// Return the error only if there is no retry expected or if we are running the last attempt
-			if it.Retry.MaxAttempts == 0 || it.Retry.MaxAttempts == it.Retry.currentCount {
-				return resp, errs
-			} else {
-				// If it has error and we are in a retry context, process the errors and continue to next loop
-				if !it.processRetryErrors((len(errsRequest) == 0), t) {
-					continue
-				}
-			}
-		}
-
-		it.Info(t, "Finish make request")
-
-		// Validate response body
-		errs = append(errs, it.validateResponse(t, resp)...)
-
-		// Execute After
-		afterTestErrs := it.afterTest(t, resp, errs)
-
-		// Return results
-		errs = append(errs, afterTestErrs...)
-		
-		// If there is no error, we break the loop i.e. the test is successful, so no retry
-		if it.processRetryErrors(len(errs) == 0, t) {
-			break
-		// Else we continue to the next loop and try again (providing currentCount < MaxAttempts)
-		} else {
-			continue
-		}
+	// CreateWithStep executeInsideAllure timer
+	if it.Expect.ExecuteTime == 0 {
+		it.Expect.ExecuteTime = defaultExecuteTestTime
 	}
-	// Reset the currentCount to MaxRetry value for proper logging
-	if it.Retry.currentCount > it.Retry.MaxAttempts {
-		it.Retry.currentCount = it.Retry.MaxAttempts
+
+	ctx, cancel := context.WithTimeout(ctx, it.Expect.ExecuteTime)
+	defer cancel()
+
+	// CreateWithStep request
+	req, err := it.createRequest(ctx)
+	if err != nil {
+		return nil, []error{err}
 	}
+
+	// Execute Before
+	if errs := it.beforeTest(t, req); len(errs) > 0 {
+		return nil, errs
+	}
+
+	it.Info(t, "Start make request")
+
+	// Make request
+	resp, errs := it.makeRequest(t, req)
+	if len(errs) > 0 {
+		return resp, errs
+	}
+
+	it.Info(t, "Finish make request")
+
+	// Validate response body
+	errs = it.validateResponse(t, resp)
+
+	// Execute After
+	afterTestErrs := it.afterTest(t, resp, errs)
+
+	// Return results
+	errs = append(errs, afterTestErrs...)
 	if len(errs) > 0 {
 		return resp, errs
 	}
@@ -434,7 +426,7 @@ func (it *Test) afterTest(t internalT, resp *http.Response, errs []error) []erro
 		return nil
 	}
 
-	return executeWithStep(it, t, "After", func(t T) []error {
+	return it.executeWithStep(t, "After", func(t T) []error {
 		scope := make([]error, 0)
 
 		for _, execute := range it.Middleware.After {
@@ -458,7 +450,7 @@ func (it *Test) beforeTest(t internalT, req *http.Request) []error {
 		return nil
 	}
 
-	return executeWithStep(it, t, "Before", func(t T) []error {
+	return it.executeWithStep(t, "Before", func(t T) []error {
 		scope := make([]error, 0)
 
 		for _, execute := range it.Middleware.Before {
@@ -673,12 +665,12 @@ func (it *Test) validateResponse(t internalT, resp *http.Response) []error {
 
 	saveBody, resp.Body, err = utils.DrainBody(resp.Body)
 	if err != nil {
-		return append(scope, fmt.Errorf("could not drain response body. error %v", err))
+		return append(scope, fmt.Errorf("could not drain response body. error %w", err))
 	}
 
 	body, err := utils.GetBody(saveBody)
 	if err != nil {
-		return append(scope, fmt.Errorf("could not get response body. error %v", err))
+		return append(scope, fmt.Errorf("could not get response body. error %w", err))
 	}
 
 	// Execute asserts for body

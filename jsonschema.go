@@ -25,7 +25,7 @@ func (it *Test) validateJSONSchema(t internalT, body []byte) []error {
 		return nil
 	}
 
-	return executeWithStep(it, t, "Validate body by JSON schema", func(t T) []error {
+	return it.executeWithStep(t, "Validate body by JSON schema", func(t T) []error {
 		return checkJSONSchema(expect, body)
 	})
 }

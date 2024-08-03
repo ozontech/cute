@@ -32,8 +32,8 @@ func (it *Test) logf(t tlogger, level, format string, args ...interface{}) {
 		name = t.Name()
 	}
 	// If we are in a retry context, add some indication in the logs about the current attempt
-	if it.Retry.MaxAttempts > 0 {
-		t.Logf("[%s][%s](Attempt #%d) %v\n", name, level, it.Retry.currentCount+1, fmt.Sprintf(format, args...))
+	if it.Retry.MaxAttempts != 1 {
+		t.Logf("[%s][%s](Attempt #%d) %v\n", name, level, it.Retry.currentCount, fmt.Sprintf(format, args...))
 	} else {
 		t.Logf("[%s][%s] %v\n", name, level, fmt.Sprintf(format, args...))
 	}
@@ -46,8 +46,8 @@ func (it *Test) errorf(t tlogger, level, format string, args ...interface{}) {
 		name = t.Name()
 	}
 	// If we are in a retry context, add some indication in the logs about the current attempt
-	if it.Retry.MaxAttempts > 0 {
-		t.Errorf("[%s][%s](Attempt #%d) %v\n", name, level, it.Retry.currentCount+1, fmt.Sprintf(format, args...))
+	if it.Retry.MaxAttempts != 1 {
+		t.Errorf("[%s][%s](Attempt #%d) %v\n", name, level, it.Retry.currentCount, fmt.Sprintf(format, args...))
 	} else {
 		t.Errorf("[%s][%s] %v\n", name, level, fmt.Sprintf(format, args...))
 	}

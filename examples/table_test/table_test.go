@@ -62,7 +62,7 @@ func Test_Table_Array(t *testing.T) {
 				},
 			},
 			Expect: &cute.Expect{
-				Code: 201,
+				Code: 200,
 			},
 		},
 		{
@@ -111,7 +111,7 @@ func Test_One_Execute(t *testing.T) {
 	test.Execute(context.Background(), t)
 }
 
-func Test_Array(t *testing.T) {
+func Test_Array(t *testing.T) { // не полный отчет в аллюре
 	tests := []*cute.Test{
 		{
 			Name:       "test_1",
@@ -292,7 +292,7 @@ func Test_Array_Retry(t *testing.T) {
 		{
 			Name:     "test_1",
 			Parallel: true,
-			Retry: cute.Retry{
+			Retry: &cute.Retry{
 				MaxAttempts: 10,
 				Delay:       1,
 			},
@@ -310,7 +310,7 @@ func Test_Array_Retry(t *testing.T) {
 		{
 			Name:     "test_2",
 			Parallel: true,
-			Retry: cute.Retry{
+			Retry: &cute.Retry{
 				MaxAttempts: 10,
 				Delay:       1,
 			},

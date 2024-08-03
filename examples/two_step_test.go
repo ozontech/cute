@@ -21,7 +21,7 @@ func Test_TwoSteps_1(t *testing.T) {
 		Title("Test with two requests.").
 		Tags("two_steps").
 		Parallel().
-		CreateStep("Creat entry /posts/1").
+		CreateStep("Create entry /posts/1").
 
 		// CreateWithStep first step
 

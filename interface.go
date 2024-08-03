@@ -87,9 +87,23 @@ type MiddlewareTable interface {
 // MiddlewareRequest is function for create requests or add After/Before functions
 type MiddlewareRequest interface {
 	RequestHTTPBuilder
+	RetryPolitic
 
 	BeforeTest
 	AfterTest
+}
+
+// RetryPolitic is a scope of methods to configure test repeat
+type RetryPolitic interface {
+	// Retry is a function for configure test repeat
+	// if response.Code != Expect.Code or any of asserts are failed/broken than test will repeat counts with delay.
+	// Default delay is 1 second.
+	Retry(count int) MiddlewareRequest
+
+	// RetryDelay set delay for test repeat.
+	// if response.Code != Expect.Code or any of asserts are failed/broken than test will repeat counts with delay.
+	// Default delay is 1 second.
+	RetryDelay(timeout time.Duration) MiddlewareRequest
 }
 
 // BeforeTest are functions for processing request before test execution
@@ -174,26 +188,36 @@ type RequestParams interface {
 	// RequestRepeat is a function for set options in request
 	// if response.Code != Expect.Code, than request will repeat counts with delay.
 	// Default delay is 1 second.
+	// Deprecated: use RequestRetry instead
 	RequestRepeat(count int) RequestHTTPBuilder
+	RequestRetry(count int) RequestHTTPBuilder
 
 	// RequestRepeatDelay set delay for request repeat.
 	// if response.Code != Expect.Code, than request will repeat counts with delay.
 	// Default delay is 1 second.
+	// Deprecated: use RequestRetryDelay instead
 	RequestRepeatDelay(delay time.Duration) RequestHTTPBuilder
+	RequestRetryDelay(delay time.Duration) RequestHTTPBuilder
 
 	// RequestRepeatPolitic is a politic for repeat request.
 	// if response.Code != Expect.Code, than request will repeat counts with delay.
 	// if Optional is true and request is failed, than test step allure will be skipped, and t.Fail() will not execute.
 	// If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will execute.
+	// Deprecated: use RequestRetryPolitic instead
 	RequestRepeatPolitic(politic *RequestRepeatPolitic) RequestHTTPBuilder
+	RequestRetryPolitic(politic *RequestRetryPolitic) RequestHTTPBuilder
 
 	// RequestRepeatOptional is a option politic for repeat request.
 	// if Optional is true and request is failed, than test step allure will be skipped, and t.Fail() will not execute.
+	// Deprecated: use RequestRetryOptional instead
 	RequestRepeatOptional(optional bool) RequestHTTPBuilder
+	RequestRetryOptional(optional bool) RequestHTTPBuilder
 
 	// RequestRepeatBroken is a broken politic for repeat request.
 	// If Broken is true and request is failed, than test step allure will be broken, and t.Fail() will execute.
+	// Deprecated: use RequestRetryBroken instead
 	RequestRepeatBroken(broken bool) RequestHTTPBuilder
+	RequestRetryBroken(broken bool) RequestHTTPBuilder
 }
 
 // ExpectHTTPBuilder is a scope of methods for validate http response
