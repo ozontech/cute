@@ -48,14 +48,15 @@ type Test struct {
 // Retry is a struct to control the retry of a whole single test (not only the request)
 // The test will be retried up to MaxAttempts times
 // The retries will only be executed if the test is having errors
-// If the test is successful at any iteration between attempt 1 and MaxAttempts, the loop will break and return the result as successful
-// The status of the test (success or fail) will be based on either the first attempt that is successful, or, if no attempt
-// is successful, it will be based on the latest execution
+// If the test is successful at any iteration between attempt 1 and MaxAttempts, the loop will break and return the result
+// If OptionalFirstTries is set to true, the attempts between the first and the last one will be wrapped in optional error, so it will not trigger t.Fail()
+// Else, any attempt that is failing will trigger t.Fail() on the overall test and mark the test as failed, even if one of the retry is successful
 // Delay is the number of seconds to wait before attempting to run the test again. It will only wait if Delay is set.
 type Retry struct {
-	currentCount int
-	MaxAttempts  int
-	Delay        time.Duration
+	currentCount       int
+	MaxAttempts        int
+	Delay              time.Duration
+	OptionalFirstTries bool
 }
 
 // Request is struct with HTTP request.
@@ -249,6 +250,11 @@ func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTT
 	for ; it.Retry.currentCount <= it.Retry.MaxAttempts; it.Retry.currentCount++ {
 		resp, errs = it.startTest(ctx, t)
 
+		// If we are in a retry context, we are not at the last try and OptionalFirstTries is true, we wrap errors as optional
+		if it.Retry.MaxAttempts != 1 && it.Retry.currentCount != it.Retry.MaxAttempts && it.Retry.OptionalFirstTries {
+			errs = wrapOptionalErrors(errs)
+		}
+		
 		resultState = it.processTestErrors(t, errs)
 
 		// if the test is successful, we break the loop
@@ -312,8 +318,8 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 			if tErr.IsOptional() {
 				it.Info(t, "[OPTIONAL ERROR] %v", err.Error())
 
-				state = ResultStateSuccess
-
+				state = ResultStateOptional
+			
 				continue
 			}
 		}
@@ -355,6 +361,11 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	}
 
 	switch state {
+	case ResultStateOptional:
+		// If we are not in a retry context, we print the message associated with optional error
+		if (it.Retry.MaxAttempts == it.Retry.currentCount) && it.Retry.MaxAttempts == 1 {
+			it.Info(t, "Test finished successfully (optional error(s) happened)")
+		}
 	case ResultStateBroken:
 		t.BrokenNow()
 		it.Info(t, "Test broken")

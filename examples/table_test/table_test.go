@@ -119,7 +119,8 @@ func Test_Array_TimeoutRetry(t *testing.T) {
 	tests := []*cute.Test{
 		{
 			Retry: &cute.Retry{
-				MaxAttempts: 2,
+				MaxAttempts:        2,
+				OptionalFirstTries: true,
 			},
 			Name: "test_timeout",
 			Middleware: &cute.Middleware{
@@ -128,7 +129,7 @@ func Test_Array_TimeoutRetry(t *testing.T) {
 						query := request.URL.Query()
 						query.Set("sleep", strconv.Itoa(executeTimeout))
 						request.URL.RawQuery = query.Encode()
-						executeTimeout = executeTimeout - 1000
+						executeTimeout = executeTimeout - 1500
 						return nil
 					}),
 				},
@@ -197,7 +198,7 @@ func Test_Array(t *testing.T) {
 func Test_Array_All_Parallel(t *testing.T) {
 	tests := []*cute.Test{
 		{
-			Name:       "test_201",
+			Name:       "test_optional_error",
 			Parallel:   true,
 			Middleware: nil,
 			Request: &cute.Request{
@@ -208,10 +209,15 @@ func Test_Array_All_Parallel(t *testing.T) {
 			},
 			Expect: &cute.Expect{
 				Code: 201,
+				AssertBody: []cute.AssertBody{
+					func(body []byte) error {
+						return errors.NewOptionalError("example error")
+					},
+				},
 			},
 		},
 		{
-			Name:       "test_200_delay_5s",
+			Name:       "test_200_delay_5s_failing",
 			Parallel:   true,
 			Middleware: nil,
 			Request: &cute.Request{
@@ -221,7 +227,7 @@ func Test_Array_All_Parallel(t *testing.T) {
 				},
 			},
 			Expect: &cute.Expect{
-				Code: 200,
+				Code: 201,
 			},
 		},
 		{
@@ -328,14 +334,14 @@ func Test_Array_Some_Parallel(t *testing.T) {
 	}
 }
 
-func Test_Array_Retry(t *testing.T) {
+func Test_Array_Retry_NotOptionalFirstTries(t *testing.T) {
 	tests := []*cute.Test{
 		{
-			Name:     "test_1",
-			Parallel: true,
+			Name: "test_1",
+
 			Retry: &cute.Retry{
 				MaxAttempts: 10,
-				Delay:       1,
+				Delay:       1 * time.Second,
 			},
 			Middleware: nil,
 			Request: &cute.Request{
@@ -349,11 +355,10 @@ func Test_Array_Retry(t *testing.T) {
 			},
 		},
 		{
-			Name:     "test_2",
-			Parallel: true,
+			Name: "test_2",
 			Retry: &cute.Retry{
 				MaxAttempts: 10,
-				Delay:       1,
+				Delay:       1 * time.Second,
 			},
 			Middleware: nil,
 			Request: &cute.Request{
@@ -373,9 +378,105 @@ func Test_Array_Retry(t *testing.T) {
 	}
 }
 
+func Test_Array_Retry_OptionalFirstTries(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name: "test_1",
+
+			Retry: &cute.Retry{
+				MaxAttempts:        10,
+				Delay:              1 * time.Second,
+				OptionalFirstTries: true,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/201,202"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name: "test_2",
+			Retry: &cute.Retry{
+				MaxAttempts:        10,
+				Delay:              1 * time.Second,
+				OptionalFirstTries: true,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/403,404"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 404,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
+func Test_Array_Retry_OptionalFirstTries_UltimatelyFailing(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name: "test_1",
+
+			Retry: &cute.Retry{
+				MaxAttempts:        4,
+				Delay:              1 * time.Second,
+				OptionalFirstTries: true,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/202,200"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name: "test_2",
+			Retry: &cute.Retry{
+				MaxAttempts:        3,
+				Delay:              1 * time.Second,
+				OptionalFirstTries: true,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/403,401"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 404,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
 func Test_Array_Timeout(t *testing.T) {
 	tests := []*cute.Test{
 		{
+			Retry: &cute.Retry{
+				MaxAttempts: 2,
+				Delay:       1 * time.Second,
+			},
 			Name:       "test_timeout",
 			Middleware: nil,
 			Request: &cute.Request{
@@ -386,7 +487,7 @@ func Test_Array_Timeout(t *testing.T) {
 			},
 			Expect: &cute.Expect{
 				Code:        202,
-				ExecuteTime: 2,
+				ExecuteTime: 2 * time.Second,
 			},
 		},
 	}

@@ -67,3 +67,11 @@ func wrapOptionalError(err error) error {
 
 	return errors.WrapOptionalError(err)
 }
+
+func wrapOptionalErrors(errs []error) []error {
+	var optionalErrors []error
+	for _, err := range(errs) {
+		optionalErrors = append(optionalErrors, wrapOptionalError(err))
+	}
+	return optionalErrors
+}

@@ -10,6 +10,7 @@ type ResultState int
 // ResultState is state of test
 const (
 	ResultStateSuccess ResultState = iota
+	ResultStateOptional
 	ResultStateBroken
 	ResultStateFail
 
