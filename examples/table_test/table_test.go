@@ -386,7 +386,7 @@ func Test_Array_Timeout(t *testing.T) {
 			},
 			Expect: &cute.Expect{
 				Code:        202,
-				ExecuteTime: 2,
+				ExecuteTime: 2 * time.Second,
 			},
 		},
 	}

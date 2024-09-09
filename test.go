@@ -251,13 +251,13 @@ func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTT
 
 		resultState = it.processTestErrors(t, errs)
 
+		// we don't want to keep errors if we will retry test
+		// we have to return to user only errors from last try
+
 		// if the test is successful, we break the loop
 		if resultState == ResultStateSuccess {
 			break
 		}
-
-		// we want to keep the errors from the previous attempt, so we append them to the new errors
-		errs = append(errs, errs...)
 
 		// if we have a delay, we wait before the next attempt
 		// and we only wait if we are not at the last attempt
@@ -265,6 +265,20 @@ func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTT
 			it.Info(t, "The test had errors, retrying...")
 			time.Sleep(it.Retry.Delay)
 		}
+	}
+
+	switch resultState {
+	case ResultStateBroken:
+		t.BrokenNow()
+		it.Info(t, "Test broken")
+	case ResultStateFail:
+		t.Fail()
+		it.Error(t, "Test failed")
+	case resultStateFailNow:
+		t.FailNow()
+		it.Error(t, "Test failed")
+	case ResultStateSuccess:
+		it.Info(t, "Test finished successfully")
 	}
 
 	return newTestResult(it.Name, resp, resultState, errs)
@@ -291,8 +305,8 @@ func (it *Test) startTestInsideStep(ctx context.Context, t internalT) ResultsHTT
 
 // processTestErrors returns flag, which mean finish test or not.
 // If test has only optional errors, than test will be success
-// If test has broken errors, than test will be broken on allure and executed t.FailNow().
-// If test has require errors, than test will be failed on allure and executed t.FailNow().
+// If test has broken errors, than test will be broken on allure
+// If test has require errors, than test will be failed on allure
 func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 	if len(errs) == 0 {
 		it.Info(t, "Test finished successfully")
@@ -352,20 +366,6 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 		state = ResultStateFail
 
 		it.Error(t, "Test finished with %v errors", countNotOptionalErrors)
-	}
-
-	switch state {
-	case ResultStateBroken:
-		t.BrokenNow()
-		it.Info(t, "Test broken")
-	case ResultStateFail:
-		t.Fail()
-		it.Error(t, "Test failed")
-	case resultStateFailNow:
-		t.FailNow()
-		it.Error(t, "Test failed")
-	case ResultStateSuccess:
-		it.Info(t, "Test finished successfully")
 	}
 
 	return state
