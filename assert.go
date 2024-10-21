@@ -53,7 +53,7 @@ func (it *Test) assertHeaders(t internalT, headers http.Header) []error {
 		return nil
 	}
 
-	return executeWithStep(t, "Assert headers", func(t T) []error {
+	return it.executeWithStep(t, "Assert headers", func(t T) []error {
 		errs := make([]error, 0)
 		// Execute assert only response
 		for _, f := range asserts {
@@ -85,7 +85,7 @@ func (it *Test) assertResponse(t internalT, resp *http.Response) []error {
 		return nil
 	}
 
-	return executeWithStep(t, "Assert response", func(t T) []error {
+	return it.executeWithStep(t, "Assert response", func(t T) []error {
 		errs := make([]error, 0)
 		// Execute assert only response
 		for _, f := range asserts {
@@ -117,7 +117,7 @@ func (it *Test) assertBody(t internalT, body []byte) []error {
 		return nil
 	}
 
-	return executeWithStep(t, "Assert body", func(t T) []error {
+	return it.executeWithStep(t, "Assert body", func(t T) []error {
 		errs := make([]error, 0)
 		// Execute assert only response
 		for _, f := range asserts {

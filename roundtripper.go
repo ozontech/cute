@@ -2,6 +2,7 @@ package cute
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,23 +25,23 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 		scope = make([]error, 0)
 	)
 
-	if it.Request.Repeat.Delay != 0 {
-		delay = it.Request.Repeat.Delay
+	if it.Request.Retry.Delay != 0 {
+		delay = it.Request.Retry.Delay
 	}
 
-	if it.Request.Repeat.Count != 0 {
-		countRepeat = it.Request.Repeat.Count
+	if it.Request.Retry.Count != 0 {
+		countRepeat = it.Request.Retry.Count
 	}
 
 	for i := 1; i <= countRepeat; i++ {
-		executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
+		it.executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
 			resp, err = it.doRequest(t, req)
 			if err != nil {
-				if it.Request.Repeat.Broken {
+				if it.Request.Retry.Broken {
 					err = wrapBrokenError(err)
 				}
 
-				if it.Request.Repeat.Optional {
+				if it.Request.Retry.Optional {
 					err = wrapOptionalError(err)
 				}
 
@@ -73,6 +74,20 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 
 	resp, httpErr := it.httpClient.Do(req)
 
+	// if the timeout is triggered, we properly log the timeout error on allure and in traces
+	if errors.Is(httpErr, context.DeadlineExceeded) {
+		// Add information (method, host, curl) about request to Allure step
+		// should be after httpClient.Do and from resp.Request, because in roundTripper request may be changed
+		if addErr := it.addInformationRequest(t, req); addErr != nil {
+			// Ignore err return, because it's connected with test logic
+			it.Error(t, "Could not log information about request. error %v", addErr)
+		}
+
+		return nil, cuteErrors.NewEmptyAssertError(
+			"Request timeout",
+			fmt.Sprintf("expected request to be completed in %v, but was not", it.Expect.ExecuteTime))
+	}
+
 	// http client has case wheh it return response and error in one time
 	// we have to check this case
 	if resp == nil {
@@ -87,14 +102,14 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// BAD CODE. Need to copy body, because we can't read body again from resp.Request.Body. Problem is io.Reader
 	resp.Request.Body, baseReq.Body, err = utils.DrainBody(baseReq.Body)
 	if err != nil {
-		it.Error(t, "Could not drain body from baseReq.Body. Error %v", err)
+		it.Error(t, "Could not drain body from baseReq.Body. error %v", err)
 		// Ignore err return, because it's connected with test logic
 	}
 
 	// Add information (method, host, curl) about request to Allure step
 	// should be after httpClient.Do and from resp.Request, because in roundTripper request may be changed
 	if addErr := it.addInformationRequest(t, resp.Request); addErr != nil {
-		it.Error(t, "[ERROR] Could not log information about request. Error %v", addErr)
+		it.Error(t, "Could not log information about request. error %v", addErr)
 		// Ignore err return, because it's connected with test logic
 	}
 
@@ -105,11 +120,11 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	// Add information (code, body, headers) about response to Allure step
 	if addErr := it.addInformationResponse(t, resp); addErr != nil {
 		// Ignore err return, because it's connected with test logic
-		it.Error(t, "[ERROR] Could not log information about response. Error %v", addErr)
+		it.Error(t, "Could not log information about response. error %v", addErr)
 	}
 
 	if validErr := it.validateResponseCode(resp); validErr != nil {
-		return nil, validErr
+		return resp, validErr
 	}
 
 	return resp, nil

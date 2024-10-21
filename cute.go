@@ -113,27 +113,6 @@ func createAllureT(t *testing.T) *common.Common {
 	return newT
 }
 
-// executeTestsInsideStep is method for run group of tests inside provider.StepCtx
-func (qt *cute) executeTestsInsideStep(ctx context.Context, stepCtx provider.StepCtx) []ResultsHTTPBuilder {
-	var (
-		res = make([]ResultsHTTPBuilder, 0)
-	)
-
-	// Cycle for change number of Test
-	for i := 0; i <= qt.countTests; i++ {
-		currentTest := qt.tests[i]
-
-		result := currentTest.executeInsideStep(ctx, stepCtx)
-
-		// Remove from base struct all asserts
-		currentTest.clearFields()
-
-		res = append(res, result)
-	}
-
-	return res
-}
-
 // executeTests is method for run tests
 // It's could be table tests or usual tests
 func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider) []ResultsHTTPBuilder {
@@ -153,7 +132,7 @@ func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider)
 				// Set current test name
 				inT.Title(tableTestName)
 
-				res = append(res, qt.executeSingleTest(ctx, inT, currentTest))
+				res = append(res, qt.executeInsideAllure(ctx, inT, currentTest))
 			})
 		} else {
 			currentTest.Name = allureProvider.Name()
@@ -161,18 +140,41 @@ func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider)
 			// set labels
 			qt.setAllureInformation(allureProvider)
 
-			res = append(res, qt.executeSingleTest(ctx, allureProvider, currentTest))
+			res = append(res, qt.executeInsideAllure(ctx, allureProvider, currentTest))
 		}
 	}
 
 	return res
 }
 
-func (qt *cute) executeSingleTest(ctx context.Context, allureProvider allureProvider, currentTest *Test) ResultsHTTPBuilder {
+// executeInsideAllure is method for run test inside allure
+// It's could be table tests or usual tests
+func (qt *cute) executeInsideAllure(ctx context.Context, allureProvider allureProvider, currentTest *Test) ResultsHTTPBuilder {
 	resT := currentTest.executeInsideAllure(ctx, allureProvider)
 
 	// Remove from base struct all asserts
 	currentTest.clearFields()
 
 	return resT
+}
+
+// executeTestsInsideStep is method for run group of tests inside provider.StepCtx
+func (qt *cute) executeTestsInsideStep(ctx context.Context, stepCtx provider.StepCtx) []ResultsHTTPBuilder {
+	var (
+		res = make([]ResultsHTTPBuilder, 0)
+	)
+
+	// Cycle for change number of Test
+	for i := 0; i <= qt.countTests; i++ {
+		currentTest := qt.tests[i]
+
+		result := currentTest.executeInsideStep(ctx, stepCtx)
+
+		// Remove from base struct all asserts
+		currentTest.clearFields()
+
+		res = append(res, result)
+	}
+
+	return res
 }

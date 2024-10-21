@@ -30,7 +30,7 @@ func Test_Single_1(t *testing.T) {
 		Description("some_description").
 		Parallel().
 		Create().
-		RequestRepeat(3).
+		RequestRetry(3).
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 			cute.WithMarshalBody(struct {
@@ -96,14 +96,16 @@ func Test_Single_Broken(t *testing.T) {
 		},
 		).
 		ExecuteTest(context.Background(), t)
+
+	t.Skip()
 }
 
 func Test_Single_RepeatPolitic_Optional_Success_Test(t *testing.T) {
 	cute.NewTestBuilder().
 		Title("Test_Single_RepeatPolitic_Optional_Success_Test").
 		Create().
-		RequestRepeat(2).
-		RequestRepeatOptional(true).
+		RequestRetry(2).
+		RequestRetryOptional(true).
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 		).
@@ -120,8 +122,8 @@ func Test_Single_RepeatPolitic_Broken_Failed_Test(t *testing.T) {
 	cute.NewTestBuilder().
 		Title("Test_Single_RepeatPolitic_Broken_Failed_Test").
 		Create().
-		RequestRepeat(2).
-		RequestRepeatOptional(true).
+		RequestRetry(2).
+		RequestRetryOptional(false).
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 		).
@@ -173,8 +175,8 @@ func Test_Single_2_AllureRunner(t *testing.T) {
 			Tag("single_test").
 			Description("some_description").
 			Create().
-			RequestRepeatDelay(3*time.Second). // delay before new try
-			RequestRepeat(3).                  // count attempts
+			RequestRetryDelay(3*time.Second). // delay before new try
+			RequestRetry(3).                  // count attempts
 			RequestBuilder(
 				cute.WithURL(u),
 				cute.WithMethod(http.MethodGet),

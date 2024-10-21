@@ -103,7 +103,7 @@ func createDefaultTest(m *HTTPTestMaker) *Test {
 		Middleware:    createMiddlewareFromTemplate(m.middleware),
 		AllureStep:    new(AllureStep),
 		Request: &Request{
-			Repeat: new(RequestRepeatPolitic),
+			Retry: new(RequestRetryPolitic),
 		},
 		Expect: &Expect{JSONSchema: new(ExpectJSONSchema)},
 	}

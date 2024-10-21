@@ -209,7 +209,7 @@ func (i *ExampleSuite) BeforeAll(t provider.T) {
     // Preparing host
     host, err := url.Parse("https://jsonplaceholder.typicode.com/")
     if err != nil {
-        t.Fatalf("could not parse url, error %v", err)
+        t.Fatalf("could not parse url, error %w", err)
     }
 
     i.host = host

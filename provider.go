@@ -27,6 +27,9 @@ type allureProvider interface {
 }
 
 type internalT interface {
+	Broken()
+	BrokenNow()
+
 	tProvider
 	logProvider
 	stepProvider

@@ -157,6 +157,8 @@ func TestValidateResponseWithErrors(t *testing.T) {
 		}
 	)
 
+	ht.initEmptyFields()
+
 	errs := ht.validateResponse(temp, resp)
 
 	require.Len(t, errs, 2)

@@ -12,6 +12,8 @@ func TestValidateJSONSchemaEmptySchema(t *testing.T) {
 		tBuilder = createDefaultTest(&HTTPTestMaker{middleware: new(Middleware)})
 	)
 
+	tBuilder.initEmptyFields()
+
 	errs := tBuilder.validateJSONSchema(nil, []byte{})
 	require.Len(t, errs, 0)
 }
@@ -21,6 +23,8 @@ func TestValidateJSONSchemaFromString(t *testing.T) {
 		tBuilder = createDefaultTest(&HTTPTestMaker{middleware: new(Middleware)})
 		tempT    = createAllureT(t)
 	)
+
+	tBuilder.initEmptyFields()
 
 	body := []byte(`
 	{
@@ -60,6 +64,8 @@ func TestValidateJSONSchemaFromStringWithError(t *testing.T) {
 		tBuilder = createDefaultTest(&HTTPTestMaker{middleware: new(Middleware)})
 		tempT    = createAllureT(t)
 	)
+
+	tBuilder.initEmptyFields()
 
 	body := []byte(`
 	{
@@ -108,6 +114,8 @@ func TestValidateJSONSchemaFromByteWithTwoError(t *testing.T) {
 		tBuilder = createDefaultTest(&HTTPTestMaker{middleware: new(Middleware)})
 		tempT    = createAllureT(t)
 	)
+
+	tBuilder.initEmptyFields()
 
 	body := []byte(`
 	{

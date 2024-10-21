@@ -285,8 +285,8 @@ func TestHTTPTestMaker(t *testing.T) {
 		Link(link).
 		Description(desc).
 		CreateStep(stepName).
-		RequestRepeat(repeatCount).
-		RequestRepeatDelay(repeatDelay).
+		RequestRetry(repeatCount).
+		RequestRetryDelay(repeatDelay).
 		Request(req).
 		ExpectExecuteTimeout(executeTime).
 		ExpectStatus(status).
@@ -330,8 +330,8 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, setIssue, resHt.allureLinks.issue)
 	require.Equal(t, setTestCase, resHt.allureLinks.testCase)
 	require.Equal(t, link, resHt.allureLinks.link)
-	require.Equal(t, repeatCount, resTest.Request.Repeat.Count)
-	require.Equal(t, repeatDelay, resTest.Request.Repeat.Delay)
+	require.Equal(t, repeatCount, resTest.Request.Retry.Count)
+	require.Equal(t, repeatDelay, resTest.Request.Retry.Delay)
 
 	require.Equal(t, len(assertHeaders), len(resTest.Expect.AssertHeaders))
 	require.Equal(t, len(assertHeadersT), len(resTest.Expect.AssertHeadersT))
@@ -360,7 +360,7 @@ func TestCreateDefaultTest(t *testing.T) {
 			BeforeT: make([]BeforeExecuteT, 0),
 		},
 		Request: &Request{
-			Repeat: new(RequestRepeatPolitic),
+			Retry: new(RequestRetryPolitic),
 		},
 		Expect: &Expect{
 			JSONSchema: new(ExpectJSONSchema),
