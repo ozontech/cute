@@ -124,7 +124,7 @@ func (it *Test) doRequest(t T, baseReq *http.Request) (*http.Response, error) {
 	}
 
 	if validErr := it.validateResponseCode(resp); validErr != nil {
-		return nil, validErr
+		return resp, validErr
 	}
 
 	return resp, nil

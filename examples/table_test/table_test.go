@@ -113,6 +113,94 @@ func Test_One_Execute(t *testing.T) {
 	test.Execute(context.Background(), t)
 }
 
+func Test_Array_Retry_OptionalFirstTries(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name: "test_1",
+
+			Retry: &cute.Retry{
+				MaxAttempts: 10,
+				Delay:       1 * time.Second,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/201,202"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name: "test_2",
+			Retry: &cute.Retry{
+				MaxAttempts: 10,
+				Delay:       1 * time.Second,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/403,404"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 404,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
+func Test_Array_Retry_OptionalFirstTries_UltimatelyFailing(t *testing.T) {
+	tests := []*cute.Test{
+		{
+			Name: "test_1",
+
+			Retry: &cute.Retry{
+				MaxAttempts: 4,
+				Delay:       1 * time.Second,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/202,200"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 201,
+			},
+		},
+		{
+			Name: "test_2",
+			Retry: &cute.Retry{
+				MaxAttempts: 3,
+				Delay:       1 * time.Second,
+			},
+			Middleware: nil,
+			Request: &cute.Request{
+				Builders: []cute.RequestBuilder{
+					cute.WithURI("https://httpstat.us/Random/403,401"),
+					cute.WithMethod(http.MethodGet),
+				},
+			},
+			Expect: &cute.Expect{
+				Code: 404,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test.Execute(context.Background(), t)
+	}
+}
+
 func Test_Array_TimeoutRetry(t *testing.T) {
 	var executeTimeout = 3000
 

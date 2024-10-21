@@ -123,7 +123,7 @@ func Test_Single_RepeatPolitic_Broken_Failed_Test(t *testing.T) {
 		Title("Test_Single_RepeatPolitic_Broken_Failed_Test").
 		Create().
 		RequestRetry(2).
-		RequestRetryOptional(true).
+		RequestRetryOptional(false).
 		RequestBuilder(
 			cute.WithURI("https://jsonplaceholder.typicode.com/posts/1/comments"),
 		).
