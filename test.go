@@ -43,6 +43,11 @@ type Test struct {
 	Middleware *Middleware
 	Request    *Request
 	Expect     *Expect
+
+	HideBody            bool
+	HideHeaders         bool
+	HideResponse        bool
+	HideResponseHeaders bool
 }
 
 // Retry is a struct to control the retry of a whole single test (not only the request)
@@ -531,7 +536,6 @@ func (it *Test) buildRequest(ctx context.Context) (*http.Request, error) {
 	body := o.body
 	if o.bodyMarshal != nil {
 		body, err = it.jsonMarshaler.Marshal(o.bodyMarshal)
-
 		if err != nil {
 			return nil, err
 		}
