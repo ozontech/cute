@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/ozontech/allure-go/pkg/framework/provider"
+
 	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/ozontech/cute/internal/utils"
 )
@@ -172,6 +173,10 @@ func (it *Test) clearFields() {
 func (it *Test) initEmptyFields() {
 	if it.httpClient == nil {
 		it.httpClient = http.DefaultClient
+	}
+
+	if it.jsonMarshaler == nil {
+		it.jsonMarshaler = jsonMarshaler{}
 	}
 
 	if it.AllureStep == nil {

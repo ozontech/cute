@@ -144,6 +144,7 @@ func Test_Array_Retry_OptionalFirstTries(t *testing.T) {
 				Builders: []cute.RequestBuilder{
 					cute.WithURI("https://httpstat.us/Random/403,404"),
 					cute.WithMethod(http.MethodGet),
+					cute.WithMarshalBody([]byte("{\"test\":\"abc\"}")),
 				},
 			},
 			Expect: &cute.Expect{
