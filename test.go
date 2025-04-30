@@ -29,6 +29,8 @@ var (
 	errorRequestURLEmpty    = errors.New("url request must be not empty")
 )
 
+type SanitizeHook func(req *http.Request)
+
 // Test is a main struct of test.
 // You may field Request and Expect for create simple test
 // Parallel can be used to control the parallelism of a Test
@@ -40,10 +42,11 @@ type Test struct {
 	Parallel bool
 	Retry    *Retry
 
-	AllureStep *AllureStep
-	Middleware *Middleware
-	Request    *Request
-	Expect     *Expect
+	AllureStep  *AllureStep
+	Middleware  *Middleware
+	Request     *Request
+	Expect      *Expect
+	SanitizeURL SanitizeHook
 }
 
 // Retry is a struct to control the retry of a whole single test (not only the request)
@@ -490,6 +493,10 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 	// Validate Request
 	if err := it.validateRequest(req); err != nil {
 		return nil, err
+	}
+
+	if it.SanitizeURL != nil {
+		it.SanitizeURL(req)
 	}
 
 	return req, nil

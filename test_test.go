@@ -163,3 +163,32 @@ func TestValidateResponseWithErrors(t *testing.T) {
 
 	require.Len(t, errs, 2)
 }
+
+func TestSanitizeURLHook(t *testing.T) {
+	test := &Test{
+		Name: "Test with sanitization",
+		Request: &Request{
+			Builders: []RequestBuilder{
+				WithMethod(http.MethodGet),
+				WithURI("http://localhost/api?key=123"),
+			},
+		},
+		SanitizeURL: sanitizeKeyParam("****"),
+	}
+
+	req, err := test.createRequest(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, req)
+
+	decodedQuery, err := url.QueryUnescape(req.URL.RawQuery)
+	require.NoError(t, err)
+	require.Equal(t, "key=****", decodedQuery)
+}
+
+func sanitizeKeyParam(mask string) SanitizeHook {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Set("key", mask)
+		req.URL.RawQuery = q.Encode()
+	}
+}
