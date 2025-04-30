@@ -29,6 +29,8 @@ var (
 	errorRequestURLEmpty    = errors.New("url request must be not empty")
 )
 
+// SanitizeHook is a function used to modify the request URL
+// before it is logged or attached to test reports (e.g., for hiding secrets).
 type SanitizeHook func(req *http.Request)
 
 // Test is a main struct of test.
@@ -477,6 +479,9 @@ func (it *Test) beforeTest(t internalT, req *http.Request) []error {
 	})
 }
 
+// createRequest builds the final *http.Request to be executed by the test.
+// If the Test.SanitizeURL hook is defined, it will be called after validation
+// to allow safe modification of the request before logging or execution.
 func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 	var (
 		req = it.Request.Base
@@ -495,6 +500,7 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 		return nil, err
 	}
 
+	// Apply optional request sanitizer (e.g., for hiding sensitive query params)
 	if it.SanitizeURL != nil {
 		it.SanitizeURL(req)
 	}
