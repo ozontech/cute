@@ -148,6 +148,8 @@ func (it *Test) addInformationRequest(t T, req *http.Request) error {
 		err      error
 	)
 
+	it.lastRequestURL = req.URL.String()
+
 	curl, err := http2curl.GetCurlCommand(req)
 	if err != nil {
 		return err

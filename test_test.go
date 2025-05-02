@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/ozontech/allure-go/pkg/framework/core/common"
@@ -164,28 +165,69 @@ func TestValidateResponseWithErrors(t *testing.T) {
 	require.Len(t, errs, 2)
 }
 
+type mockRoundTripper struct{}
+
+func (m *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: 200,
+		Request:    req,
+		Body:       io.NopCloser(strings.NewReader("mock response")),
+	}, nil
+}
+
 func TestSanitizeURLHook(t *testing.T) {
-	var sanitized string
+	client := &http.Client{
+		Transport: &mockRoundTripper{},
+	}
 
 	test := &Test{
-		Name: "Test with sanitization",
+		httpClient: client,
 		Request: &Request{
 			Builders: []RequestBuilder{
 				WithMethod(http.MethodGet),
 				WithURI("http://localhost/api?key=123"),
 			},
 		},
-		SanitizeURL: func(req *http.Request) {
-			q := req.URL.Query()
-			q.Set("key", "****")
-			req.URL.RawQuery = q.Encode()
-			decoded, err := url.QueryUnescape(req.URL.RawQuery)
-			require.NoError(t, err)
-			sanitized = decoded
-		},
+		SanitizeURL: sanitizeKeyParam("****"),
 	}
 
-	_, err := test.createRequest(context.Background())
+	req, err := test.createRequest(context.Background())
 	require.NoError(t, err)
-	require.Equal(t, "key=****", sanitized)
+	require.NotNil(t, req)
+
+	decodedQuery, err := url.QueryUnescape(req.URL.RawQuery)
+	require.NoError(t, err)
+	require.Equal(t, "key=****", decodedQuery)
+}
+
+func TestSanitizeURL_LastRequestURL(t *testing.T) {
+	client := &http.Client{
+		Transport: &mockRoundTripper{},
+	}
+
+	test := &Test{
+		httpClient: client,
+		Request: &Request{
+			Builders: []RequestBuilder{
+				WithMethod(http.MethodGet),
+				WithURI("http://localhost/api?key=123"),
+			},
+		},
+		SanitizeURL: sanitizeKeyParam("****"),
+	}
+
+	allureT := createAllureT(t)
+	test.Execute(context.Background(), allureT)
+
+	decodedURL, err := url.QueryUnescape(test.lastRequestURL)
+	require.NoError(t, err)
+	require.Contains(t, decodedURL, "key=****", "Expected masked key in lastRequestURL")
+}
+
+func sanitizeKeyParam(mask string) SanitizeHook {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Set("key", mask)
+		req.URL.RawQuery = q.Encode()
+	}
 }

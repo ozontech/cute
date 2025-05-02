@@ -37,17 +37,19 @@ type SanitizeHook func(req *http.Request)
 // You may field Request and Expect for create simple test
 // Parallel can be used to control the parallelism of a Test
 type Test struct {
-	httpClient    *http.Client
-	jsonMarshaler JSONMarshaler
+	httpClient     *http.Client
+	jsonMarshaler  JSONMarshaler
+	lastRequestURL string
 
 	Name     string
 	Parallel bool
 	Retry    *Retry
 
-	AllureStep  *AllureStep
-	Middleware  *Middleware
-	Request     *Request
-	Expect      *Expect
+	AllureStep *AllureStep
+	Middleware *Middleware
+	Request    *Request
+	Expect     *Expect
+
 	SanitizeURL SanitizeHook
 }
 
@@ -500,16 +502,9 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 		return nil, err
 	}
 
-	// Make a backup copy of URL
-	originalURL := *req.URL
-
-	// Apply sanitizer for logging
 	if it.SanitizeURL != nil {
 		it.SanitizeURL(req)
 	}
-
-	// Roll back to original before sending
-	defer func() { req.URL = &originalURL }()
 
 	return req, nil
 }
