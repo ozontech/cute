@@ -500,10 +500,16 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 		return nil, err
 	}
 
-	// Apply optional request sanitizer (e.g., for hiding sensitive query params)
+	// Make a backup copy of URL
+	originalURL := *req.URL
+
+	// Apply sanitizer for logging
 	if it.SanitizeURL != nil {
 		it.SanitizeURL(req)
 	}
+
+	// Roll back to original before sending
+	defer func() { req.URL = &originalURL }()
 
 	return req, nil
 }

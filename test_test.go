@@ -165,6 +165,8 @@ func TestValidateResponseWithErrors(t *testing.T) {
 }
 
 func TestSanitizeURLHook(t *testing.T) {
+	var sanitized string
+
 	test := &Test{
 		Name: "Test with sanitization",
 		Request: &Request{
@@ -173,22 +175,17 @@ func TestSanitizeURLHook(t *testing.T) {
 				WithURI("http://localhost/api?key=123"),
 			},
 		},
-		SanitizeURL: sanitizeKeyParam("****"),
+		SanitizeURL: func(req *http.Request) {
+			q := req.URL.Query()
+			q.Set("key", "****")
+			req.URL.RawQuery = q.Encode()
+			decoded, err := url.QueryUnescape(req.URL.RawQuery)
+			require.NoError(t, err)
+			sanitized = decoded
+		},
 	}
 
-	req, err := test.createRequest(context.Background())
+	_, err := test.createRequest(context.Background())
 	require.NoError(t, err)
-	require.NotNil(t, req)
-
-	decodedQuery, err := url.QueryUnescape(req.URL.RawQuery)
-	require.NoError(t, err)
-	require.Equal(t, "key=****", decodedQuery)
-}
-
-func sanitizeKeyParam(mask string) SanitizeHook {
-	return func(req *http.Request) {
-		q := req.URL.Query()
-		q.Set("key", mask)
-		req.URL.RawQuery = q.Encode()
-	}
+	require.Equal(t, "key=****", sanitized)
 }
