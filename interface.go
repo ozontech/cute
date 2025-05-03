@@ -218,6 +218,12 @@ type RequestParams interface {
 	// Deprecated: use RequestRetryBroken instead
 	RequestRepeatBroken(broken bool) RequestHTTPBuilder
 	RequestRetryBroken(broken bool) RequestHTTPBuilder
+
+	// RequestWithSanitizeHook sets a SanitizeHook function for the request.
+	// This hook allows you to modify or mask parts of the request URL (e.g., hide sensitive data)
+	// before it is logged or added to the test report (Allure).
+	// Example usage: RequestWithSanitizeHook(func(req *http.Request) { ... }).
+	RequestWithSanitizeHook(hook SanitizeHook) RequestHTTPBuilder
 }
 
 // ExpectHTTPBuilder is a scope of methods for validate http response

@@ -188,7 +188,7 @@ func TestSanitizeURLHook(t *testing.T) {
 				WithURI("http://localhost/api?key=123"),
 			},
 		},
-		SanitizeURL: sanitizeKeyParam("****"),
+		Sanitizer: sanitizeKeyParam("****"),
 	}
 
 	req, err := test.createRequest(context.Background())
@@ -213,7 +213,7 @@ func TestSanitizeURL_LastRequestURL(t *testing.T) {
 				WithURI("http://localhost/api?key=123"),
 			},
 		},
-		SanitizeURL: sanitizeKeyParam("****"),
+		Sanitizer: sanitizeKeyParam("****"),
 	}
 
 	allureT := createAllureT(t)

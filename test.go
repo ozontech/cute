@@ -50,7 +50,7 @@ type Test struct {
 	Request    *Request
 	Expect     *Expect
 
-	SanitizeURL SanitizeHook
+	Sanitizer SanitizeHook
 }
 
 // Retry is a struct to control the retry of a whole single test (not only the request)
@@ -482,7 +482,7 @@ func (it *Test) beforeTest(t internalT, req *http.Request) []error {
 }
 
 // createRequest builds the final *http.Request to be executed by the test.
-// If the Test.SanitizeURL hook is defined, it will be called after validation
+// If the Test.Sanitizer hook is defined, it will be called after validation
 // to allow safe modification of the request before logging or execution.
 func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 	var (
@@ -502,8 +502,8 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 		return nil, err
 	}
 
-	if it.SanitizeURL != nil {
-		it.SanitizeURL(req)
+	if it.Sanitizer != nil {
+		it.Sanitizer(req)
 	}
 
 	return req, nil
