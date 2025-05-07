@@ -282,13 +282,15 @@ func (it *Test) createTitle(try, countRepeat int, req *http.Request) string {
 	// We have to execute sanitizer hook because
 	// we need to log it and it can contain sensitive data
 	if it.RequestSanitizer != nil {
+		clone, err := copyRequest(req.Context(), req)
+
 		// ignore error, because we want to log request
 		// and it does not matter if we can copy request
-		clone, _ := copyRequest(req.Context(), req)
+		if err == nil {
+			it.RequestSanitizer(clone)
 
-		it.RequestSanitizer(clone)
-
-		toProcess = clone
+			toProcess = clone
+		}
 	}
 
 	title := toProcess.Method + " " + toProcess.URL.String()
