@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/ozontech/allure-go/pkg/framework/core/common"
@@ -162,4 +163,71 @@ func TestValidateResponseWithErrors(t *testing.T) {
 	errs := ht.validateResponse(temp, resp)
 
 	require.Len(t, errs, 2)
+}
+
+type mockRoundTripper struct{}
+
+func (m *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: 200,
+		Request:    req,
+		Body:       io.NopCloser(strings.NewReader("mock response")),
+	}, nil
+}
+
+func TestSanitizeURLHook(t *testing.T) {
+	client := &http.Client{
+		Transport: &mockRoundTripper{},
+	}
+
+	test := &Test{
+		httpClient: client,
+		Request: &Request{
+			Builders: []RequestBuilder{
+				WithMethod(http.MethodGet),
+				WithURI("http://localhost/api?key=123"),
+			},
+		},
+		Sanitizer: sanitizeKeyParam("****"),
+	}
+
+	req, err := test.createRequest(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, req)
+
+	decodedQuery, err := url.QueryUnescape(req.URL.RawQuery)
+	require.NoError(t, err)
+	require.Equal(t, "key=****", decodedQuery)
+}
+
+func TestSanitizeURL_LastRequestURL(t *testing.T) {
+	client := &http.Client{
+		Transport: &mockRoundTripper{},
+	}
+
+	test := &Test{
+		httpClient: client,
+		Request: &Request{
+			Builders: []RequestBuilder{
+				WithMethod(http.MethodGet),
+				WithURI("http://localhost/api?key=123"),
+			},
+		},
+		Sanitizer: sanitizeKeyParam("****"),
+	}
+
+	allureT := createAllureT(t)
+	test.Execute(context.Background(), allureT)
+
+	decodedURL, err := url.QueryUnescape(test.lastRequestURL)
+	require.NoError(t, err)
+	require.Contains(t, decodedURL, "key=****", "Expected masked key in lastRequestURL")
+}
+
+func sanitizeKeyParam(mask string) SanitizeHook {
+	return func(req *http.Request) {
+		q := req.URL.Query()
+		q.Set("key", mask)
+		req.URL.RawQuery = q.Encode()
+	}
 }
