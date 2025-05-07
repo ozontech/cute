@@ -35,7 +35,7 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	}
 
 	for i := 1; i <= countRepeat; i++ {
-		it.executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
+		it.executeWithStep(t, it.createTitle(i, countRepeat, req), func(t T) []error {
 			resp, err = it.doRequest(t, req)
 			if err != nil {
 				if it.Request.Retry.Broken {
@@ -276,8 +276,22 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 	return nil
 }
 
-func createTitle(try, countRepeat int, req *http.Request) string {
-	title := req.Method + " " + req.URL.String()
+func (it *Test) createTitle(try, countRepeat int, req *http.Request) string {
+	toProcess := req
+
+	// We have to execute sanitizer hook because
+	// we need to log it and it can contain sensitive data
+	if it.RequestSanitizer != nil {
+		// ignore error, because we want to log request
+		// and it does not matter if we can copy request
+		clone, _ := copyRequest(req.Context(), req)
+
+		it.RequestSanitizer(clone)
+
+		toProcess = clone
+	}
+
+	title := toProcess.Method + " " + toProcess.URL.String()
 
 	if countRepeat == 1 {
 		return title

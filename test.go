@@ -487,8 +487,6 @@ func (it *Test) beforeTest(t internalT, req *http.Request) []error {
 }
 
 // createRequest builds the final *http.Request to be executed by the test.
-// If the Test.RequestSanitizer hook is defined, it will be called after validation
-// to allow safe modification of the request before logging or execution.
 func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 	var (
 		req = it.Request.Base
