@@ -12,6 +12,7 @@ import (
 
 	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/allure-go/pkg/framework/runner"
+
 	"github.com/ozontech/cute"
 )
 
@@ -30,6 +31,11 @@ func TestInsideStep(t *testing.T) {
 				Tags("simple", "suite", "some_local_tag", "json").
 				Parallel().
 				Create().
+				RequestSanitizerHook(func(req *http.Request) {
+					req.URL.Path = "/path/masked"
+
+					req.Header["some_header"] = []string{"masked"}
+				}).
 				RequestBuilder(
 					cute.WithHeaders(map[string][]string{
 						"some_header": []string{"something"},

@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/ozontech/allure-go/pkg/allure"
+	"moul.io/http2curl/v2"
+
 	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/ozontech/cute/internal/utils"
-	"moul.io/http2curl/v2"
 )
 
 func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {
@@ -148,6 +149,10 @@ func (it *Test) addInformationRequest(t T, req *http.Request) error {
 		err      error
 	)
 
+	if it.RequestSanitizer != nil {
+		it.RequestSanitizer(req)
+	}
+
 	it.lastRequestURL = req.URL.String()
 
 	curl, err := http2curl.GetCurlCommand(req)
@@ -216,6 +221,10 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 		saveBody io.ReadCloser
 		err      error
 	)
+
+	if it.ResponseSanitizer != nil {
+		it.ResponseSanitizer(response)
+	}
 
 	headers, _ := utils.ToJSON(response.Header)
 	if headers != "" {

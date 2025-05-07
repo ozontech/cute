@@ -29,9 +29,11 @@ var (
 	errorRequestURLEmpty    = errors.New("url request must be not empty")
 )
 
-// SanitizeHook is a function used to modify the request URL
+// RequestSanitizerHook is a function used to modify the request URL
 // before it is logged or attached to test reports (e.g., for hiding secrets).
-type SanitizeHook func(req *http.Request)
+type RequestSanitizerHook func(req *http.Request)
+
+type ResponseSanitizerHook func(resp *http.Response)
 
 // Test is a main struct of test.
 // You may field Request and Expect for create simple test
@@ -50,7 +52,8 @@ type Test struct {
 	Request    *Request
 	Expect     *Expect
 
-	Sanitizer SanitizeHook
+	RequestSanitizer  RequestSanitizerHook
+	ResponseSanitizer ResponseSanitizerHook
 }
 
 // Retry is a struct to control the retry of a whole single test (not only the request)
@@ -482,7 +485,7 @@ func (it *Test) beforeTest(t internalT, req *http.Request) []error {
 }
 
 // createRequest builds the final *http.Request to be executed by the test.
-// If the Test.Sanitizer hook is defined, it will be called after validation
+// If the Test.RequestSanitizer hook is defined, it will be called after validation
 // to allow safe modification of the request before logging or execution.
 func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 	var (
@@ -500,10 +503,6 @@ func (it *Test) createRequest(ctx context.Context) (*http.Request, error) {
 	// Validate Request
 	if err := it.validateRequest(req); err != nil {
 		return nil, err
-	}
-
-	if it.Sanitizer != nil {
-		it.Sanitizer(req)
 	}
 
 	return req, nil

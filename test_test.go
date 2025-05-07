@@ -11,8 +11,9 @@ import (
 	"testing"
 
 	"github.com/ozontech/allure-go/pkg/framework/core/common"
-	"github.com/ozontech/cute/internal/utils"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ozontech/cute/internal/utils"
 )
 
 func TestCreateRequest(t *testing.T) {
@@ -188,7 +189,7 @@ func TestSanitizeURLHook(t *testing.T) {
 				WithURI("http://localhost/api?key=123"),
 			},
 		},
-		Sanitizer: sanitizeKeyParam("****"),
+		RequestSanitizer: sanitizeKeyParam("****"),
 	}
 
 	req, err := test.createRequest(context.Background())
@@ -213,7 +214,7 @@ func TestSanitizeURL_LastRequestURL(t *testing.T) {
 				WithURI("http://localhost/api?key=123"),
 			},
 		},
-		Sanitizer: sanitizeKeyParam("****"),
+		RequestSanitizer: sanitizeKeyParam("****"),
 	}
 
 	allureT := createAllureT(t)
@@ -224,7 +225,7 @@ func TestSanitizeURL_LastRequestURL(t *testing.T) {
 	require.Contains(t, decodedURL, "key=****", "Expected masked key in lastRequestURL")
 }
 
-func sanitizeKeyParam(mask string) SanitizeHook {
+func sanitizeKeyParam(mask string) RequestSanitizerHook {
 	return func(req *http.Request) {
 		q := req.URL.Query()
 		q.Set("key", mask)

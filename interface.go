@@ -219,11 +219,19 @@ type RequestParams interface {
 	RequestRepeatBroken(broken bool) RequestHTTPBuilder
 	RequestRetryBroken(broken bool) RequestHTTPBuilder
 
-	// RequestWithSanitizeHook sets a SanitizeHook function for the request.
+	// RequestSanitizerHook sets a RequestSanitizerHook function for the request.
 	// This hook allows you to modify or mask parts of the request URL (e.g., hide sensitive data)
 	// before it is logged or added to the test report (Allure).
 	// Example usage: RequestWithSanitizeHook(func(req *http.Request) { ... }).
-	RequestWithSanitizeHook(hook SanitizeHook) RequestHTTPBuilder
+	// Example: RequestWithSanitizeHook(func(req *http.Request) { req.URL.Path = "/masked" }).
+	// Example: RequestWithSanitizeHook(func(req *http.Request) { req.Header["some_header"] = []string{"masked"} }).
+	RequestSanitizerHook(hook RequestSanitizerHook) RequestHTTPBuilder
+
+	// ResponseSanitizerHook sets a ResponseSanitizerHook function for the request.
+	// This hook allows you to modify or mask parts of the response body (e.g., hide sensitive data)
+	// before it is logged or added to the test report (Allure).
+	// Example usage: ResponseWithSanitizeHook(func(resp *http.Response) { ... }).
+	ResponseSanitizerHook(hook ResponseSanitizerHook) RequestHTTPBuilder
 }
 
 // ExpectHTTPBuilder is a scope of methods for validate http response
