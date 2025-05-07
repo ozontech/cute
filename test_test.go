@@ -183,10 +183,19 @@ func TestSanitizeURLHook(t *testing.T) {
 
 	test := &Test{
 		httpClient: client,
+		Retry: &Retry{
+			currentCount: 0,
+			MaxAttempts:  0,
+			Delay:        0,
+		},
 		Request: &Request{
 			Builders: []RequestBuilder{
 				WithMethod(http.MethodGet),
 				WithURI("http://localhost/api?key=123"),
+			},
+			Retry: &RequestRetryPolitic{
+				Count: 1,
+				Delay: 2,
 			},
 		},
 		RequestSanitizer: sanitizeKeyParam("****"),
@@ -195,6 +204,11 @@ func TestSanitizeURLHook(t *testing.T) {
 	req, err := test.createRequest(context.Background())
 	require.NoError(t, err)
 	require.NotNil(t, req)
+
+	newT := createAllureT(t)
+
+	err = test.addInformationRequest(newT, req)
+	require.NoError(t, err)
 
 	decodedQuery, err := url.QueryUnescape(req.URL.RawQuery)
 	require.NoError(t, err)
