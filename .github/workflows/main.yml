@@ -41,7 +41,7 @@ jobs:
     name: examples
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run examples
         run: make examples
       - name: Archive code coverage results
