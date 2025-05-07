@@ -33,6 +33,8 @@ var (
 // before it is logged or attached to test reports (e.g., for hiding secrets).
 type RequestSanitizerHook func(req *http.Request)
 
+// ResponseSanitizerHook is a function used to modify the response
+// before it is logged or attached to test reports (e.g., for hiding secrets).
 type ResponseSanitizerHook func(resp *http.Response)
 
 // Test is a main struct of test.
