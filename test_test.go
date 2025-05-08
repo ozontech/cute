@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
@@ -245,4 +246,29 @@ func sanitizeKeyParam(mask string) RequestSanitizerHook {
 		q.Set("key", mask)
 		req.URL.RawQuery = q.Encode()
 	}
+}
+
+func TestSanitizeURL_RealRequest(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		t.Logf("Server received URL: %s, Body: %s", r.URL.String(), string(body))
+		require.Contains(t, r.URL.String(), "key=123", "Sanitizer must not change real request")
+		w.WriteHeader(200)
+	}))
+	defer ts.Close()
+
+	client := &http.Client{}
+	test := &Test{
+		httpClient: client,
+		Request: &Request{
+			Builders: []RequestBuilder{
+				WithMethod(http.MethodGet),
+				WithURI(ts.URL + "/api?key=123"),
+			},
+		},
+		RequestSanitizer: sanitizeKeyParam("****"),
+	}
+
+	allureT := createAllureT(t)
+	test.Execute(context.Background(), allureT)
 }
