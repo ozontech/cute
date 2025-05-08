@@ -111,6 +111,22 @@ func (qt *cute) RequestRetryBroken(broken bool) RequestHTTPBuilder {
 	return qt
 }
 
+// RequestSanitizerHook assigns the provided RequestSanitizerHook to the test,
+// allowing URL sanitization before logging or reporting.
+func (qt *cute) RequestSanitizerHook(hook RequestSanitizerHook) RequestHTTPBuilder {
+	qt.tests[qt.countTests].RequestSanitizer = hook
+
+	return qt
+}
+
+// ResponseSanitizerHook assigns the provided ResponseSanitizerHook to the test,
+// allowing URL sanitization before logging or reporting.
+func (qt *cute) ResponseSanitizerHook(hook ResponseSanitizerHook) RequestHTTPBuilder {
+	qt.tests[qt.countTests].ResponseSanitizer = hook
+
+	return qt
+}
+
 func (qt *cute) Request(r *http.Request) ExpectHTTPBuilder {
 	qt.tests[qt.countTests].Request.Base = r
 

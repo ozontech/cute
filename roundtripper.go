@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/ozontech/allure-go/pkg/allure"
+	"moul.io/http2curl/v2"
+
 	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/ozontech/cute/internal/utils"
-	"moul.io/http2curl/v2"
 )
 
 func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []error) {
@@ -34,7 +35,7 @@ func (it *Test) makeRequest(t internalT, req *http.Request) (*http.Response, []e
 	}
 
 	for i := 1; i <= countRepeat; i++ {
-		it.executeWithStep(t, createTitle(i, countRepeat, req), func(t T) []error {
+		it.executeWithStep(t, it.createTitle(i, countRepeat, req), func(t T) []error {
 			resp, err = it.doRequest(t, req)
 			if err != nil {
 				if it.Request.Retry.Broken {
@@ -148,6 +149,12 @@ func (it *Test) addInformationRequest(t T, req *http.Request) error {
 		err      error
 	)
 
+	if it.RequestSanitizer != nil {
+		it.RequestSanitizer(req)
+	}
+
+	it.lastRequestURL = req.URL.String()
+
 	curl, err := http2curl.GetCurlCommand(req)
 	if err != nil {
 		return err
@@ -215,6 +222,10 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 		err      error
 	)
 
+	if it.ResponseSanitizer != nil {
+		it.ResponseSanitizer(response)
+	}
+
 	headers, _ := utils.ToJSON(response.Header)
 	if headers != "" {
 		t.WithNewParameters("response_headers", headers)
@@ -265,8 +276,24 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 	return nil
 }
 
-func createTitle(try, countRepeat int, req *http.Request) string {
-	title := req.Method + " " + req.URL.String()
+func (it *Test) createTitle(try, countRepeat int, req *http.Request) string {
+	toProcess := req
+
+	// We have to execute sanitizer hook because
+	// we need to log it and it can contain sensitive data
+	if it.RequestSanitizer != nil {
+		clone, err := copyRequest(req.Context(), req)
+
+		// ignore error, because we want to log request
+		// and it does not matter if we can copy request
+		if err == nil {
+			it.RequestSanitizer(clone)
+
+			toProcess = clone
+		}
+	}
+
+	title := toProcess.Method + " " + toProcess.URL.String()
 
 	if countRepeat == 1 {
 		return title
