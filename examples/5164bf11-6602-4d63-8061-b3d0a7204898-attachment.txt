@@ -1,2 +1,0 @@
-some optional error from creator
-Called from: /Users/vzbarashchenko/Code/github/ozontech/cute/examples/suite/one_step_errors.go:74

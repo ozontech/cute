@@ -1,2 +1,0 @@
-on path $[0].email. expect something, but actual Eliseo@gardner.biz
-Called from: /Users/vzbarashchenko/Code/github/ozontech/cute/examples/suite/one_step_errors.go:44

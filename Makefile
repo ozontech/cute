@@ -60,7 +60,9 @@ cover:
 
 .PHONY: example
 example:
-	go test ./... -tags example
+	# examples deliberately include failing tests that demonstrate failure reporting,
+	# so the exit code is ignored; the allure-results artifacts are what matters
+	-go test ./... -tags example
 
 .PHONY: test
 test:

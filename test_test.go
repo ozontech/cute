@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"flag"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -19,8 +21,27 @@ import (
 	"github.com/ozontech/cute/internal/utils"
 )
 
-// runCuteTest runs f with a live cute.T (testo.T + allure plugin) and
-// redirects allure output to a temp dir so unit tests leave no artifacts.
+// TestMain redirects allure output of the whole package to a temp dir so
+// unit tests leave no artifacts (the flag is also picked up by the child
+// tests that Test.Execute spawns, which do not inherit plugin options).
+func TestMain(m *testing.M) {
+	flag.Parse()
+
+	dir, err := os.MkdirTemp("", "cute-allure-results")
+	if err == nil {
+		_ = flag.Set("allure.dir", dir)
+	}
+
+	code := m.Run()
+
+	if dir != "" {
+		_ = os.RemoveAll(dir)
+	}
+
+	os.Exit(code)
+}
+
+// runCuteTest runs f with a live cute.T (testo.T + allure plugin).
 func runCuteTest(t *testing.T, f func(ct defaultT)) {
 	testo.RunTest(t, f, allure.WithOutputDir(t.TempDir()))
 }

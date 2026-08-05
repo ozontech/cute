@@ -1,2 +1,0 @@
-on path $. 5 is greater than 99999
-Called from: /Users/vzbarashchenko/Code/github/ozontech/cute/examples/suite/one_step_errors.go:44

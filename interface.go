@@ -274,7 +274,7 @@ type ExpectHTTPBuilder interface {
 	// BrokenAssertBody  is function for validate response, if it's failed, then test will be Broken.
 	// Mark in allure as Broken
 	BrokenAssertBody(asserts ...AssertBody) ExpectHTTPBuilder
-	// AssertBodyT is function for validate response body with help testing.TB and allure allureProvider.
+	// AssertBodyT is function for validate response body with help of cute.T.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertBodyT(asserts ...AssertBodyT) ExpectHTTPBuilder
 	// RequireBodyT implements the same assertions as the `AssertBodyT`, but stops test execution when a test fails.
@@ -300,7 +300,7 @@ type ExpectHTTPBuilder interface {
 	// BrokenAssertHeaders  is function for validate response, if it's failed, then test will be Broken.
 	// Mark in allure as Broken
 	BrokenAssertHeaders(asserts ...AssertHeaders) ExpectHTTPBuilder
-	// AssertHeadersT is function for validate headers body with help testing.TB and allure allureProvider.
+	// AssertHeadersT is function for validate headers body with help of cute.T.
 	// You may create allure step inside assert, add attachment, log information, etc.
 	AssertHeadersT(asserts ...AssertHeadersT) ExpectHTTPBuilder
 	// RequireHeadersT implements the same assertions as the `AssertHeadersT`, but stops test execution when a test fails.

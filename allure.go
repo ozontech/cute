@@ -1,8 +1,35 @@
 package cute
 
 import (
+	"fmt"
+	"os"
+	"strings"
+
 	allure "github.com/ozontech/testo-allure"
 )
+
+// Env keys with URL patterns for links, kept compatible with allure-go.
+// A pattern must contain exactly one "%s", which is replaced by the ID.
+const (
+	issuePatternEnvKey    = "ALLURE_ISSUE_PATTERN"
+	testCasePatternEnvKey = "ALLURE_TESTCASE_PATTERN"
+	tmsPatternEnvKey      = "ALLURE_LINK_TMS_PATTERN"
+
+	testCaseLinkType allure.LinkType = "test_case"
+)
+
+func linkFromPattern(envKey, name, id string, linkType allure.LinkType) allure.Link {
+	pattern := os.Getenv(envKey)
+	if !strings.Contains(pattern, "%s") {
+		pattern = "%s"
+	}
+
+	return allure.Link{
+		Name: name,
+		URL:  fmt.Sprintf(pattern, id),
+		Type: linkType,
+	}
+}
 
 func (qt *cute) setAllureInformation(t T) {
 	// Log main vars to allure
@@ -12,24 +39,24 @@ func (qt *cute) setAllureInformation(t T) {
 }
 
 func (qt *cute) setLinksAllure(t T) {
-	if qt.allureLinks.issue != "" {
-		t.Links(allure.Issue(qt.allureLinks.issue))
+	if issue := qt.allureLinks.issue; issue != "" {
+		t.Links(linkFromPattern(issuePatternEnvKey, fmt.Sprintf("Issue[%s]", issue), issue, allure.LinkTypeIssue))
 	}
 
-	if qt.allureLinks.testCase != "" {
-		t.Links(allure.TMS(qt.allureLinks.testCase))
+	if testCase := qt.allureLinks.testCase; testCase != "" {
+		t.Links(linkFromPattern(testCasePatternEnvKey, fmt.Sprintf("TestCase[%s]", testCase), testCase, testCaseLinkType))
 	}
 
 	if qt.allureLinks.link != nil {
 		t.Links(*qt.allureLinks.link)
 	}
 
-	if qt.allureLinks.tmsLink != "" {
-		t.Links(allure.TMS(qt.allureLinks.tmsLink))
+	if tmsLink := qt.allureLinks.tmsLink; tmsLink != "" {
+		t.Links(linkFromPattern(tmsPatternEnvKey, tmsLink, tmsLink, allure.LinkTypeTMS))
 	}
 
 	for _, tmsLink := range qt.allureLinks.tmsLinks {
-		t.Links(allure.TMS(tmsLink))
+		t.Links(linkFromPattern(tmsPatternEnvKey, tmsLink, tmsLink, allure.LinkTypeTMS))
 	}
 }
 

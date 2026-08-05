@@ -91,6 +91,13 @@ func (qt *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuild
 			res = qt.executeTests(ctx, inT)
 		}, opts...)
 
+		if res == nil {
+			// executeTests died fatally (e.g. broken assert -> FailNow) before
+			// returning. Pre-migration this stopped the caller's goroutine too,
+			// so abort here instead of returning a nil result slice.
+			tt.FailNow()
+		}
+
 		return res
 	default:
 		panic("t must be *testing.T or cute.T (a testo T with the allure plugin)")

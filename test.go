@@ -240,12 +240,14 @@ func (it *Test) executeInsideAllure(ctx context.Context, t T) ResultsHTTPBuilder
 		return it.startTestInsideStep(ctx, t)
 	} else {
 		// Execute Test
-		return it.startRepeatableTest(ctx, t)
+		return it.startRepeatableTest(ctx, t, nil)
 	}
 }
 
-// startRepeatableTest is method for start test with repeatable execution
-func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTTPBuilder {
+// startRepeatableTest is method for start test with repeatable execution.
+// brokenOut, when non-nil, is set before the FailNow of a broken test so that
+// callers running the test inside a step can propagate the broken status.
+func (it *Test) startRepeatableTest(ctx context.Context, t internalT, brokenOut *bool) ResultsHTTPBuilder {
 	var (
 		resp        *http.Response
 		errs        []error
@@ -277,6 +279,11 @@ func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTT
 	case ResultStateBroken:
 		t.Status(allure.StatusBroken)
 		it.Info(t, "Test broken")
+
+		if brokenOut != nil {
+			*brokenOut = true
+		}
+
 		t.FailNow()
 	case ResultStateFail:
 		t.Fail()
@@ -296,11 +303,21 @@ func (it *Test) startTestInsideStep(ctx context.Context, t internalT) ResultsHTT
 		result ResultsHTTPBuilder
 	)
 
+	broken := false
+
 	allure.Step(t, it.AllureStep.Name, func(stepT T) {
+		// The deferred func runs even when the step dies via FailNow, so a
+		// broken test inside a step still marks the whole test as broken.
+		defer func() {
+			if broken {
+				t.Status(allure.StatusBroken)
+			}
+		}()
+
 		it.Info(t, "Start step %v", it.AllureStep.Name)
 		defer it.Info(t, "Finish step %v", it.AllureStep.Name)
 
-		result = it.startRepeatableTest(ctx, stepT)
+		result = it.startRepeatableTest(ctx, stepT, &broken)
 
 		if result.GetResultState() == ResultStateFail {
 			stepT.Fail()

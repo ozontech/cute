@@ -26,7 +26,7 @@ type AssertHeaders func(headers http.Header) error
 // AssertResponse is type for create custom assertions for response
 type AssertResponse func(response *http.Response) error
 
-// This is type for create custom assertions with using allure and testing.allureProvider
+// This is type for create custom assertions with using allure and cute.T
 
 // AssertBodyT is type for create custom assertions for body with TB
 // Check example in AssertBody

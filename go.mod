@@ -25,3 +25,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// v1.1.21 was accidentally published from the allure-go-based codebase and
+// its tag has been deleted; the Go module proxy still serves it.
+retract v1.1.21
