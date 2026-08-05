@@ -6,7 +6,7 @@
 
 HTTP and REST API testing for Go using Allure reports.
 
-Built on the [testo](https://github.com/ozontech/testo) framework with the [testo-allure](https://github.com/ozontech/testo-allure) plugin. Migrating from cute v0.x? See [Migrating from cute v0.x (allure-go)](#migrating-from-cute-v0x-allure-go).
+Built on the [testo](https://github.com/ozontech/testo) framework with the [testo-allure](https://github.com/ozontech/testo-allure) plugin. If you are coming from cute v0.x, see [Migrating from cute v0.x (allure-go)](#migrating-from-cute-v0x-allure-go).
 
 ## Features
 
@@ -73,7 +73,7 @@ To view detailed test reports, install Allure framework. It's optional.
 brew install allure
 ```
 
-Run Allure. All examples write their results to `examples/allure-results` (the root examples via the default `-allure.dir`, the suite example via `allure.WithOutputDir("../allure-results")`, and the table tests via a `TestMain` that sets the `allure.dir` flag).
+Run Allure. All examples write their results to `examples/allure-results`: the root examples rely on the default `-allure.dir` value, the suite example passes `allure.WithOutputDir("../allure-results")`, and the table tests set the `allure.dir` flag in `TestMain`.
 
 ```bash
 allure serve ./examples/allure-results
@@ -86,7 +86,7 @@ See [**Examples**](examples) directory for featured examples.
 ### <h3><a href="examples/single_test.go">Single-step test</a></h3>
 
 Allows implementing single-request tests. See full example in the [**Examples**](examples) directory.
-`ExecuteTest` accepts a plain `*testing.T` or your [testo](https://github.com/ozontech/testo) T (see [Suite](#suite)) — the Allure report is produced either way.
+`ExecuteTest` accepts a plain `*testing.T` or your [testo](https://github.com/ozontech/testo) T (see [Suite](#suite)). Either way you get an Allure report.
 
 ```go
 import (
@@ -513,7 +513,7 @@ func customAssertBody() cute.AssertBody {
 
 #### T
 
-Used for creating custom asserts via `cute.T` — a [testo](https://github.com/ozontech/testo) T with the [testo-allure](https://github.com/ozontech/testo-allure) plugin.
+Used for creating custom asserts via `cute.T`, a [testo](https://github.com/ozontech/testo) T with the [testo-allure](https://github.com/ozontech/testo-allure) plugin.
 You can:
 
 - log information to Allure,
@@ -659,7 +659,7 @@ type OptionalError interface {
 
 ## <h2><a href="https://github.com/ozontech/testo-allure?tab=readme-ov-file#flags">Allure configuration</a></h2>
 
-Allure output is configured by [testo-allure](https://github.com/ozontech/testo-allure). The allure-go output-path environment keys (`ALLURE_OUTPUT_PATH`, `ALLURE_OUTPUT_FOLDER`) are gone — use the `-allure.dir` flag or the `allure.WithOutputDir` option instead. The link-pattern environment keys (`ALLURE_ISSUE_PATTERN`, `ALLURE_TESTCASE_PATTERN`, `ALLURE_LINK_TMS_PATTERN`) still work with `SetIssue`, `SetTestCase` and `TmsLink(s)`, exactly as in allure-go.
+Allure output is configured by [testo-allure](https://github.com/ozontech/testo-allure). The allure-go output-path environment keys (`ALLURE_OUTPUT_PATH`, `ALLURE_OUTPUT_FOLDER`) are gone. Use the `-allure.dir` flag or the `allure.WithOutputDir` option instead. The link-pattern environment keys (`ALLURE_ISSUE_PATTERN`, `ALLURE_TESTCASE_PATTERN`, `ALLURE_LINK_TMS_PATTERN`) still work with `SetIssue`, `SetTestCase` and `TmsLink(s)`, exactly as in allure-go.
 
 Set the output directory with the `-allure.dir` flag (default `allure-results`):
 
@@ -708,19 +708,18 @@ Renamed methods and types:
 | `t.BrokenNow()`                                | `t.Status(allure.StatusBroken); t.FailNow()`              |
 | `allure.Failed` / `allure.Broken` / `allure.Skipped` | `allure.StatusFailed` / `allure.StatusBroken` / `allure.StatusSkipped` |
 | `allure.SeverityType` constants (`allure.CRITICAL`, ...) | `allure.Severity` constants (`allure.SeverityCritical`, ...) |
-| `*allure.Link` (pointer)                       | `allure.Link` (value) — `allure.NewLink(url)`, `allure.Issue(s)`, `allure.TMS(s)` |
-| `*allure.Label` (pointer)                      | `allure.Label` (value) — also `Labels(...allure.Label)` |
+| `*allure.Link` (pointer)                       | `allure.Link` (value): `allure.NewLink(url)`, `allure.Issue(s)`, `allure.TMS(s)` |
+| `*allure.Label` (pointer)                      | `allure.Label` (value); `Labels` takes `...allure.Label` |
 
 Behavior changes:
 
-- Failures inside `CreateStep(...)` now fail the test. Previously a failed
-  expectation inside a step only marked the allure step as failed while
-  `go test` still passed — testo correctly promotes step failures to the test.
+- Failures inside `CreateStep(...)` now fail the test. With allure-go, a failed
+  expectation inside a step only marked the step as failed in the report and
+  `go test` still passed. Testo promotes step failures to the test.
 - Table tests (`CreateTableTest`) still produce a separate Allure result per
-  entry, but run as child tests of your test function; they use the default
-  allure plugin, so plugins from a custom suite T are not propagated to them.
-- `Stage`/`Stagef` now emit a label named `stage` instead of setting the allure
-  result's `stage` field — testo-allure has no result-level stage; the value is
-  preserved best-effort as a label.
+  entry, but each entry now runs as a child test of your test function with the
+  default allure plugin. Plugins from a custom suite T do not reach them.
+- `Stage`/`Stagef` write a label named `stage` because the testo-allure result
+  has no stage field.
 
 See the [testo migration guide](https://github.com/ozontech/testo/blob/main/docs/migration.md) for the full framework-level migration.
