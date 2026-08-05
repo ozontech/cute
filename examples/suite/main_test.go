@@ -11,5 +11,5 @@ import (
 )
 
 func TestExampleSuite(t *testing.T) {
-	testo.RunSuite(t, new(ExampleSuite), allure.WithOutputDir("../")) // custom, read Readme.md for more info
+	testo.RunSuite(t, new(ExampleSuite), allure.WithOutputDir("../allure-results")) // custom, read Readme.md for more info
 }
