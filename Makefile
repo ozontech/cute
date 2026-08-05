@@ -5,13 +5,13 @@ LOCAL_BIN:=$(CURDIR)/bin
 ##################### GOLANG-CI RELATED CHECKS #####################
 # Check global GOLANGCI-LINT
 GOLANGCI_BIN:=$(LOCAL_BIN)/golangci-lint
-GOLANGCI_TAG:=1.54.2
+GOLANGCI_TAG:=1.64.8
 
 # Check local bin version
 ifneq ($(wildcard $(GOLANGCI_BIN)),)
 GOLANGCI_BIN_VERSION:=$(shell $(GOLANGCI_BIN) --version)
 ifneq ($(GOLANGCI_BIN_VERSION),)
-GOLANGCI_BIN_VERSION_SHORT:=$(shell echo "$(GOLANGCI_BIN_VERSION)" | sed -E 's/.* version (.*) built from .* on .*/\1/g')
+GOLANGCI_BIN_VERSION_SHORT:=$(shell echo "$(GOLANGCI_BIN_VERSION)" | sed -E 's/.* version v?([0-9.]+) built.*/\1/g')
 else
 GOLANGCI_BIN_VERSION_SHORT:=0
 endif
@@ -24,7 +24,7 @@ endif
 ifneq (, $(shell which golangci-lint))
 GOLANGCI_VERSION:=$(shell golangci-lint --version 2> /dev/null )
 ifneq ($(GOLANGCI_VERSION),)
-GOLANGCI_VERSION_SHORT:=$(shell echo "$(GOLANGCI_VERSION)"|sed -E 's/.* version (.*) built from .* on .*/\1/g')
+GOLANGCI_VERSION_SHORT:=$(shell echo "$(GOLANGCI_VERSION)"|sed -E 's/.* version v?([0-9.]+) built.*/\1/g')
 else
 GOLANGCI_VERSION_SHORT:=0
 endif
@@ -41,7 +41,7 @@ install:
 # run full lint like in pipeline
 .PHONY: lint
 lint: install-lint
-	$(GOLANGCI_BIN) run --config=.golangci.yaml ./... --new-from-rev=origin/master --build-tags=examples,allure_go,provider
+	$(GOLANGCI_BIN) run --config=.golangci.yaml ./... --new-from-rev=origin/master --build-tags=example,example_upload_file
 
 
 .PHONY: install-lint

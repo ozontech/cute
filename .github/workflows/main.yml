@@ -13,9 +13,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.21
+          go-version: '1.24'
 
       - name: Build
         run: go build -v ./...
@@ -27,12 +27,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run golangci-lint
-        # You may pin to the exact commit or the version.
-        # uses: golangci/golangci-lint-action@5c56cd6c9dc07901af25baab6f2b0d9f3b7c3018
-        uses: golangci/golangci-lint-action@v2.5.2
-        # for settings see https://github.com/golangci/golangci-lint-action
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
+          go-version: '1.24'
+      - name: Run golangci-lint
+        # for settings see https://github.com/golangci/golangci-lint-action
+        uses: golangci/golangci-lint-action@v6
+        with:
+          # last v1.x release; supports Go 1.24 and the current v1-format .golangci.yaml
+          version: v1.64.8
           only-new-issues: true
           # golangci-lint command line arguments
           args: --timeout=5m0s
@@ -42,8 +46,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
       - name: Run examples
-        run: make examples
+        run: make example
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
