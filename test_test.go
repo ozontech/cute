@@ -11,11 +11,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ozontech/allure-go/pkg/framework/core/common"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ozontech/testo"
+	allure "github.com/ozontech/testo-allure"
 
 	"github.com/ozontech/cute/internal/utils"
 )
+
+// runCuteTest runs f with a live cute.T (testo.T + allure plugin) and
+// redirects allure output to a temp dir so unit tests leave no artifacts.
+func runCuteTest(t *testing.T, f func(ct defaultT)) {
+	testo.RunTest(t, f, allure.WithOutputDir(t.TempDir()))
+}
 
 func TestCreateRequest(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "http://go.com", nil)
@@ -110,20 +118,20 @@ func TestValidateResponseEmpty(t *testing.T) {
 		Expect: new(Expect),
 	}
 
-	temp := common.NewT(t)
-
-	errs := ht.validateResponse(temp, &http.Response{})
-	require.Empty(t, errs)
+	runCuteTest(t, func(ct defaultT) {
+		errs := ht.validateResponse(ct, &http.Response{})
+		require.Empty(ct, errs)
+	})
 }
 
 func TestValidateResponseCode(t *testing.T) {
 	ht := &Test{
 		Expect: &Expect{Code: 200},
 	}
-	temp := common.NewT(t)
-
-	errs := ht.validateResponse(temp, &http.Response{StatusCode: http.StatusOK})
-	require.Empty(t, errs)
+	runCuteTest(t, func(ct defaultT) {
+		errs := ht.validateResponse(ct, &http.Response{StatusCode: http.StatusOK})
+		require.Empty(ct, errs)
+	})
 }
 
 func TestValidateResponseWithErrors(t *testing.T) {
@@ -149,7 +157,6 @@ func TestValidateResponseWithErrors(t *testing.T) {
 		}
 
 		reader = bytes.NewReader([]byte(`{"a":"ab","b":"bc"}`))
-		temp   = createAllureT(t)
 		resp   = &http.Response{
 			StatusCode: http.StatusBadRequest,
 			Header: map[string][]string{
@@ -162,9 +169,11 @@ func TestValidateResponseWithErrors(t *testing.T) {
 
 	ht.initEmptyFields()
 
-	errs := ht.validateResponse(temp, resp)
+	runCuteTest(t, func(ct defaultT) {
+		errs := ht.validateResponse(ct, resp)
 
-	require.Len(t, errs, 2)
+		require.Len(ct, errs, 2)
+	})
 }
 
 type mockRoundTripper struct{}
@@ -206,14 +215,14 @@ func TestSanitizeURLHook(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, req)
 
-	newT := createAllureT(t)
+	runCuteTest(t, func(ct defaultT) {
+		err = test.addInformationRequest(ct, req)
+		require.NoError(ct, err)
 
-	err = test.addInformationRequest(newT, req)
-	require.NoError(t, err)
-
-	decodedQuery, err := url.QueryUnescape(req.URL.RawQuery)
-	require.NoError(t, err)
-	require.Equal(t, "key=****", decodedQuery)
+		decodedQuery, decodeErr := url.QueryUnescape(req.URL.RawQuery)
+		require.NoError(ct, decodeErr)
+		require.Equal(ct, "key=****", decodedQuery)
+	})
 }
 
 func TestSanitizeURL_LastRequestURL(t *testing.T) {
@@ -232,8 +241,9 @@ func TestSanitizeURL_LastRequestURL(t *testing.T) {
 		RequestSanitizer: sanitizeKeyParam("****"),
 	}
 
-	allureT := createAllureT(t)
-	test.Execute(context.Background(), allureT)
+	runCuteTest(t, func(ct defaultT) {
+		test.Execute(context.Background(), ct)
+	})
 
 	decodedURL, err := url.QueryUnescape(test.lastRequestURL)
 	require.NoError(t, err)
@@ -269,6 +279,7 @@ func TestSanitizeURL_RealRequest(t *testing.T) {
 		RequestSanitizer: sanitizeKeyParam("****"),
 	}
 
-	allureT := createAllureT(t)
-	test.Execute(context.Background(), allureT)
+	runCuteTest(t, func(ct defaultT) {
+		test.Execute(context.Background(), ct)
+	})
 }

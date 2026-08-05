@@ -161,7 +161,7 @@ func (it *Test) addInformationRequest(t T, req *http.Request) error {
 	}
 
 	if c := curl.String(); len(c) <= 2048 {
-		it.Info(t, "[Request] "+c)
+		it.Info(t, "[Request] %s", c)
 	} else {
 		it.Info(t, "[Request] Do request")
 	}
@@ -230,7 +230,7 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 	}
 
 	t.Parameters(allure.NewParameter("response_code", fmt.Sprint(response.StatusCode)))
-	it.Info(t, "[Response] Status: "+response.Status)
+	it.Info(t, "[Response] Status: %s", response.Status)
 
 	if response.Body == nil {
 		return nil

@@ -364,7 +364,7 @@ func (it *Test) processTestErrors(t internalT, errs []error) ResultState {
 			}
 		}
 
-		it.Error(t, message)
+		it.Error(t, "%s", message)
 
 		countNotOptionalErrors++
 	}

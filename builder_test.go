@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/allure"
 	"github.com/stretchr/testify/require"
+
+	allure "github.com/ozontech/testo-allure"
 )
 
 func TestBuilderAfterTest(t *testing.T) {
@@ -179,17 +180,17 @@ func TestHTTPTestMaker(t *testing.T) {
 		allureID       = "AllureID"
 		owner          = "Owner"
 		lead           = "Lead"
-		label          = &allure.Label{Name: "kek", Value: "lol"}
+		label          = allure.NewLabel("kek", "lol")
 		setIssue       = "SetIssue"
 		setTestCase    = "SetTestCase"
 		repeatCount    = 10
 		repeatDelay    = time.Duration(10)
-		link           = &allure.Link{
+		link           = allure.Link{
 			Name: "link",
 			Type: "type",
 			URL:  "http://go.go",
 		}
-		labels = []*allure.Label{
+		labels = []allure.Label{
 			{
 				Name:  "label_1",
 				Value: "value_1",
@@ -274,7 +275,7 @@ func TestHTTPTestMaker(t *testing.T) {
 		AddParentSuite(addParentSuite).
 		Story(story).
 		Tag(tag).
-		Severity(allure.CRITICAL).
+		Severity(allure.SeverityCritical).
 		AllureID(allureID).
 		Owner(owner).
 		Lead(lead).
@@ -325,11 +326,11 @@ func TestHTTPTestMaker(t *testing.T) {
 	require.Equal(t, tag, resHt.allureLabels.tag)
 	require.Equal(t, owner, resHt.allureLabels.owner)
 	require.Equal(t, lead, resHt.allureLabels.lead)
-	require.Equal(t, label, resHt.allureLabels.label)
+	require.Equal(t, &label, resHt.allureLabels.label)
 	require.Equal(t, allureID, resHt.allureLabels.allureID)
 	require.Equal(t, setIssue, resHt.allureLinks.issue)
 	require.Equal(t, setTestCase, resHt.allureLinks.testCase)
-	require.Equal(t, link, resHt.allureLinks.link)
+	require.Equal(t, &link, resHt.allureLinks.link)
 	require.Equal(t, repeatCount, resTest.Request.Retry.Count)
 	require.Equal(t, repeatDelay, resTest.Request.Retry.Delay)
 
