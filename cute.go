@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/ozontech/testo"
+	"github.com/ozontech/testo/testoplugin"
+	"github.com/ozontech/testo/testoreflect"
 
 	allure "github.com/ozontech/testo-allure"
 )
@@ -70,7 +72,16 @@ func (qt *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuild
 
 		return qt.executeTests(ctx, tt)
 	case *testing.T:
-		var res []ResultsHTTPBuilder
+		var (
+			res  []ResultsHTTPBuilder
+			opts []testoplugin.Option
+		)
+
+		if qt.isTableTest {
+			// The wrapper test is only a launcher for table tests, each of which
+			// produces its own allure result. Keep the wrapper out of the report.
+			opts = append(opts, allure.WithExcluded(true))
+		}
 
 		testo.RunTest(tt, func(inT defaultT) {
 			if qt.parallel {
@@ -78,7 +89,7 @@ func (qt *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuild
 			}
 
 			res = qt.executeTests(ctx, inT)
-		})
+		}, opts...)
 
 		return res
 	default:
@@ -118,7 +129,7 @@ func (qt *cute) executeTests(ctx context.Context, t T) []ResultsHTTPBuilder {
 			currentTest.Name = t.Name()
 
 			// set labels, but only when running as a test, not inside a step
-			if info := testo.Reflect(t).Test; info == nil || info.GetLevel() == 0 {
+			if info, ok := testo.Reflect(t).Test.(testoreflect.RegularTestInfo); !ok || !info.IsSubtest {
 				qt.setAllureInformation(t)
 			}
 
