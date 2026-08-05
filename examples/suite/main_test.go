@@ -4,13 +4,12 @@
 package suite
 
 import (
-	"os"
 	"testing"
 
-	"github.com/ozontech/allure-go/pkg/framework/suite"
+	"github.com/ozontech/testo"
+	allure "github.com/ozontech/testo-allure"
 )
 
 func TestExampleSuite(t *testing.T) {
-	os.Setenv("ALLURE_OUTPUT_PATH", "../") // custom, read Readme.md for more info
-	suite.RunSuite(t, new(ExampleSuite))
+	testo.RunSuite(t, new(ExampleSuite), allure.WithOutputDir("../")) // custom, read Readme.md for more info
 }

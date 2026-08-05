@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/ozontech/allure-go/pkg/allure"
 	"github.com/ozontech/cute"
 	cuteErrors "github.com/ozontech/cute/errors"
+	allure "github.com/ozontech/testo-allure"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,7 +32,7 @@ func CustomAssertBody() cute.AssertBody {
 
 func CustomAssertBodyT() cute.AssertBodyT {
 	return func(t cute.T, bytes []byte) error {
-		t.WithNewParameters("example_parameter", "example")
+		t.Parameters(allure.NewParameter("example_parameter", "example"))
 		require.GreaterOrEqual(t, len(bytes), 100)
 		return nil
 	}
@@ -40,18 +40,12 @@ func CustomAssertBodyT() cute.AssertBodyT {
 
 func CustomAssertBodyWithAllureStep() cute.AssertBodyT {
 	return func(t cute.T, bytes []byte) error {
-
-		step := allure.NewSimpleStep("Custom assert step")
-		defer func() {
-			t.Step(step)
-		}()
-
-		if len(bytes) == 0 {
-			step.Status = allure.Failed
-			step.WithAttachments(allure.NewAttachment("Error", allure.Text, []byte("response body is empty")))
-
-			return nil
-		}
+		allure.Step(t, "Custom assert step", func(t cute.T) {
+			if len(bytes) == 0 {
+				t.Attach("Error", allure.Bytes("response body is empty").As(allure.TextPlain))
+				t.Status(allure.StatusFailed)
+			}
+		})
 
 		return nil
 	}

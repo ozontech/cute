@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute"
 )
 
@@ -18,7 +17,7 @@ import (
 
 */
 
-func (i *ExampleSuite) Test_Simple(t provider.T) {
+func (i *ExampleSuite) Test_Simple(t T) {
 	var (
 		testMaker   = cute.NewHTTPTestMaker()
 		testBuilder = testMaker.NewTestBuilder()

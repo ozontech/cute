@@ -14,10 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/allure"
-	"github.com/ozontech/allure-go/pkg/framework/provider"
-	"github.com/ozontech/allure-go/pkg/framework/runner"
 	cuteErrors "github.com/ozontech/cute/errors"
+	"github.com/ozontech/testo"
+	allure "github.com/ozontech/testo-allure"
 
 	"github.com/ozontech/cute"
 	"github.com/ozontech/cute/asserts/json"
@@ -51,7 +50,9 @@ func Test_Single_1(t *testing.T) {
 			CustomAssertBody(),
 		).
 		AssertBodyT(func(t cute.T, body []byte) error {
-			t.Step(allure.NewSimpleStep("inside Assert body. 1 ", allure.NewParameters("key", "value")...))
+			allure.Step(t, "inside Assert body. 1 ", func(stepT cute.T) {
+				stepT.Parameters(allure.NewParameter("key", "value"))
+			})
 
 			return nil
 		}).
@@ -160,8 +161,8 @@ func Test_Single_Broken_2(t *testing.T) {
 		ExecuteTest(context.Background(), t)
 }
 
-func Test_Single_2_AllureRunner(t *testing.T) {
-	runner.Run(t, "Single test with allure-go Runner", func(t provider.T) {
+func Test_Single_2_TestoRunner(t *testing.T) {
+	t.Run("Single test with testo Runner", testo.Test(func(t T) {
 		var (
 			testMaker   = cute.NewHTTPTestMaker()
 			testBuilder = testMaker.NewTestBuilder()
@@ -171,7 +172,7 @@ func Test_Single_2_AllureRunner(t *testing.T) {
 		u.Path = path.Join(u.Path, "/posts/1/comments")
 
 		testBuilder.
-			Title("Single test with allure.T and repeat errors").
+			Title("Single test with testo T and repeat errors").
 			Tag("single_test").
 			Description("some_description").
 			Create().
@@ -191,5 +192,5 @@ func Test_Single_2_AllureRunner(t *testing.T) {
 				json.Present("$[0].photo"), // Example optional fail
 			).
 			ExecuteTest(context.Background(), t)
-	})
+	}))
 }

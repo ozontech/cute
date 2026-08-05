@@ -7,7 +7,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute"
 	"github.com/ozontech/cute/asserts/headers"
 	"github.com/ozontech/cute/asserts/json"
@@ -63,7 +62,7 @@ Response:
 
 ]
 */
-func (i *ExampleSuite) Test_OneStep(t provider.T) {
+func (i *ExampleSuite) Test_OneStep(t T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()
 	)

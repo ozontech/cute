@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute"
 	"github.com/ozontech/cute/examples"
 )
@@ -24,7 +23,7 @@ import (
 
 */
 
-func (i *ExampleSuite) Test_TwoSteps(t provider.T) {
+func (i *ExampleSuite) Test_TwoSteps(t T) {
 	var (
 		testBuilder = i.testMaker.NewTestBuilder()
 

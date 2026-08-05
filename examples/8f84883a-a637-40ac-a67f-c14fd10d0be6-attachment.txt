@@ -1,0 +1,2 @@
+on path $. expect lenght 0, but actual 5
+Called from: /Users/vzbarashchenko/Code/github/ozontech/cute/examples/suite/one_step_errors.go:44

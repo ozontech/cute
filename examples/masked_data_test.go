@@ -10,20 +10,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
-	"github.com/ozontech/allure-go/pkg/framework/runner"
+	"github.com/ozontech/testo"
+	allure "github.com/ozontech/testo-allure"
 
 	"github.com/ozontech/cute"
 )
 
 func TestSanitizer(t *testing.T) {
-	runner.Run(t, "Single test with request and response sanitizer", func(t provider.T) {
+	t.Run("Single test with request and response sanitizer", testo.Test(func(t T) {
 
-		t.WithNewStep("First step", func(sCtx provider.StepCtx) {
-			sCtx.NewStep("Inside first step")
+		allure.Step(t, "First step", func(t T) {
+			allure.Step(t, "Inside first step", func(T) {})
 		})
 
-		t.WithNewStep("Step name", func(sCtx provider.StepCtx) {
+		allure.Step(t, "Step name", func(t T) {
 			u, _ := url.Parse("https://jsonplaceholder.typicode.com/posts/1/comments?example=11")
 			query := u.Query()
 			query.Set("name", "Vasya")
@@ -57,8 +57,8 @@ func TestSanitizer(t *testing.T) {
 				).
 				ExpectExecuteTimeout(10*time.Second).
 				ExpectStatus(http.StatusCreated).
-				ExecuteTest(context.Background(), sCtx)
+				ExecuteTest(context.Background(), t)
 		})
-	})
+	}))
 
 }

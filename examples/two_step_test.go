@@ -11,9 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
-	"github.com/ozontech/allure-go/pkg/framework/runner"
 	"github.com/ozontech/cute"
+	"github.com/ozontech/testo"
 )
 
 func Test_TwoSteps_1(t *testing.T) {
@@ -45,12 +44,12 @@ func Test_TwoSteps_1(t *testing.T) {
 		ExecuteTest(context.Background(), t)
 }
 
-func Test_TwoSteps_2_AllureRunner(t *testing.T) {
-	runner.Run(t, "Test with two steps", func(t provider.T) {
+func Test_TwoSteps_2_TestoRunner(t *testing.T) {
+	t.Run("Test with two steps", testo.Test(func(t T) {
 		testBuilder := cute.NewHTTPTestMaker().NewTestBuilder()
 
 		testBuilder.
-			Title("Test with two requests executed by allure-go").
+			Title("Test with two requests executed by testo").
 			Tag("two_steps").
 			Description("some_description").
 			CreateStep("Request 1").
@@ -70,7 +69,7 @@ func Test_TwoSteps_2_AllureRunner(t *testing.T) {
 			ExpectExecuteTimeout(10*time.Second).
 			ExpectStatus(http.StatusOK).
 			ExecuteTest(context.Background(), t)
-	})
+	}))
 }
 
 func Test_TwoSteps_3(t *testing.T) {

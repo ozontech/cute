@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
 	"github.com/ozontech/cute"
+	allure "github.com/ozontech/testo-allure"
 )
 
 func Test_Async_1(t *testing.T) {
@@ -21,11 +21,11 @@ func Test_Async_1(t *testing.T) {
 		Create().
 		BeforeExecuteT(
 			func(t cute.T, r *http.Request) error {
-				t.WithNewStep("insideBefore", func(stepCtx provider.StepCtx) {
+				allure.Step(t, "insideBefore", func(stepT cute.T) {
 					time.Sleep(time.Second)
 					now := time.Now()
-					stepCtx.Logf("Test 1. Start time %v", now)
-					stepCtx.WithNewParameters("Test 1. Time", now)
+					stepT.Logf("Test 1. Start time %v", now)
+					stepT.Parameters(allure.NewParameter("Test 1. Time", now))
 				})
 
 				return nil
@@ -33,10 +33,10 @@ func Test_Async_1(t *testing.T) {
 		).
 		AfterExecuteT(
 			func(t cute.T, resp *http.Response, errs []error) error {
-				t.WithNewStep("insideAfter", func(stepCtx provider.StepCtx) {
+				allure.Step(t, "insideAfter", func(stepT cute.T) {
 					now := time.Now()
-					stepCtx.Logf("Test 1. Stop time %v", now)
-					stepCtx.WithNewParameters("Test 1. Stop time", now)
+					stepT.Logf("Test 1. Stop time %v", now)
+					stepT.Parameters(allure.NewParameter("Test 1. Stop time", now))
 				})
 
 				return nil
@@ -56,10 +56,10 @@ func Test_Async_2(t *testing.T) {
 		Create().
 		BeforeExecuteT(
 			func(t cute.T, r *http.Request) error {
-				t.WithNewStep("insideBefore", func(stepCtx provider.StepCtx) {
+				allure.Step(t, "insideBefore", func(stepT cute.T) {
 					now := time.Now()
-					stepCtx.Logf("Test 2. Start time %v", now)
-					stepCtx.WithNewParameters("Test 2. Start time", now)
+					stepT.Logf("Test 2. Start time %v", now)
+					stepT.Parameters(allure.NewParameter("Test 2. Start time", now))
 					time.Sleep(2 * time.Second)
 				})
 
@@ -68,10 +68,10 @@ func Test_Async_2(t *testing.T) {
 		).
 		AfterExecuteT(
 			func(t cute.T, resp *http.Response, errs []error) error {
-				t.WithNewStep("insideAfter", func(stepCtx provider.StepCtx) {
+				allure.Step(t, "insideAfter", func(stepT cute.T) {
 					now := time.Now()
-					stepCtx.Logf("test 2. Stop time %v", now)
-					stepCtx.WithNewParameters("Test 2. Stop time", now)
+					stepT.Logf("test 2. Stop time %v", now)
+					stepT.Parameters(allure.NewParameter("Test 2. Stop time", now))
 				})
 
 				return nil

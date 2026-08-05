@@ -3,21 +3,20 @@ package suite
 import (
 	"net/url"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
-	"github.com/ozontech/allure-go/pkg/framework/suite"
+	"github.com/ozontech/testo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ozontech/cute"
 )
 
 type ExampleSuite struct {
-	suite.Suite
+	testo.Suite[T]
 	host *url.URL
 
 	testMaker *cute.HTTPTestMaker
 }
 
-func (i *ExampleSuite) BeforeAll(t provider.T) {
+func (i *ExampleSuite) BeforeAll(t T) {
 	// Prepare http test builder
 	i.testMaker = cute.NewHTTPTestMaker()
 
@@ -28,7 +27,7 @@ func (i *ExampleSuite) BeforeAll(t provider.T) {
 	i.host = host
 }
 
-func (i *ExampleSuite) BeforeEach(t provider.T) {
+func (i *ExampleSuite) BeforeEach(t T) {
 	t.Feature("ExampleSuite")
 	t.Tags("some_global_tag")
 }

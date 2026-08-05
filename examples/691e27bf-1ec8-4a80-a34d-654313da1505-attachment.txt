@@ -1,0 +1,2 @@
+on path $[1].not_present. value not present
+Called from: /Users/vzbarashchenko/Code/github/ozontech/cute/examples/suite/one_step_errors.go:44
