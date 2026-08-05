@@ -6,6 +6,8 @@
 
 HTTP and REST API testing for Go using Allure reports.
 
+Built on the [testo](https://github.com/ozontech/testo) framework with the [testo-allure](https://github.com/ozontech/testo-allure) plugin. Migrating from cute v0.x? See [Migrating from cute v0.x (allure-go)](#migrating-from-cute-v0x-allure-go).
+
 ## Features
 
 - Expressive and intuitive syntax.
@@ -37,7 +39,8 @@ HTTP and REST API testing for Go using Allure reports.
         - [Base](#base)
         - [T](#t)
         - [Errors](#assert-errors)
-- [Global Environment Keys](#global-environment-keys)
+- [Allure configuration](#allure-configuration)
+- [Migrating from cute v0.x (allure-go)](#migrating-from-cute-v0x-allure-go)
 
 
 ## Workflow
@@ -53,7 +56,7 @@ HTTP and REST API testing for Go using Allure reports.
 
 ## Requirements
 
-- Go 1.17+
+- Go 1.24+
 
 
 ## Demo
@@ -83,7 +86,7 @@ See [**Examples**](examples) directory for featured examples.
 ### <h3><a href="examples/single_test.go">Single-step test</a></h3>
 
 Allows implementing single-request tests. See full example in the [**Examples**](examples) directory.
-To view an Allure report, use `testing.T` or `provider.T` from [allure-go](https://github.com/ozontech/allure-go/tree/master?tab=readme-ov-file).
+`ExecuteTest` accepts a plain `*testing.T` or your [testo](https://github.com/ozontech/testo) T (see [Suite](#suite)) — the Allure report is produced either way.
 
 ```go
 import (
@@ -183,33 +186,39 @@ See full in the [**Examples**](examples/two_step_test.go) directory.
 
 Suite provides a structure for describing tests by organizing them into test suites. It's helpful if you have a large number of different tests and find it difficult to browse through them without using additional layer nesting levels of test calls.
 
-[Learn more about suite with Allure reports](https://github.com/ozontech/allure-go#suite)
+[Learn more about suites in testo](https://github.com/ozontech/testo/blob/main/docs/tutorial.md#suites)
 
 
-1. Declare a structure with `suite.Suite` and `*cute.HTTPTestMaker`.
+1. Declare a T struct with `*testo.T` and the Allure plugin, and a suite structure with `testo.Suite[T]` and `*cute.HTTPTestMaker`.
 
 ```go
 import (
     "github.com/ozontech/cute"
-    "github.com/ozontech/allure-go/pkg/framework/provider"
-    "github.com/ozontech/allure-go/pkg/framework/suite"
+    "github.com/ozontech/testo"
+    allure "github.com/ozontech/testo-allure"
 )
 
+type T struct {
+    *testo.T
+    *allure.PluginAllure
+}
+
 type ExampleSuite struct {
-    suite.Suite
+    testo.Suite[T]
+
     host *url.URL
 
     testMaker *cute.HTTPTestMaker
 }
 
-func (i *ExampleSuite) BeforeAll(t provider.T) {
+func (i *ExampleSuite) BeforeAll(t T) {
     // Prepare http test builder
     i.testMaker = cute.NewHTTPTestMaker()
 
     // Preparing host
     host, err := url.Parse("https://jsonplaceholder.typicode.com/")
     if err != nil {
-        t.Fatalf("could not parse url, error %w", err)
+        t.Fatalf("could not parse url, error %v", err)
     }
 
     i.host = host
@@ -220,11 +229,11 @@ func (i *ExampleSuite) BeforeAll(t provider.T) {
 
 ```go
 import (
-    "github.com/ozontech/allure-go/pkg/framework/suite"
+    "github.com/ozontech/testo"
 )
 
 func TestExampleTest(t *testing.T) {
-    suite.RunSuite(t, new(ExampleSuite))
+    testo.RunSuite(t, new(ExampleSuite))
 }
 ```
 
@@ -237,7 +246,7 @@ import (
     "github.com/ozontech/cute/asserts/json"
 )
 
-func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
+func (i *ExampleSuite) TestExample_OneStep(t T) {
     var (
         testBuilder = i.testMaker.NewTestBuilder()
     )
@@ -248,8 +257,7 @@ func (i *ExampleSuite) TestExample_OneStep(t provider.T) {
     testBuilder.
         Title("TestExample_OneStep").
         Tags("one_step", "some_local_tag", "json").
-        Create().
-        StepName("Example GET json request").
+        CreateStep("Example GET json request").
         RequestBuilder(
             cute.WithHeaders(map[string][]string{
                 "some_header":       []string{"something"},
@@ -495,7 +503,7 @@ func customAssertBody() cute.AssertBody {
 
 #### T
 
-Used for creating custom asserts via [Allure Actions](https://github.com/ozontech/allure-go#suite) and [testing.TB](https://pkg.go.dev/testing#TB).
+Used for creating custom asserts via `cute.T` — a [testo](https://github.com/ozontech/testo) T with the [testo-allure](https://github.com/ozontech/testo-allure) plugin.
 You can:
 
 - log information to Allure,
@@ -519,27 +527,28 @@ func customAssertBodyT() cute.AssertBodyT {
 }
 ```
 
-Example with creating steps:
+Example with creating steps, parameters and attachments:
 
 ```go
+import (
+    allure "github.com/ozontech/testo-allure"
+)
+
 func customAssertBodySuite() cute.AssertBodyT {
     return func(t cute.T, bytes []byte) error {
-        step := allure.NewSimpleStep("Custom assert step")
-        defer func() {
-            t.Step(step)
-        }()
+        allure.Step(t, "Custom assert step", func(t cute.T) {
+            t.Parameters(allure.NewParameter("body_len", len(bytes)))
 
-        if len(bytes) == 0 {
-            step.Status = allure.Failed
-            step.Attachment(allure.NewAttachment("Error", allure.Text, []byte("response body is empty")))
-
-            return nil
-        }
+            if len(bytes) == 0 {
+                t.Attach("Error", allure.Bytes("response body is empty").As(allure.TextPlain))
+                t.Status(allure.StatusFailed)
+                t.Fail()
+            }
+        })
 
         return nil
     }
 }
-
 ```
 
 <details>
@@ -637,13 +646,66 @@ type OptionalError interface {
 
 </details>
 
-## <h2><a href="https://github.com/ozontech/allure-go?tab=readme-ov-file#wrench-configure-your-environment">Global Environment Keys</a></h2>
+## <h2><a href="https://github.com/ozontech/testo-allure?tab=readme-ov-file#flags">Allure configuration</a></h2>
 
+Allure output is configured by [testo-allure](https://github.com/ozontech/testo-allure). The allure-go environment keys (`ALLURE_OUTPUT_PATH`, `ALLURE_OUTPUT_FOLDER`, etc.) are gone.
 
-| Key | Meaning                                                       | Default                 |
-|---|---------------------------------------------------------------|-------------------------|
-|`ALLURE_OUTPUT_PATH`| Path to output allure results.                                 | `.` (Folder with tests) |
-|`ALLURE_OUTPUT_FOLDER`| Name of result folder.                                            | `/allure-results`       |
-|`ALLURE_ISSUE_PATTERN`| Url pattepn to issue. Must contain `%s`.                   |                         |
-|`ALLURE_TESTCASE_PATTERN`| URL pattern to TestCase. Must contain `%s`.               |                         |
-|`ALLURE_LAUNCH_TAGS`| Default tags for all tests. Tags must be separated by commas. |                         |
+Set the output directory with the `-allure.dir` flag (default `allure-results`):
+
+```bash
+  go test ./... -allure.dir /some/custom/dir/my-allure-results
+```
+
+Or in code, pass the `allure.WithOutputDir(dir)` option to `testo.RunSuite` / `testo.RunTest` / `testo.Test`:
+
+```go
+func TestExampleTest(t *testing.T) {
+    testo.RunSuite(t, new(ExampleSuite), allure.WithOutputDir("./allure-results"))
+}
+```
+
+`ALLURE_TESTPLAN_PATH` (selective test run via an Allure TestOps testplan) still works.
+
+See the [testo-allure README](https://github.com/ozontech/testo-allure?tab=readme-ov-file#flags) for the full list of flags and options.
+
+## Migrating from cute v0.x (allure-go)
+
+Cute is now built on [testo](https://github.com/ozontech/testo) with the [testo-allure](https://github.com/ozontech/testo-allure) plugin instead of [allure-go](https://github.com/ozontech/allure-go). The builder API is unchanged; only the test-framework layer differs:
+
+- Declare a T struct and use it everywhere `provider.T` was used before:
+
+```go
+type T struct {
+    *testo.T
+    *allure.PluginAllure
+}
+```
+
+- `ExecuteTest(ctx, t)` and `Test.Execute(ctx, t)` still accept a plain `*testing.T` as well as your T.
+- Runner: `runner.Run(t, "name", func(t provider.T) {...})` → `t.Run("name", testo.Test(func(t T) {...}))`.
+
+Renamed methods and types:
+
+| allure-go (cute v0.x)                          | testo (cute v1+)                                          |
+|------------------------------------------------|-----------------------------------------------------------|
+| `suite.Suite`                                  | `testo.Suite[T]`                                          |
+| `suite.RunSuite(t, new(S))`                    | `testo.RunSuite(t, new(S))`                               |
+| `provider.T` / `provider.StepCtx`              | `cute.T` / your T                                         |
+| `t.WithNewStep("name", func(sCtx provider.StepCtx) {...})` | `allure.Step(t, "name", func(t T) {...})`     |
+| `t.WithNewParameters("k", "v")`                | `t.Parameters(allure.NewParameter("k", "v"))`             |
+| `t.WithNewAttachment(name, mime, content)`     | `t.Attach(name, allure.Bytes(content).As(mediaType))`     |
+| `t.BrokenNow()`                                | `t.Status(allure.StatusBroken); t.FailNow()`              |
+| `allure.Failed` / `allure.Broken` / `allure.Skipped` | `allure.StatusFailed` / `allure.StatusBroken` / `allure.StatusSkipped` |
+| `allure.SeverityLevel` constants (`allure.CRITICAL`, ...) | `allure.Severity` constants (`allure.SeverityCritical`, ...) |
+| `*allure.Link` (pointer)                       | `allure.Link` (value) — `allure.NewLink(url)`, `allure.Issue(s)`, `allure.TMS(s)` |
+
+Behavior changes:
+
+- Failures inside `CreateStep(...)` now fail the test. Previously a failed
+  expectation inside a step only marked the allure step as failed while
+  `go test` still passed — testo correctly promotes step failures to the test.
+- Table tests (`CreateTableTest`) still produce a separate Allure result per
+  entry, but run as child tests of your test function; they use the default
+  allure plugin, so plugins from a custom suite T are not propagated to them.
+
+See the [testo migration guide](https://github.com/ozontech/testo/blob/main/docs/migration.md) for the full framework-level migration.
