@@ -63,20 +63,20 @@ Built on the [testo](https://github.com/ozontech/testo) framework with the [test
 
 Run example.
 ```bash
-  make example
+make example
 ```
 To view detailed test reports, install Allure framework. It's optional.
 
 [Learn more about Allure reports](https://github.com/allure-framework)
 
 ```bash
-  brew install allure
+brew install allure
 ```
 
-Run Allure.
+Run Allure. All examples write their results to `examples/allure-results` (the root examples via the default `-allure.dir`, the suite example via `allure.WithOutputDir("../allure-results")`, and the table tests via a `TestMain` that sets the `allure.dir` flag).
 
 ```bash
-  allure serve ./examples/allure-results
+allure serve ./examples/allure-results
 ```
 
 ## Test examples
@@ -92,7 +92,6 @@ Allows implementing single-request tests. See full example in the [**Examples**]
 import (
     "context"
     "net/http"
-    "path"
     "testing"
     "time"
 
@@ -139,7 +138,7 @@ import (
 
     "github.com/ozontech/cute"
 )
-    
+
 func Test_TwoSteps(t *testing.T) {
     responseCode := 0
 
@@ -156,7 +155,7 @@ func Test_TwoSteps(t *testing.T) {
         NextTest().
 
         // Execute after first step and parse response code
-        AfterTestExecute(func(response *http.Response, errors []error) error { 
+        AfterTestExecute(func(response *http.Response, errors []error) error {
             responseCode = response.StatusCode
 
             return nil
@@ -193,6 +192,8 @@ Suite provides a structure for describing tests by organizing them into test sui
 
 ```go
 import (
+    "net/url"
+
     "github.com/ozontech/cute"
     "github.com/ozontech/testo"
     allure "github.com/ozontech/testo-allure"
@@ -229,6 +230,8 @@ func (i *ExampleSuite) BeforeAll(t T) {
 
 ```go
 import (
+    "testing"
+
     "github.com/ozontech/testo"
 )
 
@@ -241,6 +244,12 @@ func TestExampleTest(t *testing.T) {
 
 ```go
 import (
+    "context"
+    "net/http"
+    "net/url"
+    "path"
+    "time"
+
     "github.com/ozontech/cute"
     "github.com/ozontech/cute/asserts/headers"
     "github.com/ozontech/cute/asserts/json"
@@ -250,10 +259,10 @@ func (i *ExampleSuite) TestExample_OneStep(t T) {
     var (
         testBuilder = i.testMaker.NewTestBuilder()
     )
-    
+
     u, _ := url.Parse(i.host.String())
     u.Path = path.Join(u.Path, "/posts/1/comments")
-    
+
     testBuilder.
         Title("TestExample_OneStep").
         Tags("one_step", "some_local_tag", "json").
@@ -273,15 +282,15 @@ func (i *ExampleSuite) TestExample_OneStep(t T) {
             json.Equal("$[0].email", "Eliseo@gardner.biz"),
             json.Present("$[1].name"),
             json.NotPresent("$[1].some_not_present"),
-            json.GreaterThan("$", 3),
+            json.LengthGreaterThan("$", 3),
             json.Length("$", 5),
-            json.LessThan("$", 100),
+            json.LengthLessThan("$", 100),
             json.NotEqual("$[3].name", "kekekekeke"),
         ).
         OptionalAssertBody(
-            json.GreaterThan("$", 3),
+            json.LengthGreaterThan("$", 3),
             json.Length("$", 5),
-            json.LessThan("$", 100),
+            json.LengthLessThan("$", 100),
         ).
         AssertHeaders(
             headers.Present("Content-Type"),
@@ -307,11 +316,12 @@ You can create a table test in 2 ways. They'll have the same Allure reports.
 ```go
 import (
     "context"
-    "fmt"
     "net/http"
     "testing"
 
     "github.com/ozontech/cute"
+    "github.com/ozontech/cute/asserts/json"
+    "github.com/ozontech/cute/errors"
 )
 
 func Test_Table_Array(t *testing.T) {
@@ -434,10 +444,10 @@ You can create your own asserts or use ready-made from the package asserts.
 - `Equal` is a function to assert that a JSONPath expression matches the given value.
 - `NotEqual` is a function to check that a JSONPath expression value isn't equal to the given value.
 - `Length` is a function to assert that value is the expected length.
-    - `GreaterThan` is a function to assert that value is greater than the given length.
-    - `GreaterOrEqualThan` is a function to assert that value is greater or equal to the given length.
-    - `LessThan` is a function to assert that value is less than the given length.
-    - `LessOrEqualThan` is a function to assert that value is less or equal to the given length.
+    - `LengthGreaterThan` is a function to assert that value is greater than the given length.
+    - `LengthGreaterOrEqualThan` is a function to assert that value is greater or equal to the given length.
+    - `LengthLessThan` is a function to assert that value is less than the given length.
+    - `LengthLessOrEqualThan` is a function to assert that value is less or equal to the given length.
 - `Present` is a function to assert that value is present. Value can be 0 or null.
 - `NotEmpty` is a function to assert that value is present and not empty. Value can't be 0 or null.
 - `NotPresent` is a function to assert that value isn't present.
@@ -495,7 +505,7 @@ func customAssertBody() cute.AssertBody {
         if len(bytes) == 0 {
             return errors.New("response body is empty")
         }
-        
+
         return nil
     }
 }
@@ -531,6 +541,7 @@ Example with creating steps, parameters and attachments:
 
 ```go
 import (
+    "github.com/ozontech/cute"
     allure "github.com/ozontech/testo-allure"
 )
 
@@ -648,7 +659,7 @@ type OptionalError interface {
 
 ## <h2><a href="https://github.com/ozontech/testo-allure?tab=readme-ov-file#flags">Allure configuration</a></h2>
 
-Allure output is configured by [testo-allure](https://github.com/ozontech/testo-allure). The allure-go environment keys (`ALLURE_OUTPUT_PATH`, `ALLURE_OUTPUT_FOLDER`, etc.) are gone.
+Allure output is configured by [testo-allure](https://github.com/ozontech/testo-allure). The allure-go output-path environment keys (`ALLURE_OUTPUT_PATH`, `ALLURE_OUTPUT_FOLDER`) are gone — use the `-allure.dir` flag or the `allure.WithOutputDir` option instead. The link-pattern environment keys (`ALLURE_ISSUE_PATTERN`, `ALLURE_TESTCASE_PATTERN`, `ALLURE_LINK_TMS_PATTERN`) still work with `SetIssue`, `SetTestCase` and `TmsLink(s)`, exactly as in allure-go.
 
 Set the output directory with the `-allure.dir` flag (default `allure-results`):
 
@@ -670,7 +681,7 @@ See the [testo-allure README](https://github.com/ozontech/testo-allure?tab=readm
 
 ## Migrating from cute v0.x (allure-go)
 
-Cute is now built on [testo](https://github.com/ozontech/testo) with the [testo-allure](https://github.com/ozontech/testo-allure) plugin instead of [allure-go](https://github.com/ozontech/allure-go). The builder API is unchanged; only the test-framework layer differs:
+Cute is now built on [testo](https://github.com/ozontech/testo) with the [testo-allure](https://github.com/ozontech/testo-allure) plugin instead of [allure-go](https://github.com/ozontech/allure-go). The builder method names are unchanged (a few allure argument types moved from pointers to values); only the test-framework layer differs:
 
 - Declare a T struct and use it everywhere `provider.T` was used before:
 
@@ -686,7 +697,7 @@ type T struct {
 
 Renamed methods and types:
 
-| allure-go (cute v0.x)                          | testo (cute v1+)                                          |
+| allure-go (cute v0.x)                          | testo-based cute                                          |
 |------------------------------------------------|-----------------------------------------------------------|
 | `suite.Suite`                                  | `testo.Suite[T]`                                          |
 | `suite.RunSuite(t, new(S))`                    | `testo.RunSuite(t, new(S))`                               |
@@ -696,8 +707,9 @@ Renamed methods and types:
 | `t.WithNewAttachment(name, mime, content)`     | `t.Attach(name, allure.Bytes(content).As(mediaType))`     |
 | `t.BrokenNow()`                                | `t.Status(allure.StatusBroken); t.FailNow()`              |
 | `allure.Failed` / `allure.Broken` / `allure.Skipped` | `allure.StatusFailed` / `allure.StatusBroken` / `allure.StatusSkipped` |
-| `allure.SeverityLevel` constants (`allure.CRITICAL`, ...) | `allure.Severity` constants (`allure.SeverityCritical`, ...) |
+| `allure.SeverityType` constants (`allure.CRITICAL`, ...) | `allure.Severity` constants (`allure.SeverityCritical`, ...) |
 | `*allure.Link` (pointer)                       | `allure.Link` (value) — `allure.NewLink(url)`, `allure.Issue(s)`, `allure.TMS(s)` |
+| `*allure.Label` (pointer)                      | `allure.Label` (value) — also `Labels(...allure.Label)` |
 
 Behavior changes:
 
@@ -707,5 +719,8 @@ Behavior changes:
 - Table tests (`CreateTableTest`) still produce a separate Allure result per
   entry, but run as child tests of your test function; they use the default
   allure plugin, so plugins from a custom suite T are not propagated to them.
+- `Stage`/`Stagef` now emit a label named `stage` instead of setting the allure
+  result's `stage` field — testo-allure has no result-level stage; the value is
+  preserved best-effort as a label.
 
 See the [testo migration guide](https://github.com/ozontech/testo/blob/main/docs/migration.md) for the full framework-level migration.
