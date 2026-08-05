@@ -1,49 +1,53 @@
 package cute
 
-func (qt *cute) setAllureInformation(t allureProvider) {
-	// Log main vars to allureProvider
+import (
+	allure "github.com/ozontech/testo-allure"
+)
+
+func (qt *cute) setAllureInformation(t T) {
+	// Log main vars to allure
 	qt.setLabelsAllure(t)
 	qt.setInfoAllure(t)
 	qt.setLinksAllure(t)
 }
 
-func (qt *cute) setLinksAllure(t linksAllureProvider) {
+func (qt *cute) setLinksAllure(t T) {
 	if qt.allureLinks.issue != "" {
-		t.SetIssue(qt.allureLinks.issue)
+		t.Links(allure.Issue(qt.allureLinks.issue))
 	}
 
 	if qt.allureLinks.testCase != "" {
-		t.SetTestCase(qt.allureLinks.testCase)
+		t.Links(allure.TMS(qt.allureLinks.testCase))
 	}
 
 	if qt.allureLinks.link != nil {
-		t.Link(qt.allureLinks.link)
+		t.Links(*qt.allureLinks.link)
 	}
 
 	if qt.allureLinks.tmsLink != "" {
-		t.TmsLink(qt.allureLinks.tmsLink)
+		t.Links(allure.TMS(qt.allureLinks.tmsLink))
 	}
 
-	if len(qt.allureLinks.tmsLinks) > 0 {
-		t.TmsLinks(qt.allureLinks.tmsLinks...)
+	for _, tmsLink := range qt.allureLinks.tmsLinks {
+		t.Links(allure.TMS(tmsLink))
 	}
 }
 
-func (qt *cute) setLabelsAllure(t labelsAllureProvider) {
+func (qt *cute) setLabelsAllure(t T) {
 	if qt.allureLabels.id != "" {
-		t.ID(qt.allureLabels.id)
+		t.Labels(allure.NewLabel("id", qt.allureLabels.id))
 	}
 
 	if qt.allureLabels.suiteLabel != "" {
-		t.AddSuiteLabel(qt.allureLabels.suiteLabel)
+		t.Labels(allure.NewLabel("suite", qt.allureLabels.suiteLabel))
 	}
 
 	if qt.allureLabels.subSuite != "" {
-		t.AddSubSuite(qt.allureLabels.subSuite)
+		t.Labels(allure.NewLabel("subSuite", qt.allureLabels.subSuite))
 	}
 
 	if qt.allureLabels.parentSuite != "" {
-		t.AddParentSuite(qt.allureLabels.parentSuite)
+		t.Labels(allure.NewLabel("parentSuite", qt.allureLabels.parentSuite))
 	}
 
 	if qt.allureLabels.story != "" {
@@ -51,15 +55,15 @@ func (qt *cute) setLabelsAllure(t labelsAllureProvider) {
 	}
 
 	if qt.allureLabels.tag != "" {
-		t.Tag(qt.allureLabels.tag)
+		t.Tags(qt.allureLabels.tag)
 	}
 
 	if qt.allureLabels.allureID != "" {
-		t.AllureID(qt.allureLabels.allureID)
+		t.ID(qt.allureLabels.allureID)
 	}
 
-	if qt.allureLabels.severity != "" {
-		t.Severity(qt.allureLabels.severity)
+	if qt.allureLabels.severity != nil {
+		t.Severity(*qt.allureLabels.severity)
 	}
 
 	if qt.allureLabels.owner != "" {
@@ -67,11 +71,11 @@ func (qt *cute) setLabelsAllure(t labelsAllureProvider) {
 	}
 
 	if qt.allureLabels.lead != "" {
-		t.Lead(qt.allureLabels.lead)
+		t.Labels(allure.NewLabel("lead", qt.allureLabels.lead))
 	}
 
 	if qt.allureLabels.label != nil {
-		t.Label(qt.allureLabels.label)
+		t.Labels(*qt.allureLabels.label)
 	}
 
 	if len(qt.allureLabels.labels) != 0 {
@@ -91,11 +95,11 @@ func (qt *cute) setLabelsAllure(t labelsAllureProvider) {
 	}
 
 	if qt.allureLabels.layer != "" {
-		t.Layer(qt.allureLabels.layer)
+		t.Labels(allure.NewLabel("layer", qt.allureLabels.layer))
 	}
 }
 
-func (qt *cute) setInfoAllure(t infoAllureProvider) {
+func (qt *cute) setInfoAllure(t T) {
 	if qt.allureInfo.title != "" {
 		t.Title(qt.allureInfo.title)
 	}
@@ -105,6 +109,6 @@ func (qt *cute) setInfoAllure(t infoAllureProvider) {
 	}
 
 	if qt.allureInfo.stage != "" {
-		t.Stage(qt.allureInfo.stage)
+		t.Labels(allure.NewLabel("stage", qt.allureInfo.stage))
 	}
 }

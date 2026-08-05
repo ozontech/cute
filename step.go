@@ -3,8 +3,10 @@ package cute
 import (
 	"fmt"
 
-	"github.com/ozontech/allure-go/pkg/allure"
-	"github.com/ozontech/allure-go/pkg/framework/provider"
+	"github.com/ozontech/testo"
+
+	allure "github.com/ozontech/testo-allure"
+
 	"github.com/ozontech/cute/errors"
 )
 
@@ -17,17 +19,17 @@ func (it *Test) executeWithStep(t internalT, stepName string, execute func(t T) 
 	if it.Retry.MaxAttempts != 1 {
 		stepName = fmt.Sprintf("[Attempt #%d] %v", it.Retry.currentCount, stepName)
 	}
-	t.WithNewStep(stepName, func(stepCtx provider.StepCtx) {
-		errs = execute(stepCtx)
-		processStepErrors(stepCtx, errs)
+
+	allure.Step(t, stepName, func(stepT T) {
+		errs = execute(stepT)
+		processStepErrors(stepT, errs)
 	})
 
 	return errs
 }
 
-func processStepErrors(stepCtx provider.StepCtx, errs []error) {
+func processStepErrors(stepT T, errs []error) {
 	var (
-		step     = stepCtx.CurrentStep()
 		statuses = make([]allure.Status, 0)
 	)
 
@@ -36,58 +38,65 @@ func processStepErrors(stepCtx provider.StepCtx, errs []error) {
 	}
 
 	for _, err := range errs {
-		currentStatus := allure.Failed
-		currentStep := step
+		currentStatus := allure.StatusFailed
 
 		if tErr, ok := err.(errors.OptionalError); ok {
 			if tErr.IsOptional() {
-				currentStatus = allure.Skipped
+				currentStatus = allure.StatusSkipped
 			}
 		}
 
 		if tErr, ok := err.(errors.BrokenError); ok {
 			if tErr.IsBroken() {
-				currentStatus = allure.Broken
+				currentStatus = allure.StatusBroken
 			}
 		}
 
 		if tErr, ok := err.(errors.WithNameError); ok {
-			currentStep = allure.NewSimpleStep(tErr.GetName())
-			currentStep.Status = currentStatus
-			currentStep.WithParent(step)
-		}
+			// Record the error as a named sub-step with its own status
+			status, stepErr := currentStatus, err
 
-		if tErr, ok := err.(errors.WithFields); ok {
-			for k, v := range tErr.GetFields() {
-				if v == nil {
-					continue
-				}
-
-				currentStep.WithNewParameters(k, v)
-			}
-		}
-
-		if tErr, ok := err.(errors.WithAttachments); ok {
-			for _, v := range tErr.GetAttachments() {
-				if v == nil {
-					continue
-				}
-
-				currentStep.WithAttachments(allure.NewAttachment(v.Name, allure.MimeType(v.MimeType), v.Content))
-			}
+			testo.Run(stepT, tErr.GetName(), func(subT T) {
+				subT.Status(status)
+				addErrorDetails(subT, stepErr)
+			})
+		} else {
+			addErrorDetails(stepT, err)
 		}
 
 		statuses = append(statuses, currentStatus)
-
-		currentStep.WithAttachments(allure.NewAttachment("Error", allure.Text, []byte(err.Error())))
 	}
 
 	// If one error was not optional, parent step should be failed
 	for _, status := range statuses {
-		step.Status = status
+		stepT.Status(status)
 
-		if status == allure.Failed {
+		if status == allure.StatusFailed {
 			break
 		}
 	}
+}
+
+func addErrorDetails(t T, err error) {
+	if tErr, ok := err.(errors.WithFields); ok {
+		for k, v := range tErr.GetFields() {
+			if v == nil {
+				continue
+			}
+
+			t.Parameters(allure.NewParameter(k, v))
+		}
+	}
+
+	if tErr, ok := err.(errors.WithAttachments); ok {
+		for _, v := range tErr.GetAttachments() {
+			if v == nil {
+				continue
+			}
+
+			t.Attach(v.Name, allure.Bytes(v.Content).As(allure.MediaType(v.MimeType)))
+		}
+	}
+
+	t.Attach("Error", allure.Bytes(err.Error()).As(allure.TextPlain))
 }

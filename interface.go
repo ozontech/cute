@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/allure"
+	allure "github.com/ozontech/testo-allure"
 )
 
 // AllureBuilder is a scope of methods for create allure information (Title, Tags, etc.)
@@ -37,7 +37,7 @@ type AllureInfoBuilder interface {
 type AllureLinksBuilder interface {
 	SetIssue(issue string) AllureBuilder
 	SetTestCase(testCase string) AllureBuilder
-	Link(link *allure.Link) AllureBuilder
+	Link(link allure.Link) AllureBuilder
 	TmsLink(tmsLink string) AllureBuilder
 	TmsLinks(tmsLinks ...string) AllureBuilder
 }
@@ -54,11 +54,11 @@ type AllureLabelsBuilder interface {
 	AddParentSuite(value string) AllureBuilder
 	Story(value string) AllureBuilder
 	Tag(value string) AllureBuilder
-	Severity(value allure.SeverityType) AllureBuilder
+	Severity(value allure.Severity) AllureBuilder
 	Owner(value string) AllureBuilder
 	Lead(value string) AllureBuilder
-	Label(label *allure.Label) AllureBuilder
-	Labels(labels ...*allure.Label) AllureBuilder
+	Label(label allure.Label) AllureBuilder
+	Labels(labels ...allure.Label) AllureBuilder
 	Layer(value string) AllureBuilder
 	Stagef(format string, args ...interface{}) AllureBuilder
 	Stage(stage string) AllureBuilder

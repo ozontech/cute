@@ -1,41 +1,40 @@
 package cute
 
 import (
-	"github.com/ozontech/allure-go/pkg/allure"
-	"github.com/ozontech/allure-go/pkg/framework/provider"
+	"github.com/ozontech/testo"
+
+	allure "github.com/ozontech/testo-allure"
 )
 
-// T is internal testing.T provider
+// T is the test handle passed to user-defined asserts and middleware.
+//
+// It is satisfied by any testo T struct that embeds *testo.T and
+// *allure.PluginAllure:
+//
+//	type T struct {
+//		*testo.T
+//		*allure.PluginAllure
+//	}
+//
+// Inside asserts you may create allure steps with allure.Step(t, ...),
+// add attachments with t.Attach(...), parameters with t.Parameters(...),
+// log information, etc.
 type T interface {
-	tProvider
-	logProvider
-	stepProvider
-	attachmentProvider
-	parametersProvider
+	testo.CommonT
+	allure.Interface
 }
 
-type allureProvider interface {
-	internalT
-	Parallel()
-	Broken()
-	BrokenNow()
-	Run(testName string, testBody func(provider.T), tags ...string) (res *allure.Result)
+// internalT is an internal alias kept for readability of the execution flow.
+type internalT = T
 
-	infoAllureProvider
-	labelsAllureProvider
-	linksAllureProvider
+// defaultT is the T used when a raw *testing.T is passed to ExecuteTest.
+type defaultT struct {
+	*testo.T
+	*allure.PluginAllure
 }
 
-type internalT interface {
-	Broken()
-	BrokenNow()
-
-	tProvider
-	logProvider
-	stepProvider
-	attachmentProvider
-}
-
+// tProvider is a minimal testing handle accepted by ExecuteTest and Execute.
+// It is satisfied by *testing.T and by any cute.T (testo T with allure plugin).
 type tProvider interface {
 	Fail()
 	FailNow()
@@ -47,62 +46,4 @@ type tProvider interface {
 
 	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
-}
-
-type logProvider interface {
-	LogStep(args ...interface{})
-	LogfStep(format string, args ...interface{})
-}
-
-type stepProvider interface {
-	Step(step *allure.Step)
-	WithNewStep(stepName string, step func(ctx provider.StepCtx), params ...*allure.Parameter)
-}
-
-type attachmentProvider interface {
-	WithAttachments(attachments ...*allure.Attachment)
-	WithNewAttachment(name string, mimeType allure.MimeType, content []byte)
-}
-
-type parametersProvider interface {
-	WithParameters(parameters ...*allure.Parameter)
-	WithNewParameters(kv ...interface{})
-}
-
-type infoAllureProvider interface {
-	Title(args ...interface{})
-	Titlef(format string, args ...interface{})
-
-	Description(args ...interface{})
-	Descriptionf(format string, args ...interface{})
-
-	Stage(args ...interface{})
-	Stagef(format string, args ...interface{})
-}
-
-type labelsAllureProvider interface {
-	ID(value string)
-	AllureID(value string)
-	Epic(value string)
-	Layer(value string)
-	AddSuiteLabel(value string)
-	AddSubSuite(value string)
-	AddParentSuite(value string)
-	Feature(value string)
-	Story(value string)
-	Tag(value string)
-	Tags(values ...string)
-	Severity(value allure.SeverityType)
-	Owner(value string)
-	Lead(value string)
-	Label(label *allure.Label)
-	Labels(labels ...*allure.Label)
-}
-
-type linksAllureProvider interface {
-	SetIssue(issue string)
-	SetTestCase(testCase string)
-	Link(link *allure.Link)
-	TmsLink(tmsCase string)
-	TmsLinks(tmsCases ...string)
 }

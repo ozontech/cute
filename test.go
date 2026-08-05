@@ -13,7 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/framework/provider"
+	"github.com/ozontech/testo"
+
+	allure "github.com/ozontech/testo-allure"
 
 	cuteErrors "github.com/ozontech/cute/errors"
 	"github.com/ozontech/cute/internal/utils"
@@ -139,36 +141,35 @@ type ExpectJSONSchema struct {
 // Execute is common method for run test from builder
 func (it *Test) Execute(ctx context.Context, t tProvider) ResultsHTTPBuilder {
 	var (
-		internalT allureProvider
-		res       ResultsHTTPBuilder
+		res ResultsHTTPBuilder
 	)
 
 	if t == nil {
 		panic("could not start test without testing.T")
 	}
 
-	stepCtx, isStepCtx := t.(provider.StepCtx)
-	if isStepCtx {
-		return it.executeInsideStep(ctx, stepCtx)
-	}
-
-	tOriginal, ok := t.(*testing.T)
-	if ok {
-		tOriginal.Helper()
-		internalT = createAllureT(tOriginal)
-	}
-
-	allureT, ok := t.(provider.T)
-	if ok {
-		internalT = allureT
-	}
-
-	internalT.Run(it.Name, func(inT provider.T) {
+	body := func(inT T) {
 		if it.Parallel {
 			inT.Parallel()
 		}
 		res = it.executeInsideAllure(ctx, inT)
-	})
+	}
+
+	switch tt := t.(type) {
+	case T:
+		runSeparateTest(tt, it.Name, body)
+	case *testing.T:
+		tt.Helper()
+		tt.Run(it.Name, func(rt *testing.T) {
+			testo.RunTest(rt, func(inT defaultT) {
+				inT.Title(it.Name)
+
+				body(inT)
+			})
+		})
+	default:
+		panic("t must be *testing.T or cute.T (a testo T with the allure plugin)")
+	}
 
 	return res
 }
@@ -227,31 +228,19 @@ func (it *Test) initEmptyFields() {
 	it.Retry.currentCount = 1
 }
 
-// executeInsideStep is method for start test with provider.StepCtx
-// It's test inside the step
-func (it *Test) executeInsideStep(ctx context.Context, t internalT) ResultsHTTPBuilder {
+func (it *Test) executeInsideAllure(ctx context.Context, t T) ResultsHTTPBuilder {
 	// Set empty fields in test
 	it.initEmptyFields()
 
 	// we don't want to defer the finish message, because it will be logged in processTestErrors
 	it.Info(t, "Start test")
 
-	return it.startRepeatableTest(ctx, t)
-}
-
-func (it *Test) executeInsideAllure(ctx context.Context, allureProvider allureProvider) ResultsHTTPBuilder {
-	// Set empty fields in test
-	it.initEmptyFields()
-
-	// we don't want to defer the finish message, because it will be logged in processTestErrors
-	it.Info(allureProvider, "Start test")
-
 	if it.AllureStep.Name != "" {
 		// Execute test inside step
-		return it.startTestInsideStep(ctx, allureProvider)
+		return it.startTestInsideStep(ctx, t)
 	} else {
 		// Execute Test
-		return it.startRepeatableTest(ctx, allureProvider)
+		return it.startRepeatableTest(ctx, t)
 	}
 }
 
@@ -286,8 +275,9 @@ func (it *Test) startRepeatableTest(ctx context.Context, t internalT) ResultsHTT
 
 	switch resultState {
 	case ResultStateBroken:
-		t.BrokenNow()
+		t.Status(allure.StatusBroken)
 		it.Info(t, "Test broken")
+		t.FailNow()
 	case ResultStateFail:
 		t.Fail()
 		it.Error(t, "Test failed")
@@ -306,14 +296,14 @@ func (it *Test) startTestInsideStep(ctx context.Context, t internalT) ResultsHTT
 		result ResultsHTTPBuilder
 	)
 
-	t.WithNewStep(it.AllureStep.Name, func(stepCtx provider.StepCtx) {
+	allure.Step(t, it.AllureStep.Name, func(stepT T) {
 		it.Info(t, "Start step %v", it.AllureStep.Name)
 		defer it.Info(t, "Finish step %v", it.AllureStep.Name)
 
-		result = it.startRepeatableTest(ctx, stepCtx)
+		result = it.startRepeatableTest(ctx, stepT)
 
 		if result.GetResultState() == ResultStateFail {
-			stepCtx.Fail()
+			stepT.Fail()
 		}
 	})
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ozontech/allure-go/pkg/allure"
+	allure "github.com/ozontech/testo-allure"
 	"moul.io/http2curl/v2"
 
 	cuteErrors "github.com/ozontech/cute/errors"
@@ -173,13 +173,11 @@ func (it *Test) addInformationRequest(t T, req *http.Request) error {
 		return err
 	}
 
-	t.WithParameters(
-		allure.NewParameters(
-			"method", req.Method,
-			"host", req.Host,
-			"headers", headers,
-			"curl", curl.String(),
-		)...,
+	t.Parameters(
+		allure.NewParameter("method", req.Method),
+		allure.NewParameter("host", req.Host),
+		allure.NewParameter("headers", headers),
+		allure.NewParameter("curl", curl.String()),
 	)
 
 	if req.Body != nil {
@@ -194,7 +192,7 @@ func (it *Test) addInformationRequest(t T, req *http.Request) error {
 		}
 
 		if len(body) != 0 {
-			t.WithNewParameters("body", string(body))
+			t.Parameters(allure.NewParameter("body", string(body)))
 		}
 	}
 
@@ -228,10 +226,10 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 
 	headers, _ := utils.ToJSON(response.Header)
 	if headers != "" {
-		t.WithNewParameters("response_headers", headers)
+		t.Parameters(allure.NewParameter("response_headers", headers))
 	}
 
-	t.WithNewParameters("response_code", fmt.Sprint(response.StatusCode))
+	t.Parameters(allure.NewParameter("response_code", fmt.Sprint(response.StatusCode)))
 	it.Info(t, "[Response] Status: "+response.Status)
 
 	if response.Body == nil {
@@ -255,23 +253,23 @@ func (it *Test) addInformationResponse(t T, response *http.Response) error {
 		return nil
 	}
 
-	responseType := allure.Text
+	responseType := allure.TextPlain
 
 	if _, ok := response.Header["Content-Type"]; ok {
 		if len(response.Header["Content-Type"]) > 0 {
 			if strings.Contains(response.Header["Content-Type"][0], "application/json") {
-				responseType = allure.JSON
+				responseType = allure.DocumentJSON
 			} else {
-				responseType = allure.MimeType(response.Header["Content-Type"][0])
+				responseType = allure.MediaType(response.Header["Content-Type"][0])
 			}
 		}
 	}
 
-	if responseType == allure.JSON {
+	if responseType == allure.DocumentJSON {
 		body, _ = utils.PrettyJSON(body)
 	}
 
-	t.WithAttachments(allure.NewAttachment("response", responseType, body))
+	t.Attach("response", allure.Bytes(body).As(responseType))
 
 	return nil
 }

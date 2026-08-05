@@ -3,7 +3,7 @@ package cute
 import (
 	"fmt"
 
-	"github.com/ozontech/allure-go/pkg/allure"
+	allure "github.com/ozontech/testo-allure"
 )
 
 func (qt *cute) Parallel() AllureBuilder {
@@ -78,8 +78,8 @@ func (qt *cute) SetTestCase(testCase string) AllureBuilder {
 	return qt
 }
 
-func (qt *cute) Link(link *allure.Link) AllureBuilder {
-	qt.allureLinks.link = link
+func (qt *cute) Link(link allure.Link) AllureBuilder {
+	qt.allureLinks.link = &link
 
 	return qt
 }
@@ -126,8 +126,8 @@ func (qt *cute) Tag(value string) AllureBuilder {
 	return qt
 }
 
-func (qt *cute) Severity(value allure.SeverityType) AllureBuilder {
-	qt.allureLabels.severity = value
+func (qt *cute) Severity(value allure.Severity) AllureBuilder {
+	qt.allureLabels.severity = &value
 
 	return qt
 }
@@ -144,13 +144,13 @@ func (qt *cute) Lead(value string) AllureBuilder {
 	return qt
 }
 
-func (qt *cute) Label(label *allure.Label) AllureBuilder {
-	qt.allureLabels.label = label
+func (qt *cute) Label(label allure.Label) AllureBuilder {
+	qt.allureLabels.label = &label
 
 	return qt
 }
 
-func (qt *cute) Labels(labels ...*allure.Label) AllureBuilder {
+func (qt *cute) Labels(labels ...allure.Label) AllureBuilder {
 	qt.allureLabels.labels = labels
 
 	return qt

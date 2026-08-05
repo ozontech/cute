@@ -2,13 +2,11 @@ package cute
 
 import (
 	"context"
-	"strings"
 	"testing"
 
-	"github.com/ozontech/allure-go/pkg/allure"
-	"github.com/ozontech/allure-go/pkg/framework/core/allure_manager/manager"
-	"github.com/ozontech/allure-go/pkg/framework/core/common"
-	"github.com/ozontech/allure-go/pkg/framework/provider"
+	"github.com/ozontech/testo"
+
+	allure "github.com/ozontech/testo-allure"
 )
 
 type cute struct {
@@ -42,11 +40,11 @@ type allureLabels struct {
 	subSuite    string
 	parentSuite string
 	story       string
-	severity    allure.SeverityType
+	severity    *allure.Severity
 	owner       string
 	lead        string
 	label       *allure.Label
-	labels      []*allure.Label
+	labels      []allure.Label
 	allureID    string
 	layer       string
 }
@@ -60,62 +58,49 @@ type allureLinks struct {
 }
 
 func (qt *cute) ExecuteTest(ctx context.Context, t tProvider) []ResultsHTTPBuilder {
-	var internalT allureProvider
-
 	if t == nil {
 		panic("could not start test without testing.T")
 	}
 
-	stepCtx, isStepCtx := t.(provider.StepCtx)
-	if isStepCtx {
-		return qt.executeTestsInsideStep(ctx, stepCtx)
-	}
-
-	tOriginal, ok := t.(*testing.T)
-	if ok {
-		newT := createAllureT(tOriginal)
-		if !qt.isTableTest {
-			defer newT.FinishTest() //nolint
+	switch tt := t.(type) {
+	case T:
+		if qt.parallel {
+			tt.Parallel()
 		}
 
-		internalT = newT
-	}
+		return qt.executeTests(ctx, tt)
+	case *testing.T:
+		var res []ResultsHTTPBuilder
 
-	allureT, ok := t.(provider.T)
-	if ok {
-		internalT = allureT
-	}
+		testo.RunTest(tt, func(inT defaultT) {
+			if qt.parallel {
+				inT.Parallel()
+			}
 
-	if qt.parallel {
-		internalT.Parallel()
-	}
+			res = qt.executeTests(ctx, inT)
+		})
 
-	return qt.executeTests(ctx, internalT)
+		return res
+	default:
+		panic("t must be *testing.T or cute.T (a testo T with the allure plugin)")
+	}
 }
 
-func createAllureT(t *testing.T) *common.Common {
-	var (
-		newT        = common.NewT(t)
-		callers     = strings.Split(t.Name(), "/")
-		providerCfg = manager.NewProviderConfig().
-				WithFullName(t.Name()).
-				WithPackageName("package").
-				WithSuiteName(t.Name()).
-				WithRunner(callers[0])
-		newProvider = manager.NewProvider(providerCfg)
-	)
+// runSeparateTest runs f as a new child test with its own allure result,
+// mirroring allure-go's Run semantics (a separate test in the report, not a step).
+func runSeparateTest(t T, name string, f func(t T)) {
+	testo.Reflect(t).TestingT.Run(name, func(rt *testing.T) {
+		testo.RunTest(rt, func(inT defaultT) {
+			inT.Title(name)
 
-	newProvider.NewTest(t.Name(), "package")
-
-	newT.SetProvider(newProvider)
-	newT.Provider.TestContext()
-
-	return newT
+			f(inT)
+		})
+	})
 }
 
 // executeTests is method for run tests
 // It's could be table tests or usual tests
-func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider) []ResultsHTTPBuilder {
+func (qt *cute) executeTests(ctx context.Context, t T) []ResultsHTTPBuilder {
 	var (
 		res = make([]ResultsHTTPBuilder, 0)
 	)
@@ -124,23 +109,20 @@ func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider)
 	for i := 0; i <= qt.countTests; i++ {
 		currentTest := qt.tests[i]
 
-		// Execute by new T for table tests
+		// Execute in a separate test for table tests
 		if qt.isTableTest {
-			tableTestName := currentTest.Name
-
-			allureProvider.Run(tableTestName, func(inT provider.T) {
-				// Set current test name
-				inT.Title(tableTestName)
-
+			runSeparateTest(t, currentTest.Name, func(inT T) {
 				res = append(res, qt.executeInsideAllure(ctx, inT, currentTest))
 			})
 		} else {
-			currentTest.Name = allureProvider.Name()
+			currentTest.Name = t.Name()
 
-			// set labels
-			qt.setAllureInformation(allureProvider)
+			// set labels, but only when running as a test, not inside a step
+			if info := testo.Reflect(t).Test; info == nil || info.GetLevel() == 0 {
+				qt.setAllureInformation(t)
+			}
 
-			res = append(res, qt.executeInsideAllure(ctx, allureProvider, currentTest))
+			res = append(res, qt.executeInsideAllure(ctx, t, currentTest))
 		}
 	}
 
@@ -149,32 +131,11 @@ func (qt *cute) executeTests(ctx context.Context, allureProvider allureProvider)
 
 // executeInsideAllure is method for run test inside allure
 // It's could be table tests or usual tests
-func (qt *cute) executeInsideAllure(ctx context.Context, allureProvider allureProvider, currentTest *Test) ResultsHTTPBuilder {
-	resT := currentTest.executeInsideAllure(ctx, allureProvider)
+func (qt *cute) executeInsideAllure(ctx context.Context, t T, currentTest *Test) ResultsHTTPBuilder {
+	resT := currentTest.executeInsideAllure(ctx, t)
 
 	// Remove from base struct all asserts
 	currentTest.clearFields()
 
 	return resT
-}
-
-// executeTestsInsideStep is method for run group of tests inside provider.StepCtx
-func (qt *cute) executeTestsInsideStep(ctx context.Context, stepCtx provider.StepCtx) []ResultsHTTPBuilder {
-	var (
-		res = make([]ResultsHTTPBuilder, 0)
-	)
-
-	// Cycle for change number of Test
-	for i := 0; i <= qt.countTests; i++ {
-		currentTest := qt.tests[i]
-
-		result := currentTest.executeInsideStep(ctx, stepCtx)
-
-		// Remove from base struct all asserts
-		currentTest.clearFields()
-
-		res = append(res, result)
-	}
-
-	return res
 }
