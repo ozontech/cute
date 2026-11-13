@@ -4,6 +4,8 @@
 
 # CUTE — create your tests easily
 
+[Русская версия](README_ru.md)
+
 HTTP and REST API testing for Go using Allure reports.
 
 ## Features
